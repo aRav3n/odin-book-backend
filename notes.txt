@@ -1,0 +1,46 @@
+Database
+  User
+    id
+    email
+    hash
+    Profile (can have multiple)
+
+  Profile
+    id
+    name
+    about (optional)
+    website (optional)
+    User (can only have 1)
+    Post (can have multiple)
+    Following (can have multiple)
+    Followers (can have multiple)
+    Like (can have multiple)
+
+  Post
+    id
+    createdAt
+    Profile (can only have 1)
+    text
+    Like (can have multiple)
+    Comment (can have multiple)
+
+  Comment
+    id
+    text
+    Profile (can only have 1)
+    Post (optional, can only have 1)
+    Comment (optional, can only have 1)
+    Like (can have multiple)
+
+  Follow
+    id
+    last_changed
+    accepted (bool, default false)
+    follower (Profile, can only have 1)
+    following (Profile, can only have 1)
+
+  Like
+    id
+    Profile (can only have 1)
+    Post (optional, can only have 1)
+    Comment (optional, can only have 1)
