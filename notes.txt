@@ -1,3 +1,138 @@
+API 
+  CRUD
+    /user
+      /
+        POST
+          Requires: { email, password }
+          Success returns: { token }
+          Fail returns: 400
+      /:userId
+        GET
+          Requires: authHeader
+          Success returns: { email }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        PUT
+          Requires: authHeader, { currentEmail, currentPassword, newPassword, newPasswordConfirm }
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        DELETE
+          Requires: authHeader, { password }
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /login
+        POST 
+          Requires: { email, password }
+          Success: { token }
+          Fail returns: 403 if wrong user info, 400 otherwise
+    /profile
+      /
+        POST
+          Requires: authHeader, { name, about (can be blank), website (can be blank) }
+          Success returns: { id }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /:profileId
+        GET
+          Requires: authHeader (just to verify logged in, doesn't have to match profileId)
+          Success returns: { name, about, website, posts, followers, following }
+          Fail returns: 401 if bad authHeader, 400 otherwise
+        PUT
+          Requires: authHeader
+          Success returns: { name, about, website, posts, followers, following }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        DELETE
+          Requires: authHeader
+          Success: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+    /post
+      /
+        POST
+          Requires: authHeader, { profileId, text }
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /:postId
+        GET
+          Requires: authHeader
+          Success returns: { createdAt, profileId, text, profileName, profileId, likes, comments }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        PUT
+          Requires: authHeader
+          Success returns: { createdAt, profileId, text, profileName, profileId, likes, comments }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        DELETE
+          Requires: authHeader
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+    /comment
+      /post/:postId
+        GET
+          Requires: authHeader (just to verify logged in, doesn't have to match profileId)
+          Success returns: { [ profile.name, likes ] }
+          Fail returns: 401 if bad authHeader, 400 otherwise
+        POST
+          Requires: authHeader, { text }
+          Success returns: { profile.name, text, replies, likes }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /reply/:commentId
+        GET
+          Requires: authHeader (just to verify logged in, doesn't have to match profileId)
+          Success returns: { [ profile.name, likes ] }
+          Fail returns: 401 if bad authHeader, 400 otherwise
+        POST
+          Requires: authHeader, { text }
+          Success returns: { profile.name, text, replies, likes }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /self/:commentId
+        PUT
+          Requires: authHeader, { newText }
+          Success returns: { profile.name, text, likes, replies }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        DELETE
+          Requires: authHeader
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+    /follow
+      /
+        POST
+          Requires: authHeader { followingId }
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /profile/followers/:profileId
+        GET
+          Requires: authHeader
+          Success returns: { [ { follower.name, updatedAt, accepted } ] }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /profile/following/:profileId
+        GET
+          Requires: authHeader
+          Success returns: { [ if accepted: { following.name, updatedAt } ] }
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /:followId
+        PUT
+          Requires: authHeader, { acceptBool }
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+        DELETE
+          Requires: authHeader
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+  CD (reading is done at the post or comment level)
+    /like
+      /comment/:commentId
+        POST
+          Requires: authHeader
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /post/:postId
+        POST
+          Requires: authHeader
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+      /:likeId
+        DELETE
+          Requires: authHeader
+          Success returns: 200
+          Fail returns: 401 if not correct authHeader, 400 otherwise
+
 Database
   User
     id

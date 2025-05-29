@@ -3,9 +3,7 @@ const app = express();
 const router = require("./routes/router");
 const cors = require("cors");
 
-const allowList = [
-  "http://localhost:5173/"
-];
+const allowList = ["http://localhost:5173"];
 const corsOptions = {
   origin: allowList,
   methods: ["GET", "POST", "PUT", "DELETE"],
