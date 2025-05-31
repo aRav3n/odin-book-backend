@@ -10,13 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addUser = addUser;
-const client_1 = require("@prisma/client");
+const prisma_1 = require("../generated/prisma");
 const extension_accelerate_1 = require("@prisma/extension-accelerate");
 require("dotenv");
 const databaseUrl = process.env.NODE_ENV === "test"
     ? process.env.TEST_DATABASE_URL
     : process.env.DATABASE_URL;
-const prisma = new client_1.PrismaClient({
+const prisma = new prisma_1.PrismaClient({
     datasources: {
         db: {
             url: databaseUrl,

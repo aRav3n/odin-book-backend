@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx tsc && NODE_ENV=development && node --watch app.js",
-    "test": "npx tsc && NODE_ENV=test && jest"
+    "test": "clear && npx tsc && NODE_ENV=test && jest"
   },
   "repository": {
     "type": "git",

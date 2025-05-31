@@ -1,7 +1,5 @@
-const db = require("../db/queries");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
-const passport = require("passport");
 const securityController = require("./securityController");
 require("dotenv").config();
 
@@ -25,25 +23,33 @@ const validateUser = [
     .trim(),
 ];
 
+// internal use functions
+function generateErrorMessage(errors) {
+  const object = {
+    errors: errors.array().map((err) => ({
+      field: err.param,
+      message: err.msg,
+    })),
+  };
+
+  return object;
+}
+
+// external use functions
 const createUser = [
   validateUser,
   async (req, res) => {
     // error check section; if there's an error return 400 with a message
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array().map((err) => ({
-          field: err.param,
-          message: err.msg,
-        })),
-      });
+      const errorObject = generateErrorMessage(errors);
+      return res.status(400).json(errorObject);
     }
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(req.body.password, salt);
     const email = req.body.email;
-ˇ
+    ˇ;
     const id = await addUser(email, hash);
 
     if (!id) {
