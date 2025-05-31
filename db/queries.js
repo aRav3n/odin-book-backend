@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addUser = addUser;
 exports.deleteAllUsers = deleteAllUsers;
+exports.getUser = getUser;
 const prisma_1 = require("../generated/prisma");
 const extension_accelerate_1 = require("@prisma/extension-accelerate");
 require("dotenv");
@@ -48,5 +49,13 @@ function deleteAllUsers() {
     return __awaiter(this, void 0, void 0, function* () {
         const deletedUserCount = yield prisma.user.deleteMany({});
         return deletedUserCount;
+    });
+}
+function getUser(email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield prisma.user.findFirst({
+            where: { email },
+        });
+        return user;
     });
 }

@@ -23,7 +23,7 @@ API
         POST 
           Requires: { email, password }
           Success: 200, { id, email, token }
-          Fail returns: 403 if wrong user info, 400 otherwise
+          Fail returns: 403 if wrong user info, 500 otherwise
     /profile
       /
         POST

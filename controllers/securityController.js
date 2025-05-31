@@ -1,17 +1,11 @@
 const jwt = require("jsonwebtoken");
-require("dotenv");
+require("dotenv").config();
 
 const secretKey = process.env.SECRET_KEY;
 
-async function sign(user) {
-  return new Promise((resolve, reject) => {
-    jwt.sign({ user }, secretKey, async (err, token) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(token);
-    });
-  });
+function sign(user) {
+  const token = jwt.sign({ user }, secretKey);
+  return token;
 }
 
 module.exports = { sign };

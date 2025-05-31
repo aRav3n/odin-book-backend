@@ -134,3 +134,79 @@ test("Signup route fails if user already exists", (done) => {
     })
     .expect(400, done);
 });
+
+test("Login route fails if no email and no password", (done) => {
+  request(app)
+    .post("/user/login")
+    .type("form")
+    .send({})
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You need an email and password to log in." }],
+    })
+    .expect(403, done);
+});
+
+test("Login route fails if no email", (done) => {
+  request(app)
+    .post("/user/login")
+    .type("form")
+    .send({ password: testUserOne.password })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You need an email and password to log in." }],
+    })
+    .expect(403, done);
+});
+
+test("Login route fails if no password", (done) => {
+  request(app)
+    .post("/user/login")
+    .type("form")
+    .send({ email: testUserOne.email })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You need an email and password to log in." }],
+    })
+    .expect(403, done);
+});
+
+test("Login route fails if wrong email", (done) => {
+  request(app)
+    .post("/user/login")
+    .type("form")
+    .send(testUserTwo)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "No user with this email exists in the database." }],
+    })
+    .expect(403, done);
+});
+
+test("Login route fails if wrong password", (done) => {
+  request(app)
+    .post("/user/login")
+    .type("form")
+    .send({ email: testUserOne.email, password: badPassword })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "That password doesn't work; please try again." }],
+    })
+    .expect(403, done);
+});
+
+test("Login route passes with correct email and correct password", (done) => {
+  request(app)
+    .post("/user/login")
+    .type("form")
+    .send(testUserOne)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body.id).toBe(testUserOne.id);
+      expect(res.body.email).toBe(testUserOne.email);
+      expect(res.body.token).toBeDefined();
+      expect(res.body.hash).not.toBeDefined();
+      done();
+    });
+});

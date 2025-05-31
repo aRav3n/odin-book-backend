@@ -42,4 +42,12 @@ async function deleteAllUsers() {
   return deletedUserCount;
 }
 
-export { addUser, deleteAllUsers };
+async function getUser(email: string) {
+  const user = await prisma.user.findFirst({
+    where: { email },
+  });
+
+  return user;
+}
+
+export { addUser, deleteAllUsers, getUser };

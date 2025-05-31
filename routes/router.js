@@ -4,8 +4,8 @@ const router = Router();
 const userController = require("../controllers/userController");
 
 router.post("/user", userController.createUser);
+router.post("/user/login", userController.loginUser);
 /*
-router.post("/user/login");
 router.get("/user/:userId");
 router.put("/user/:userId");
 router.delete("/user/:userId");
