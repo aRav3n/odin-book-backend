@@ -4,6 +4,7 @@ const securityController = require("./securityController");
 require("dotenv").config();
 
 const { addUser } = require("../db/queries");
+const { error } = require("console");
 
 const validateUser = [
   body("email").trim().isEmail().withMessage("Must be a valid email address."),
@@ -19,7 +20,7 @@ const validateUser = [
       }
       return true;
     })
-    .withMessage("Passwords must match")
+    .withMessage("Passwords must match.")
     .trim(),
 ];
 
@@ -27,7 +28,6 @@ const validateUser = [
 function generateErrorMessage(errors) {
   const object = {
     errors: errors.array().map((err) => ({
-      field: err.param,
       message: err.msg,
     })),
   };

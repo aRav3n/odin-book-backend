@@ -8,22 +8,33 @@ require("dotenv");
 app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
+const badEmail = "notAnEmail_Address";
+const goodEmail = "c@b.com";
+const badPassword = "12345";
+const goodPassword = "123456";
+
 const testUserBadEmail = {
-  email: "badEmailAddress",
-  password: "123456",
-  confirmPassword: "123456",
+  email: badEmail,
+  password: goodPassword,
+  confirmPassword: goodPassword,
 };
 
 const testUserBadPassword = {
-  email: "c@b.com",
-  password: "12345",
-  confirmPassword: "12345",
+  email: goodEmail,
+  password: badPassword,
+  confirmPassword: badPassword,
 };
 
 const testUserBadPasswordConfirm = {
-  email: "c@b.com",
-  password: "123456",
-  confirmPassword: "1234567",
+  email: goodEmail,
+  password: goodPassword,
+  confirmPassword: badPassword,
+};
+
+const testUserBadEverything = {
+  email: badEmail,
+  password: badPassword,
+  confirmPassword: goodPassword,
 };
 
 const testUserOne = {
@@ -45,5 +56,45 @@ test("Signup route fails with bad email", (done) => {
     .send(testUserBadEmail)
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Must be a valid email address." }] })
+    .expect(400, done);
+});
+
+test("Signup route fails with bad password", (done) => {
+  request(app)
+    .post("/user")
+    .type("form")
+    .send(testUserBadPassword)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Password must be between 6 and 16 characters." }],
+    })
+    .expect(400, done);
+});
+
+test("Signup route fails with bad password confirmation", (done) => {
+  request(app)
+    .post("/user")
+    .type("form")
+    .send(testUserBadPasswordConfirm)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Passwords must match." }],
+    })
+    .expect(400, done);
+});
+
+test("Signup route fails with multiple messages for multiple errors", (done) => {
+  request(app)
+    .post("/user")
+    .type("form")
+    .send(testUserBadEverything)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        { message: "Must be a valid email address." },
+        { message: "Password must be between 6 and 16 characters." },
+        { message: "Passwords must match." },
+      ],
+    })
     .expect(400, done);
 });
