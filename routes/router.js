@@ -1,12 +1,14 @@
 const { Router } = require("express");
-const controller = require("../controllers/controller");
 const router = Router();
 
-router.post("/user");
+const userController = require("../controllers/userController");
+
+router.post("/user", userController.createUser);
+/*
+router.post("/user/login");
 router.get("/user/:userId");
 router.put("/user/:userId");
 router.delete("/user/:userId");
-router.post("/user/login");
 
 router.post("/profile");
 router.get("/profile/:profileId");
@@ -34,6 +36,7 @@ router.delete("/follow/:followId");
 router.post("/like/comment/:commentId");
 router.post("/like/post/:postId");
 router.delete("/like/:likeId");
+*/
 
 router.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

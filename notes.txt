@@ -3,13 +3,13 @@ API
     /user
       /
         POST
-          Requires: { email, password }
-          Success returns: { token }
-          Fail returns: 400
+          Requires: { email, password, confirmPassword }
+          Success returns: 200, { id, email, token }
+          Fail returns: 400 or 500
       /:userId
         GET
           Requires: authHeader
-          Success returns: { email }
+          Success returns: 200, { email }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         PUT
           Requires: authHeader, { currentEmail, currentPassword, newPassword, newPasswordConfirm }
@@ -22,22 +22,22 @@ API
       /login
         POST 
           Requires: { email, password }
-          Success: { token }
+          Success: 200, { id, email, token }
           Fail returns: 403 if wrong user info, 400 otherwise
     /profile
       /
         POST
           Requires: authHeader, { name, about (can be blank), website (can be blank) }
-          Success returns: { id }
+          Success returns: 200, { id }
           Fail returns: 401 if not correct authHeader, 400 otherwise
       /:profileId
         GET
           Requires: authHeader (just to verify logged in, doesn't have to match profileId)
-          Success returns: { name, about, website, posts, followers, following }
+          Success returns: 200, { name, about, website, posts, followers, following }
           Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
         PUT
           Requires: authHeader
-          Success returns: { name, about, website, posts, followers, following }
+          Success returns: 200, { name, about, website, posts, followers, following }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE
           Requires: authHeader
@@ -52,11 +52,11 @@ API
       /:postId
         GET
           Requires: authHeader
-          Success returns: { createdAt, profileId, text, profileName, profileId, likes, comments }
+          Success returns: 200, { createdAt, profileId, text, profileName, profileId, likes, comments }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         PUT
           Requires: authHeader
-          Success returns: { createdAt, profileId, text, profileName, profileId, likes, comments }
+          Success returns: 200, { createdAt, profileId, text, profileName, profileId, likes, comments }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE
           Requires: authHeader
@@ -66,25 +66,25 @@ API
       /post/:postId
         GET
           Requires: authHeader (just to verify logged in, doesn't have to match profileId)
-          Success returns: { [ profile.name, likes ] }
+          Success returns: 200, { [ profile.name, likes ] }
           Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
         POST
           Requires: authHeader, { text }
-          Success returns: { profile.name, text, replies, likes }
+          Success returns: 200, { profile.name, text, replies, likes }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
       /reply/:commentId
         GET
           Requires: authHeader (just to verify logged in, doesn't have to match profileId)
-          Success returns: { [ profile.name, likes ] }
+          Success returns: 200, { [ profile.name, likes ] }
           Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
         POST
           Requires: authHeader, { text }
-          Success returns: { profile.name, text, replies, likes }
+          Success returns: 200, { profile.name, text, replies, likes }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
       /self/:commentId
         PUT
           Requires: authHeader, { newText }
-          Success returns: { profile.name, text, likes, replies }
+          Success returns: 200, { profile.name, text, likes, replies }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE
           Requires: authHeader
@@ -99,12 +99,12 @@ API
       /profile/followers/:profileId
         GET
           Requires: authHeader
-          Success returns: { [ { follower.name, updatedAt, accepted } ] }
+          Success returns: 200, { [ { follower.name, updatedAt, accepted } ] }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
       /profile/following/:profileId
         GET
           Requires: authHeader
-          Success returns: { [ if accepted: { following.name, updatedAt } ] }
+          Success returns: 200, { [ if accepted: { following.name, updatedAt } ] }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
       /:followId
         PUT
