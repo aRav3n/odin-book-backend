@@ -5,6 +5,8 @@ const express = require("express");
 const app = express();
 require("dotenv");
 
+const { deleteAllUsers } = require("../db/queries");
+
 app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
@@ -48,6 +50,12 @@ const testUserTwo = {
   password: "123456",
   confirmPassword: "123456",
 };
+
+afterAll(async () => {
+  const deletedUsers = await deleteAllUsers();
+  testUserOne.id = null;
+  console.log(`Cleaned up and deleted ${deletedUsers.count} user(s)`);
+});
 
 test("Signup route fails with bad email", (done) => {
   request(app)
@@ -95,6 +103,34 @@ test("Signup route fails with multiple messages for multiple errors", (done) => 
         { message: "Password must be between 6 and 16 characters." },
         { message: "Passwords must match." },
       ],
+    })
+    .expect(400, done);
+});
+
+test("Signup route succeeds with good email and good password", (done) => {
+  request(app)
+    .post("/user")
+    .type("form")
+    .send(testUserOne)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      testUserOne.id = res.body.id;
+      expect(res.body.id).toBeGreaterThan(0);
+      expect(res.body.email).toBe(testUserOne.email);
+      expect(res.body.hash).not.toBeDefined();
+      done();
+    });
+});
+
+test("Signup route fails if user already exists", (done) => {
+  request(app)
+    .post("/user")
+    .type("form")
+    .send(testUserOne)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "User with this email already exists." }],
     })
     .expect(400, done);
 });

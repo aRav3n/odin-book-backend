@@ -49,23 +49,16 @@ const createUser = [
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(req.body.password, salt);
     const email = req.body.email;
-    ˇ;
     const id = await addUser(email, hash);
 
     if (!id) {
       return res
         .status(400)
-        .json({ errors: [{ message: "User with this email already exists" }] });
+        .json({ errors: [{ message: "User with this email already exists." }] });
     }
 
-    const token = await securityController.sign(newUser);
-    if (!token) {
-      return res
-        .status(500)
-        .json({ errors: [{ message: "Error generating token" }] });
-    }
+    const user = { id, email };
 
-    const user = { id, email, token };
     return res.status(200).json(user);
   },
 ];

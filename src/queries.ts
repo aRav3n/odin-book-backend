@@ -37,4 +37,9 @@ async function addUser(email: string, hash: string) {
   return id;
 }
 
-export { addUser };
+async function deleteAllUsers() {
+  const deletedUserCount = await prisma.user.deleteMany({});
+  return deletedUserCount;
+}
+
+export { addUser, deleteAllUsers };
