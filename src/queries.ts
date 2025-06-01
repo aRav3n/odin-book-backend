@@ -47,7 +47,23 @@ async function getUser(email: string) {
     where: { email },
   });
 
+  if (!user) {
+    return null;
+  }
+
   return user;
 }
 
-export { addUser, deleteAllUsers, getUser };
+async function getUserEmail(id: number) {
+  const user = await prisma.user.findFirst({
+    where: { id },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user.email;
+}
+
+export { addUser, deleteAllUsers, getUser, getUserEmail };

@@ -2,11 +2,12 @@ const { Router } = require("express");
 const router = Router();
 
 const userController = require("../controllers/userController");
+const security = require("../controllers/securityController");
 
 router.post("/user", userController.createUser);
 router.post("/user/login", userController.loginUser);
+router.get("/user/:userId", security.verifyTokenValid, security.verifyTokenMatch, userController.getEmail);
 /*
-router.get("/user/:userId");
 router.put("/user/:userId");
 router.delete("/user/:userId");
 

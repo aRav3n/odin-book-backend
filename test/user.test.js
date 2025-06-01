@@ -54,6 +54,7 @@ const testUserTwo = {
 afterAll(async () => {
   const deletedUsers = await deleteAllUsers();
   testUserOne.id = null;
+  testUserOne.token = null;
   console.log(`Cleaned up and deleted ${deletedUsers.count} user(s)`);
 });
 
@@ -195,7 +196,7 @@ test("Login route fails if wrong password", (done) => {
     .expect(403, done);
 });
 
-test("Login route passes with correct email and correct password", (done) => {
+test("Login route succeeds with correct email and correct password", (done) => {
   request(app)
     .post("/user/login")
     .type("form")
@@ -207,6 +208,51 @@ test("Login route passes with correct email and correct password", (done) => {
       expect(res.body.email).toBe(testUserOne.email);
       expect(res.body.token).toBeDefined();
       expect(res.body.hash).not.toBeDefined();
+      testUserOne.token = res.body.token;
       done();
     });
+});
+
+test("Get Email route fails when not logged in", (done) => {
+  request(app)
+    .get(`/user/${testUserOne.id}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You must be logged in to do that." }],
+    })
+    .expect(401, done);
+});
+
+test("Get Email route fails with bad token", (done) => {
+  request(app)
+    .get(`/user/${testUserOne.id}`)
+    .set("Authorization", `Bearer ${badPassword}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Please sign in again and re-try that." }],
+    })
+    .expect(401, done);
+});
+
+test("Get Email route fails when trying to access other user's info", (done) => {
+  request(app)
+    .get("/user/0")
+    .set("Authorization", `Bearer ${testUserOne.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        { message: "You have to be logged in to your account to access that." },
+      ],
+    })
+    .expect(403, done);
+});
+
+test("Get Email route succeeds with the correct token", (done) => {
+  console.log("expects:", testUserOne.email);
+  request(app)
+    .get(`/user/${testUserOne.id}`)
+    .set("Authorization", `Bearer ${testUserOne.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ email: testUserOne.email })
+    .expect(200, done);
 });

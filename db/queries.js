@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.addUser = addUser;
 exports.deleteAllUsers = deleteAllUsers;
 exports.getUser = getUser;
+exports.getUserEmail = getUserEmail;
 const prisma_1 = require("../generated/prisma");
 const extension_accelerate_1 = require("@prisma/extension-accelerate");
 require("dotenv");
@@ -56,6 +57,20 @@ function getUser(email) {
         const user = yield prisma.user.findFirst({
             where: { email },
         });
+        if (!user) {
+            return null;
+        }
         return user;
+    });
+}
+function getUserEmail(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield prisma.user.findFirst({
+            where: { id },
+        });
+        if (!user) {
+            return null;
+        }
+        return user.email;
     });
 }

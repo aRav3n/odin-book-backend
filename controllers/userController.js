@@ -1,47 +1,15 @@
-const { body, validationResult } = require("express-validator");
+const { validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const security = require("./securityController");
 require("dotenv").config();
 
-const { addUser, getUser } = require("../db/queries");
-const { error } = require("console");
-
-const validateUser = [
-  body("email").trim().isEmail().withMessage("Must be a valid email address."),
-  body("password")
-    .trim()
-    .isLength({ min: 6, max: 16 })
-    .withMessage("Password must be between 6 and 16 characters."),
-  body("confirmPassword")
-    .exists()
-    .custom((value, { req }) => {
-      if (value !== req.body.password) {
-        return false;
-      }
-      return true;
-    })
-    .withMessage("Passwords must match.")
-    .trim(),
-];
-
-const trimFields = [body("email").trim(), body("password").trim()];
-
-// internal use functions
-function generateErrorMessageFromArray(errorArray) {
-  const object = {
-    errors: errorArray.array().map((err) => ({
-      message: err.msg,
-    })),
-  };
-
-  return object;
-}
-
-function generateIndividualErrorMessage(message) {
-  return {
-    errors: [{ message: message }],
-  };
-}
+const { addUser, getUser, getUserEmail } = require("../db/queries");
+const {
+  generateErrorMessageFromArray,
+  generateIndividualErrorMessage,
+  trimFields,
+  validateUser,
+} = require("./internalFunctions");
 
 // external use functions
 const createUser = [
@@ -71,6 +39,24 @@ const createUser = [
     return res.status(200).json(user);
   },
 ];
+
+async function getEmail(req, res) {
+  const userId = req.user.user.id;
+  const email = await getUserEmail(userId);
+
+  if (!email) {
+    return res
+      .status(400)
+      .json(
+        generateIndividualErrorMessage(
+          "Could not find your email in the database!"
+        )
+      );
+  }
+
+  console.log("gets:", email);
+  return res.status(200).json({ email });
+}
 
 const loginUser = [
   trimFields,
@@ -110,5 +96,6 @@ const loginUser = [
 
 module.exports = {
   createUser,
+  getEmail,
   loginUser,
 };
