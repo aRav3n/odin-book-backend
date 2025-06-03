@@ -39,6 +39,28 @@ function getUserInfoFromToken(token, secretKey) {
 
 const trimFields = [body("email").trim(), body("password").trim()];
 
+const validateUpdate = [
+  body("currentPassword").trim(),
+  body("newEmail")
+    .trim()
+    .isEmail()
+    .withMessage("Your new email must be a valid email address."),
+  body("newPassword")
+    .trim()
+    .isLength({ min: 6, max: 16 })
+    .withMessage("Your new password must be between 6 and 16 characters."),
+  body("newPasswordConfirm")
+    .exists()
+    .custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        return false;
+      }
+      return true;
+    })
+    .withMessage("Password confirmation must match.")
+    .trim(),
+];
+
 const validateUser = [
   body("email").trim().isEmail().withMessage("Must be a valid email address."),
   body("password")
@@ -63,5 +85,6 @@ module.exports = {
   getTokenFromReq,
   getUserInfoFromToken,
   trimFields,
+  validateUpdate,
   validateUser,
 };

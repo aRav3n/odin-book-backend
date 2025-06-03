@@ -3,11 +3,18 @@ const bcrypt = require("bcryptjs");
 const security = require("./securityController");
 require("dotenv").config();
 
-const { addUser, getUser, getUserEmail } = require("../db/queries");
+const {
+  addUser,
+  deleteSingleUser,
+  getUser,
+  getUserEmail,
+  updateUserInfo,
+} = require("../db/queries");
 const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
   trimFields,
+  validateUpdate,
   validateUser,
 } = require("./internalFunctions");
 
@@ -15,7 +22,6 @@ const {
 const createUser = [
   validateUser,
   async (req, res) => {
-    // error check section; if there's an error return 400 with a message
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const errorObject = generateErrorMessageFromArray(errors);
@@ -40,6 +46,41 @@ const createUser = [
   },
 ];
 
+async function deleteUser(req, res) {
+  const password = req.body.password;
+  if (!password) {
+    return res
+      .status(403)
+      .json(
+        generateIndividualErrorMessage(
+          "You have to be logged in to your account to access that."
+        )
+      );
+  }
+
+  const user = req.user.user;
+
+  const passwordIsValid = bcrypt.compareSync(password, user.hash);
+  if (!passwordIsValid) {
+    const message = generateIndividualErrorMessage(
+      "The password you entered is incorrect."
+    );
+    return res.status(403).json(message);
+  }
+
+  const deletedUserAccount = await deleteSingleUser(user.id);
+
+  if (
+    deletedUserAccount.id !== user.id ||
+    deletedUserAccount.email !== user.email ||
+    deletedUserAccount.hash !== user.hash
+  ) {
+    return res.sendStatus(500);
+  }
+
+  return res.status(200).json({ message: "Account successfully deleted." });
+}
+
 async function getEmail(req, res) {
   const userId = req.user.user.id;
   const email = await getUserEmail(userId);
@@ -54,7 +95,6 @@ async function getEmail(req, res) {
       );
   }
 
-  console.log("gets:", email);
   return res.status(200).json({ email });
 }
 
@@ -94,8 +134,56 @@ const loginUser = [
   },
 ];
 
+const updateUser = [
+  validateUpdate,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorObject = generateErrorMessageFromArray(errors);
+      return res.status(400).json(errorObject);
+    }
+
+    const passwordIsValid = bcrypt.compareSync(
+      req.body.currentPassword,
+      req.user.user.hash
+    );
+    if (!passwordIsValid) {
+      const message = generateIndividualErrorMessage(
+        "Your current password is incorrect."
+      );
+      return res.status(403).json(message);
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const newHash = bcrypt.hashSync(req.body.newPassword, salt);
+    const successfulUpdate = await updateUserInfo(
+      req.user.user.id,
+      req.body.newEmail,
+      newHash
+    );
+
+    if (!successfulUpdate) {
+      return res
+        .status(500)
+        .json(
+          generateIndividualErrorMessage(
+            "Something went wrong with the update!"
+          )
+        );
+    }
+
+    const token = security.sign(successfulUpdate);
+    const { hash, ...userObject } = successfulUpdate;
+    userObject.token = token;
+
+    return res.status(200).json(userObject);
+  },
+];
+
 module.exports = {
   createUser,
+  deleteUser,
   getEmail,
   loginUser,
+  updateUser,
 };

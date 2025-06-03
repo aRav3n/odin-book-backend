@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addUser = addUser;
-exports.deleteAllUsers = deleteAllUsers;
+exports.deleteSingleUser = deleteSingleUser;
 exports.getUser = getUser;
 exports.getUserEmail = getUserEmail;
+exports.updateUserInfo = updateUserInfo;
 const prisma_1 = require("../generated/prisma");
 const extension_accelerate_1 = require("@prisma/extension-accelerate");
 require("dotenv");
@@ -46,10 +47,15 @@ function addUser(email, hash) {
         return id;
     });
 }
-function deleteAllUsers() {
+function deleteSingleUser(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const deletedUserCount = yield prisma.user.deleteMany({});
-        return deletedUserCount;
+        const deletedUser = yield prisma.user.delete({
+            where: { id },
+        });
+        if (!deletedUser) {
+            return false;
+        }
+        return deletedUser;
     });
 }
 function getUser(email) {
@@ -72,5 +78,20 @@ function getUserEmail(id) {
             return null;
         }
         return user.email;
+    });
+}
+function updateUserInfo(id, email, hash) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const updatedUser = yield prisma.user.update({
+            where: { id },
+            data: {
+                email,
+                hash,
+            },
+        });
+        if (updatedUser) {
+            return updatedUser;
+        }
+        return false;
     });
 }

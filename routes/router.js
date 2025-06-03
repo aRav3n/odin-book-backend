@@ -4,13 +4,34 @@ const router = Router();
 const userController = require("../controllers/userController");
 const security = require("../controllers/securityController");
 
-router.post("/user", userController.createUser);
-router.post("/user/login", userController.loginUser);
-router.get("/user/:userId", security.verifyTokenValid, security.verifyTokenMatch, userController.getEmail);
-/*
-router.put("/user/:userId");
-router.delete("/user/:userId");
+router.post("/user", security.checkThatBodyExists, userController.createUser);
+router.post(
+  "/user/login",
+  security.checkThatBodyExists,
+  userController.loginUser
+);
+router.get(
+  "/user/:userId",
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  userController.getEmail
+);
+router.put(
+  "/user/:userId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  userController.updateUser
+);
+router.delete(
+  "/user/:userId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  userController.deleteUser
+);
 
+/*
 router.post("/profile");
 router.get("/profile/:profileId");
 router.put("/profile/:profileId");

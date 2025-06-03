@@ -37,9 +37,16 @@ async function addUser(email: string, hash: string) {
   return id;
 }
 
-async function deleteAllUsers() {
-  const deletedUserCount = await prisma.user.deleteMany({});
-  return deletedUserCount;
+async function deleteSingleUser(id: number) {
+  const deletedUser = await prisma.user.delete({
+    where: { id },
+  });
+
+  if (!deletedUser) {
+    return false;
+  }
+
+  return deletedUser;
 }
 
 async function getUser(email: string) {
@@ -66,4 +73,19 @@ async function getUserEmail(id: number) {
   return user.email;
 }
 
-export { addUser, deleteAllUsers, getUser, getUserEmail };
+async function updateUserInfo(id: number, email: string, hash: string) {
+  const updatedUser = await prisma.user.update({
+    where: { id },
+    data: {
+      email,
+      hash,
+    },
+  });
+
+  if (updatedUser) {
+    return updatedUser;
+  }
+  return false;
+}
+
+export { addUser, deleteSingleUser, getUser, getUserEmail, updateUserInfo };

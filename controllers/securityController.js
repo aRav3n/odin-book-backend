@@ -8,6 +8,19 @@ const {
 
 const secretKey = process.env.SECRET_KEY;
 
+function checkThatBodyExists(req, res, next) {
+  if (!req.body) {
+    return res
+      .status(400)
+      .json(
+        generateIndividualErrorMessage(
+          "There was a problem with the form data submitted; fill it out again and re-submit."
+        )
+      );
+  }
+  next();
+}
+
 // external functions
 function sign(user) {
   const token = jwt.sign({ user }, secretKey);
@@ -54,4 +67,9 @@ function verifyTokenValid(req, res, next) {
   next();
 }
 
-module.exports = { sign, verifyTokenMatch, verifyTokenValid };
+module.exports = {
+  checkThatBodyExists,
+  sign,
+  verifyTokenMatch,
+  verifyTokenValid,
+};

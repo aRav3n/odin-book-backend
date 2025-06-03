@@ -12,13 +12,13 @@ API
           Success returns: 200, { email }
           Fail returns: 401 if bad authHeader or not logged in, 403 if not correct user's authHeader
         PUT
-          Requires: authHeader, { currentEmail, currentPassword, newPassword, newPasswordConfirm }
+          Requires: authHeader, { currentPassword, newEmail, newPassword, newPasswordConfirm }
           Success returns: 200
-          Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
+          Fail returns: 401 if bad authHeader or not logged in, 403 if not correct user's authHeader, 400 otherwise
         DELETE
           Requires: authHeader, { password }
           Success returns: 200
-          Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
+          Fail returns: 401 if not correct authHeader, 403 for wrong id, 400 otherwise
       /login
         POST 
           Requires: { email, password }
