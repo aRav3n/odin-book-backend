@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addUser = addUser;
+exports.deleteAllUsers = deleteAllUsers;
 exports.deleteSingleUser = deleteSingleUser;
 exports.getUser = getUser;
 exports.getUserEmail = getUserEmail;
@@ -47,6 +48,12 @@ function addUser(email, hash) {
         return id;
     });
 }
+function deleteAllUsers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const deletedUserCount = yield prisma.user.deleteMany({});
+        return deletedUserCount;
+    });
+}
 function deleteSingleUser(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const deletedUser = yield prisma.user.delete({
@@ -82,6 +89,7 @@ function getUserEmail(id) {
 }
 function updateUserInfo(id, email, hash) {
     return __awaiter(this, void 0, void 0, function* () {
+        const allUsers = yield prisma.user.findMany({});
         const updatedUser = yield prisma.user.update({
             where: { id },
             data: {

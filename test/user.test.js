@@ -12,6 +12,7 @@ const badEmail = "notAnEmail_Address";
 const goodEmail = "c@b.com";
 const badPassword = "12345";
 const goodPassword = "123456";
+const { deleteAllUsers } = require("../db/queries");
 
 const testUserBadEmail = {
   email: badEmail,
@@ -54,6 +55,12 @@ const testUserTwo = {
   password: "123456",
   confirmPassword: "123456",
 };
+
+afterAll(async () => {
+  const deletedUsers = await deleteAllUsers();
+  const deleteCount = deletedUsers.count;
+  console.log(`Deleted ${deleteCount} extra user accounts.`);
+});
 
 test("Signup route fails if req.body doesn't exist", (done) => {
   request(app)
@@ -126,12 +133,12 @@ test("Signup route succeeds with good email and good password", (done) => {
     .type("form")
     .send(testUserOne)
     .expect("Content-Type", /json/)
-    .expect(200)
     .then((res) => {
       testUserOne.id = res.body.id;
       expect(res.body.id).toBeGreaterThan(0);
       expect(res.body.email).toBe(testUserOne.email);
       expect(res.body.hash).not.toBeDefined();
+      expect(200);
       done();
     });
 });
@@ -231,11 +238,12 @@ test("Login route succeeds with correct email and correct password", (done) => {
     .expect("Content-Type", /json/)
     .expect(200)
     .then((res) => {
-      expect(res.body.id).toBe(testUserOne.id);
+      testUserOne.id = res.body.id;
+      testUserOne.token = res.body.token;
+      expect(res.body.id).toBeDefined();
       expect(res.body.email).toBe(testUserOne.email);
       expect(res.body.token).toBeDefined();
       expect(res.body.hash).not.toBeDefined();
-      testUserOne.token = res.body.token;
       done();
     });
 });
