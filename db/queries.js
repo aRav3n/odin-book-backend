@@ -49,6 +49,12 @@ function addUser(email, hash) {
 }
 function deleteSingleUser(id) {
     return __awaiter(this, void 0, void 0, function* () {
+        const user = yield prisma.user.findFirst({
+            where: { id },
+        });
+        if (!user) {
+            return false;
+        }
         const deletedUser = yield prisma.user.delete({
             where: { id },
         });

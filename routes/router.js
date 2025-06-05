@@ -31,12 +31,25 @@ router.delete(
   userController.deleteUser
 );
 
-/*
-router.post("/profile");
-router.get("/profile/:profileId");
-router.put("/profile/:profileId");
-router.delete("/profile/:profileId");
+router.post(
+  "/profile",
+  security.checkThatBodyExists,
+  security.verifyTokenValid
+);
+router.get("/profile/:profileId", security.verifyTokenValid);
+router.put(
+  "/profile/:profileId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  security.verifyTokenMatch
+);
+router.delete(
+  "/profile/:profileId",
+  security.verifyTokenValid,
+  security.verifyTokenMatch
+);
 
+/*
 router.post("/post");
 router.get("/post/:postId");
 router.put("/post/:postId");
@@ -66,6 +79,7 @@ router.use((req, res) => {
 
 router.use((err, req, res, next) => {
   console.error(err.stack);
+  console.log(req.body);
   res.status(500).json({ error: "Internal Server Error" });
 });
 

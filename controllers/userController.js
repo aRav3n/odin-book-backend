@@ -28,18 +28,18 @@ const createUser = [
       return res.status(400).json(errorObject);
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(req.body.password, salt);
     const email = req.body.email;
-    const id = await addUser(email, hash);
-
-    if (!id) {
+    const existingUser = await getUser(email);
+    if (existingUser) {
       const errorMessage = generateIndividualErrorMessage(
         "User with this email already exists."
       );
       return res.status(400).json(errorMessage);
     }
 
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(req.body.password, salt);
+    const id = await addUser(email, hash);
     const user = { id, email };
 
     return res.status(200).json(user);
@@ -71,11 +71,18 @@ async function deleteUser(req, res) {
   const deletedUserAccount = await deleteSingleUser(user.id);
 
   if (
+    !deletedUserAccount ||
     deletedUserAccount.id !== user.id ||
     deletedUserAccount.email !== user.email ||
     deletedUserAccount.hash !== user.hash
   ) {
-    return res.sendStatus(500);
+    return res
+      .status(404)
+      .json(
+        generateIndividualErrorMessage(
+          `An account for ${user.email} was not found!`
+        )
+      );
   }
 
   return res.status(200).json({ message: "Account successfully deleted." });

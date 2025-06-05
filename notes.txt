@@ -36,7 +36,7 @@ API
           Success returns: 200, { name, about, website, posts, followers, following }
           Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
         PUT
-          Requires: authHeader
+          Requires: authHeader, { name, about (can be blank), website (can be blank) }
           Success returns: 200, { name, about, website, posts, followers, following }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE

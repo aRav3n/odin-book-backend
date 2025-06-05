@@ -124,6 +124,24 @@ test("Signup route fails with multiple messages for multiple errors", async () =
     .expect(400);
 });
 
+test("Signup route fails if user already exists", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+
+  await request(app)
+    .post("/user")
+    .type("form")
+    .send(user)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "User with this email already exists." }],
+    })
+    .expect(400);
+
+  await logInAndDelete(user);
+});
+
 test("Signup route succeeds with good email and good password", async () => {
   const user = generateUserObject();
 
@@ -139,23 +157,6 @@ test("Signup route succeeds with good email and good password", async () => {
       expect(res.body.hash).not.toBeDefined();
       expect(200);
     });
-
-  await logInAndDelete(user);
-});
-
-test("Signup route fails if user already exists", async () => {
-  const user = generateUserObject();
-  user.id = await signUserUp(user);
-
-  await request(app)
-    .post("/user")
-    .type("form")
-    .send(user)
-    .expect("Content-Type", /json/)
-    .expect({
-      errors: [{ message: "User with this email already exists." }],
-    })
-    .expect(400);
 
   await logInAndDelete(user);
 });

@@ -38,6 +38,13 @@ async function addUser(email: string, hash: string) {
 }
 
 async function deleteSingleUser(id: number) {
+  const user = await prisma.user.findFirst({
+    where: { id },
+  });
+  if (!user) {
+    return false;
+  }
+
   const deletedUser = await prisma.user.delete({
     where: { id },
   });
@@ -89,10 +96,4 @@ async function updateUserInfo(id: number, email: string, hash: string) {
   return false;
 }
 
-export {
-  addUser,
-  deleteSingleUser,
-  getUser,
-  getUserEmail,
-  updateUserInfo,
-};
+export { addUser, deleteSingleUser, getUser, getUserEmail, updateUserInfo };

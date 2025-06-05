@@ -8,10 +8,9 @@ require("dotenv");
 app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
-const { deleteAllUsers } = require("../db/queries");
-
 const {
   deleteUser,
+  generateSignedInUser,
   generateUserObject,
   logInAndDelete,
   logUserIn,
@@ -28,7 +27,10 @@ test("Create Profile route fails without authHeader", async () => {});
 
 test("Create Profile route fails with corrupted authHeader", async () => {});
 
-test("Create Profile route fails if req.body.name is blank", async () => {});
+test("Create Profile route fails if req.body.name is blank", async () => {
+  const user = await generateSignedInUser();
+  await deleteUser(user);
+});
 
 test("Create Profile route succeeds when using a good authHeader and name", async () => {});
 
