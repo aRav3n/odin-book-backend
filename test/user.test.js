@@ -12,7 +12,14 @@ const badEmail = "notAnEmail_Address";
 const goodEmail = "c@b.com";
 const badPassword = "12345";
 const goodPassword = "123456";
-const { deleteAllUsers } = require("../db/queries");
+
+const {
+  deleteUser,
+  generateUserObject,
+  logInAndDelete,
+  logUserIn,
+  signUserUp,
+} = require("./internalTestFunctions");
 
 const testUserBadEmail = {
   email: badEmail,
@@ -38,32 +45,22 @@ const testUserBadEverything = {
   confirmPassword: goodPassword,
 };
 
-const testUserOne = {
-  email: "b@b.com",
-  password: "123456",
-  confirmPassword: "123456",
-};
-
-const testUserOneUpdate = {
+const userUpdate = {
   newEmail: goodEmail,
   newPassword: "1234567",
   newPasswordConfirm: "1234567",
 };
 
 const testUserTwo = {
+  id: 0,
   email: "a@b.com",
   password: "123456",
   confirmPassword: "123456",
+  token: null,
 };
 
-afterAll(async () => {
-  const deletedUsers = await deleteAllUsers();
-  const deleteCount = deletedUsers.count;
-  console.log(`Deleted ${deleteCount} extra user accounts.`);
-});
-
-test("Signup route fails if req.body doesn't exist", (done) => {
-  request(app)
+test("Signup route fails if req.body doesn't exist", async () => {
+  await request(app)
     .post("/user")
     .expect("Content-Type", /json/)
     .expect({
@@ -74,21 +71,21 @@ test("Signup route fails if req.body doesn't exist", (done) => {
         },
       ],
     })
-    .expect(400, done);
+    .expect(400);
 });
 
-test("Signup route fails with bad email", (done) => {
-  request(app)
+test("Signup route fails with bad email", async () => {
+  await request(app)
     .post("/user")
     .type("form")
     .send(testUserBadEmail)
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Must be a valid email address." }] })
-    .expect(400, done);
+    .expect(400);
 });
 
-test("Signup route fails with bad password", (done) => {
-  request(app)
+test("Signup route fails with bad password", async () => {
+  await request(app)
     .post("/user")
     .type("form")
     .send(testUserBadPassword)
@@ -96,11 +93,11 @@ test("Signup route fails with bad password", (done) => {
     .expect({
       errors: [{ message: "Password must be between 6 and 16 characters." }],
     })
-    .expect(400, done);
+    .expect(400);
 });
 
-test("Signup route fails with bad password confirmation", (done) => {
-  request(app)
+test("Signup route fails with bad password confirmation", async () => {
+  await request(app)
     .post("/user")
     .type("form")
     .send(testUserBadPasswordConfirm)
@@ -108,11 +105,11 @@ test("Signup route fails with bad password confirmation", (done) => {
     .expect({
       errors: [{ message: "Passwords must match." }],
     })
-    .expect(400, done);
+    .expect(400);
 });
 
-test("Signup route fails with multiple messages for multiple errors", (done) => {
-  request(app)
+test("Signup route fails with multiple messages for multiple errors", async () => {
+  await request(app)
     .post("/user")
     .type("form")
     .send(testUserBadEverything)
@@ -124,39 +121,47 @@ test("Signup route fails with multiple messages for multiple errors", (done) => 
         { message: "Passwords must match." },
       ],
     })
-    .expect(400, done);
+    .expect(400);
 });
 
-test("Signup route succeeds with good email and good password", (done) => {
-  request(app)
+test("Signup route succeeds with good email and good password", async () => {
+  const user = generateUserObject();
+
+  await request(app)
     .post("/user")
     .type("form")
-    .send(testUserOne)
+    .send(user)
     .expect("Content-Type", /json/)
     .then((res) => {
-      testUserOne.id = res.body.id;
       expect(res.body.id).toBeGreaterThan(0);
-      expect(res.body.email).toBe(testUserOne.email);
+      user.id = res.body.id;
+      expect(res.body.email).toBe(user.email);
       expect(res.body.hash).not.toBeDefined();
       expect(200);
-      done();
     });
+
+  await logInAndDelete(user);
 });
 
-test("Signup route fails if user already exists", (done) => {
-  request(app)
+test("Signup route fails if user already exists", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
     .post("/user")
     .type("form")
-    .send(testUserOne)
+    .send(user)
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "User with this email already exists." }],
     })
-    .expect(400, done);
+    .expect(400);
+
+  await logInAndDelete(user);
 });
 
-test("Login route fails if req.body doesn't exist", (done) => {
-  request(app)
+test("Login route fails if req.body doesn't exist", async () => {
+  await request(app)
     .post("/user/login")
     .expect("Content-Type", /json/)
     .expect({
@@ -167,11 +172,11 @@ test("Login route fails if req.body doesn't exist", (done) => {
         },
       ],
     })
-    .expect(400, done);
+    .expect(400);
 });
 
-test("Login route fails if no email and no password", (done) => {
-  request(app)
+test("Login route fails if no email and no password", async () => {
+  await request(app)
     .post("/user/login")
     .type("form")
     .send({})
@@ -179,35 +184,42 @@ test("Login route fails if no email and no password", (done) => {
     .expect({
       errors: [{ message: "You need an email and password to log in." }],
     })
-    .expect(403, done);
+    .expect(403);
 });
 
-test("Login route fails if no email", (done) => {
-  request(app)
+test("Login route fails if no email", async () => {
+  const user = generateUserObject();
+
+  await request(app)
     .post("/user/login")
     .type("form")
-    .send({ password: testUserOne.password })
+    .send({ password: user.password })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "You need an email and password to log in." }],
     })
-    .expect(403, done);
+    .expect(403);
 });
 
-test("Login route fails if no password", (done) => {
-  request(app)
+test("Login route fails if no password", async () => {
+  const user = generateUserObject();
+
+  await request(app)
     .post("/user/login")
     .type("form")
-    .send({ email: testUserOne.email })
+    .send({ email: user.email })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "You need an email and password to log in." }],
     })
-    .expect(403, done);
+    .expect(403);
 });
 
-test("Login route fails if wrong email", (done) => {
-  request(app)
+test("Login route fails if wrong email", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
     .post("/user/login")
     .type("form")
     .send(testUserTwo)
@@ -215,85 +227,121 @@ test("Login route fails if wrong email", (done) => {
     .expect({
       errors: [{ message: "No user with this email exists in the database." }],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await logInAndDelete(user);
 });
 
-test("Login route fails if wrong password", (done) => {
-  request(app)
+test("Login route fails if wrong password", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
     .post("/user/login")
     .type("form")
-    .send({ email: testUserOne.email, password: badPassword })
+    .send({ email: user.email, password: badPassword })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "That password doesn't work; please try again." }],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await logInAndDelete(user);
 });
 
-test("Login route succeeds with correct email and correct password", (done) => {
-  request(app)
+test("Login route succeeds with correct email and correct password", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
     .post("/user/login")
     .type("form")
-    .send(testUserOne)
+    .send(user)
     .expect("Content-Type", /json/)
     .expect(200)
     .then((res) => {
-      testUserOne.id = res.body.id;
-      testUserOne.token = res.body.token;
+      user.id = res.body.id;
+      user.token = res.body.token;
       expect(res.body.id).toBeDefined();
-      expect(res.body.email).toBe(testUserOne.email);
+      expect(res.body.email).toBe(user.email);
       expect(res.body.token).toBeDefined();
       expect(res.body.hash).not.toBeDefined();
-      done();
     });
+
+  await deleteUser(user);
 });
 
-test("Get Email route fails when not logged in", (done) => {
-  request(app)
-    .get(`/user/${testUserOne.id}`)
+test("Get Email route fails when not logged in", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .get(`/user/${user.id}`)
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "You must be logged in to do that." }],
     })
-    .expect(401, done);
+    .expect(401);
+
+  await logInAndDelete(user);
 });
 
-test("Get Email route fails with bad token", (done) => {
-  request(app)
-    .get(`/user/${testUserOne.id}`)
+test("Get Email route fails with bad token", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .get(`/user/${user.id}`)
     .set("Authorization", `Bearer ${badPassword}`)
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "Please sign in again and re-try that." }],
     })
-    .expect(401, done);
+    .expect(401);
+
+  await logInAndDelete(user);
 });
 
-test("Get Email route fails when trying to access other user's info", (done) => {
-  request(app)
+test("Get Email route fails when trying to access other user's info", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
     .get("/user/0")
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .expect("Content-Type", /json/)
     .expect({
       errors: [
         { message: "You have to be logged in to your account to access that." },
       ],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Get Email route succeeds with the correct token", (done) => {
-  request(app)
-    .get(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Get Email route succeeds with the correct token", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .get(`/user/${loggedInUser.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .expect("Content-Type", /json/)
-    .expect({ email: testUserOne.email })
-    .expect(200, done);
+    .expect({ email: loggedInUser.email })
+    .expect(200);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Update Account route fails if req.body doesn't exist", (done) => {
-  request(app)
-    .put(`/user/${testUserOne.id}`)
+test("Update Account route fails if req.body doesn't exist", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .put(`/user/${user.id}`)
     .expect("Content-Type", /json/)
     .expect({
       errors: [
@@ -303,48 +351,64 @@ test("Update Account route fails if req.body doesn't exist", (done) => {
         },
       ],
     })
-    .expect(400, done);
+    .expect(400);
+
+  await logInAndDelete(user);
 });
 
-test("Update Account route fails when not logged in", (done) => {
-  request(app)
-    .put(`/user/${testUserOne.id}`)
+test("Update Account route fails when not logged in", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .put(`/user/${user.id}`)
     .type("form")
     .send({
-      ...testUserOneUpdate,
-      currentPassword: testUserOne.password,
+      ...userUpdate,
+      currentPassword: user.password,
     })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "You must be logged in to do that." }],
     })
-    .expect(401, done);
+    .expect(401);
+
+  await logInAndDelete(user);
 });
 
-test("Update Account route fails with bad token", (done) => {
-  request(app)
-    .put(`/user/${testUserOne.id}`)
+test("Update Account route fails with bad token", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .put(`/user/${user.id}`)
     .set("Authorization", `Bearer ${badPassword}`)
     .type("form")
     .send({
-      ...testUserOneUpdate,
-      currentPassword: testUserOne.password,
+      ...userUpdate,
+      currentPassword: user.password,
     })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "Please sign in again and re-try that." }],
     })
-    .expect(401, done);
+    .expect(401);
+
+  await logInAndDelete(user);
 });
 
-test("Update Account route fails when trying to access other user's info", (done) => {
-  request(app)
+test("Update Account route fails when trying to access other user's info", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
     .put("/user/0")
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({
-      ...testUserOneUpdate,
-      currentPassword: testUserOne.password,
+      ...userUpdate,
+      currentPassword: loggedInUser.password,
     })
     .expect("Content-Type", /json/)
     .expect({
@@ -352,20 +416,26 @@ test("Update Account route fails when trying to access other user's info", (done
         { message: "You have to be logged in to your account to access that." },
       ],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Update Account route fails if new email is invalid and password doesn't  match confirmation", (done) => {
-  request(app)
-    .put(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Update Account route fails if new email is invalid and password doesn't match confirmation", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .put(`/user/${loggedInUser.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({
       newEmail: badEmail,
-      currentEmail: testUserOne.email,
-      currentPassword: testUserOne.password,
+      currentEmail: loggedInUser.email,
+      currentPassword: loggedInUser.password,
       newPassword: badPassword,
-      newPasswordConfirm: testUserOneUpdate.newPassword,
+      newPasswordConfirm: userUpdate.newPassword,
     })
     .expect("Content-Type", /json/)
     .expect({
@@ -377,50 +447,67 @@ test("Update Account route fails if new email is invalid and password doesn't  m
         { message: "Password confirmation must match." },
       ],
     })
-    .expect(400, done);
+    .expect(400);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Update Account route fails if currentPassword is incorrect", (done) => {
-  request(app)
-    .put(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Update Account route fails if currentPassword is incorrect", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .put(`/user/${loggedInUser.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({
-      ...testUserOneUpdate,
+      ...userUpdate,
       currentPassword: badPassword,
     })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "Your current password is incorrect." }],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Update Account route succeeds with correct info and token", (done) => {
-  request(app)
-    .put(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Update Account route succeeds with correct info and token", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .put(`/user/${loggedInUser.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({
-      ...testUserOneUpdate,
-      currentPassword: testUserOne.password,
+      ...userUpdate,
+      currentPassword: loggedInUser.password,
     })
-    .expect(200)
     .then((res) => {
-      testUserOne.token = res.body.token;
-      expect(res.body.id).toBe(testUserOne.id);
-      expect(res.body.email).toBe(testUserOneUpdate.newEmail);
-      testUserOne.email = testUserOneUpdate.newEmail;
+      loggedInUser.token = res.body.token;
+      expect(res.body.id).toBe(loggedInUser.id);
+      expect(res.body.email).toBe(userUpdate.newEmail);
+      loggedInUser.email = userUpdate.newEmail;
       expect(res.body.hash).not.toBeDefined();
-      testUserOne.password = testUserOneUpdate.newPassword;
-      done();
+      loggedInUser.password = userUpdate.newPassword;
+      expect(200);
     });
+
+  await logInAndDelete(loggedInUser);
 });
 
-test("Delete route fails if req.body doesn't exist", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Delete route fails if req.body doesn't exist", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .delete(`/user/${user.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .expect("Content-Type", /json/)
     .expect({
       errors: [
@@ -430,53 +517,77 @@ test("Delete route fails if req.body doesn't exist", (done) => {
         },
       ],
     })
-    .expect(400, done);
+    .expect(400);
+
+  await logInAndDelete(loggedInUser);
 });
 
-test("Delete route fails when not logged in", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id}`)
+test("Delete route fails when not logged in", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .delete(`/user/${user.id}`)
     .type("form")
-    .send({ password: testUserOneUpdate.newPassword })
+    .send({ password: userUpdate.newPassword })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "You must be logged in to do that." }],
     })
-    .expect(401, done);
+    .expect(401);
+
+  await logInAndDelete(user);
 });
 
-test("Delete route fails with corrupted token", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id}`)
+test("Delete route fails with corrupted token", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  await request(app)
+    .delete(`/user/${user.id}`)
     .set("Authorization", `Bearer ${badPassword}`)
     .type("form")
-    .send({ password: testUserOneUpdate.newPassword })
+    .send({ password: userUpdate.newPassword })
     .expect("Content-Type", /json/)
     .expect({
       errors: [{ message: "Please sign in again and re-try that." }],
     })
-    .expect(401, done);
+    .expect(401);
+
+  await logInAndDelete(user);
 });
 
-test("Delete route fails when trying to delete another user's account", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id - 1}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Delete route fails when trying to delete another user's account", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .delete(`/user/${loggedInUser.id - 1}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
-    .send({ password: testUserOneUpdate.newPassword })
+    .send({ password: userUpdate.newPassword })
     .expect("Content-Type", /json/)
     .expect({
       errors: [
         { message: "You have to be logged in to your account to access that." },
       ],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Delete route fails with no password entered", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Delete route fails with no password entered", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .delete(`/user/${user.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({ password: "" })
     .expect("Content-Type", /json/)
@@ -485,27 +596,41 @@ test("Delete route fails with no password entered", (done) => {
         { message: "You have to be logged in to your account to access that." },
       ],
     })
-    .expect(403, done);
+    .expect(403);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Delete route fails with wrong password entered", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Delete route fails with wrong password entered", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .delete(`/user/${loggedInUser.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({ password: badPassword })
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "The password you entered is incorrect." }] })
-    .expect(403, done);
+    .expect(403);
+
+  await deleteUser(loggedInUser);
 });
 
-test("Delete route succeeds with correct authHeader and correct password", (done) => {
-  request(app)
-    .delete(`/user/${testUserOne.id}`)
-    .set("Authorization", `Bearer ${testUserOne.token}`)
+test("Delete route succeeds with correct authHeader and correct password", async () => {
+  const user = generateUserObject();
+  user.id = await signUserUp(user);
+
+  const loggedInUser = await logUserIn(user);
+
+  await request(app)
+    .delete(`/user/${loggedInUser.id}`)
+    .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
-    .send({ password: testUserOne.password })
+    .send({ password: loggedInUser.password })
     .expect("Content-Type", /json/)
     .expect({ message: "Account successfully deleted." })
-    .expect(200, done);
+    .expect(200);
 });
