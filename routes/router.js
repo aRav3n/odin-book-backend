@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const router = Router();
 
-const userController = require("../controllers/userController");
 const security = require("../controllers/securityController");
+
+const profileController = require("../controllers/profileController");
+const userController = require("../controllers/userController");
 
 router.post("/user", security.checkThatBodyExists, userController.createUser);
 router.post(
@@ -34,7 +36,8 @@ router.delete(
 router.post(
   "/profile",
   security.checkThatBodyExists,
-  security.verifyTokenValid
+  security.verifyTokenValid,
+  profileController.createProfile
 );
 router.get("/profile/:profileId", security.verifyTokenValid);
 router.put(

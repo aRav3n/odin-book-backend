@@ -128,7 +128,6 @@ test("Signup route fails if user already exists", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
-
   await request(app)
     .post("/user")
     .type("form")

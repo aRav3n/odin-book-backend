@@ -60,16 +60,42 @@ async function logInAndDelete(user) {
   await deleteUser(loggedInUser);
 }
 
+function generateUserProfileObject() {
+  const userId = null;
+  const name = "Padma Patil";
+  const website = "https://harrypotter.fandom.com/wiki/Ravenclaw";
+  const about = "";
+
+  return { userId, name, website, about };
+}
+
 async function generateSignedInUser() {
-  const user = await generateUserObject();
+  const user = generateUserObject();
   user.id = await signUserUp(user);
   const loggedInUser = logUserIn(user);
   return loggedInUser;
 }
 
+async function generateUserAndProfile() {
+  const user = await generateSignedInUser();
+  const profile = generateUserProfileObject();
+
+  const res = await request(app)
+    .post("/profile")
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send(profile)
+    .expect(200);
+
+  const newProfile = res.body;
+  return { user, profile: newProfile };
+}
+
 module.exports = {
   deleteUser,
   generateSignedInUser,
+  generateUserAndProfile,
+  generateUserProfileObject,
   generateUserObject,
   logInAndDelete,
   logUserIn,

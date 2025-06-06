@@ -39,6 +39,22 @@ function getUserInfoFromToken(token, secretKey) {
 
 const trimFields = [body("email").trim(), body("password").trim()];
 
+const validateProfile = [
+  body("name")
+    .trim()
+    .exists({ checkFalsy: true })
+    .withMessage("Name must exist.")
+    .bail()
+    .notEmpty()
+    .withMessage("Name must not be blank."),
+  body("about").trim(),
+  body("website")
+    .trim()
+    .optional({ checkFalsy: true })
+    .isURL()
+    .withMessage("Website must be a valid URL."),
+];
+
 const validateUpdate = [
   body("currentPassword").trim(),
   body("newEmail")
@@ -85,6 +101,7 @@ module.exports = {
   getTokenFromReq,
   getUserInfoFromToken,
   trimFields,
+  validateProfile,
   validateUpdate,
   validateUser,
 };

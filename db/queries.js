@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.addProfile = addProfile;
 exports.addUser = addUser;
 exports.deleteSingleUser = deleteSingleUser;
 exports.getUser = getUser;
@@ -28,6 +29,16 @@ const prisma = new prisma_1.PrismaClient({
     },
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
+// profile queries
+function addProfile(userId, name, about, website) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const newProfile = yield prisma.profile.create({
+            data: { userId, name, about, website },
+        });
+        return newProfile;
+    });
+}
+// user queries
 function addUser(email, hash) {
     return __awaiter(this, void 0, void 0, function* () {
         // if a user already exists with that email then return false

@@ -17,6 +17,21 @@ const prisma = new PrismaClient({
   // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends(withAccelerate());
 
+// profile queries
+async function addProfile(
+  userId: number,
+  name: string,
+  about?: string,
+  website?: string
+) {
+  const newProfile = await prisma.profile.create({
+    data: { userId, name, about, website },
+  });
+
+  return newProfile;
+}
+
+// user queries
 async function addUser(email: string, hash: string) {
   // if a user already exists with that email then return false
   const count = await prisma.user.count({
@@ -96,4 +111,13 @@ async function updateUserInfo(id: number, email: string, hash: string) {
   return false;
 }
 
-export { addUser, deleteSingleUser, getUser, getUserEmail, updateUserInfo };
+export {
+  // profile queries
+  addProfile,
+  // user queries
+  addUser,
+  deleteSingleUser,
+  getUser,
+  getUserEmail,
+  updateUserInfo,
+};
