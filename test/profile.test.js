@@ -115,19 +115,64 @@ test("Create Profile route succeeds when using a good authHeader and name, websi
   await deleteUser(user);
 });
 
-/*
-test("Read Profile route fails without authHeader", async () => {});
+test("Read Profile route fails without authHeader", async () => {
+  const profileId = 0;
+  await request(app)
+    .get(`/profile/${profileId}`)
+    .type("form")
+    .send({ ourOnlyHope: "Obi-Wan Kenobi" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You must be logged in to do that." }],
+    })
+    .expect(401);
+});
 
-test("Read Profile route fails with corrupted authHeader", async () => {});
+test("Read Profile route fails with corrupted authHeader", async () => {
+  const profileId = 0;
+  await request(app)
+    .get(`/profile/${profileId}`)
+    .set("Authorization", "Bearer broken_t0k3n")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Please sign in again and re-try that." }],
+    })
+    .expect(401);
+});
 
 test("Read Profile fails with id for nonexistent profile", async () => {
   const { user, profile } = await generateUserAndProfile();
+
+  const profileId = profile.id;
+  await request(app)
+    .get(`/profile/${profileId - 1}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Could not find that profile, please try again." }],
+    })
+    .expect(404);
 
   await deleteUser(user);
 });
 
 test("Read Profile succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
+
+  const profileId = profile.id;
+  await request(app)
+    .get(`/profile/${profileId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      const body = res.body;
+      expect(body.id).toBe(profile.id);
+      expect(body.userId).toBe(user.id);
+      expect(body.name).toBe(profile.name);
+      expect(body.website).toBe(profile.website);
+      expect(body.about).toBe(profile.about);
+    });
 
   await deleteUser(user);
 });
@@ -139,10 +184,8 @@ test("Update Profile route fails without authHeader", async () => {});
 test("Update Profile route fails with corrupted authHeader", async () => {});
 
 test("Update Profile route fails when trying to update another user's profile", async () => {
-  const { userOne, profileOne } = await generateUserAndProfile();
-  const { userTwo, profileTwo } = await generateUserAndProfile();
-
-  console.log({ userOne, userTwo });
+  const { user: userOne, profile: profileOne } = await generateUserAndProfile();
+  const { user: userTwo, profile: profileTwo } = await generateUserAndProfile();
 
   await deleteUser(userOne);
   await deleteUser(userTwo);
@@ -171,10 +214,8 @@ test("Delete Profile route fails without authHeader", async () => {});
 test("Delete Profile route fails with corrupted authHeader", async () => {});
 
 test("Delete Profile route fails when trying to delete another user's profile", async () => {
-  const { userOne, profileOne } = await generateUserAndProfile();
-  const { userTwo, profileTwo } = await generateUserAndProfile();
-
-  console.log({ userOne, userTwo });
+  const { user: userOne, profile: profileOne } = await generateUserAndProfile();
+  const { user: userTwo, profile: profileTwo } = await generateUserAndProfile();
 
   await deleteUser(userOne);
   await deleteUser(userTwo);
@@ -191,4 +232,3 @@ test("Delete Profile succeeds when using a good authHeader and valid id", async 
 
   await deleteUser(user);
 });
-*/

@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const security = require("./securityController");
 require("dotenv").config();
 
-const { addProfile } = require("../db/queries");
+const { addProfile, getProfile } = require("../db/queries");
 const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
@@ -44,4 +44,21 @@ const createProfile = [
   },
 ];
 
-module.exports = { createProfile };
+async function readProfile(req, res) {
+  const id = Number(req.params.profileId);
+  const profile = await getProfile(id);
+
+  if (!profile) {
+    return res
+      .status(404)
+      .json(
+        generateIndividualErrorMessage(
+          "Could not find that profile, please try again."
+        )
+      );
+  }
+
+  return res.status(200).json(profile);
+}
+
+module.exports = { createProfile, readProfile };

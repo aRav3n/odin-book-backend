@@ -39,7 +39,11 @@ router.post(
   security.verifyTokenValid,
   profileController.createProfile
 );
-router.get("/profile/:profileId", security.verifyTokenValid);
+router.get(
+  "/profile/:profileId",
+  security.verifyTokenValid,
+  profileController.readProfile
+);
 router.put(
   "/profile/:profileId",
   security.checkThatBodyExists,
