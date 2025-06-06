@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addProfile = addProfile;
+exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
 exports.updateExistingProfile = updateExistingProfile;
 exports.addUser = addUser;
@@ -38,6 +39,12 @@ function addProfile(userId, name, about, website) {
             data: { userId, name, about, website },
         });
         return newProfile;
+    });
+}
+function deleteUserProfile(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const deletedProfile = yield prisma.profile.delete({ where: { id } });
+        return deletedProfile || false;
     });
 }
 function getProfile(id) {

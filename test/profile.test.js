@@ -17,7 +17,6 @@ const {
   logUserIn,
   signUserUp,
 } = require("./internalTestFunctions");
-const { updateProfile } = require("../controllers/profileController");
 
 let profileStart;
 
@@ -342,11 +341,34 @@ test("Delete Profile route fails without authHeader", async () => {
     .expect(401);
 });
 
-test("Delete Profile route fails with corrupted authHeader", async () => {});
+test("Delete Profile route fails with corrupted authHeader", async () => {
+  const profileId = 0;
+  await request(app)
+    .delete(`/profile/${profileId}`)
+    .set("Authorization", "Bearer broken_t0k3n")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Please sign in again and re-try that." }],
+    })
+    .expect(401);
+});
 
 test("Delete Profile route fails when trying to delete another user's profile", async () => {
   const { user: userOne, profile: profileOne } = await generateUserAndProfile();
   const { user: userTwo, profile: profileTwo } = await generateUserAndProfile();
+
+  await request(app)
+    .delete(`/profile/${profileTwo.id}`)
+    .set("Authorization", `Bearer ${userOne.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Access to that profile is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
 
   await deleteUser(userOne);
   await deleteUser(userTwo);
@@ -355,11 +377,60 @@ test("Delete Profile route fails when trying to delete another user's profile", 
 test("Delete Profile fails with id for nonexistent profile", async () => {
   const { user, profile } = await generateUserAndProfile();
 
+  await request(app)
+    .delete(`/profile/${profile.id - 1}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Access to that profile is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(user);
+});
+
+test("Delete Profile fails if profile has already been delete", async () => {
+  const { user, profile } = await generateUserAndProfile();
+
+  await request(app)
+    .delete(`/profile/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200);
+
+  await request(app)
+    .delete(`/profile/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Access to that profile is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
   await deleteUser(user);
 });
 
 test("Delete Profile succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
+
+  await request(app)
+    .delete(`/profile/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      const body = res.body;
+      expect(body.id).toBe(profile.id);
+      expect(body.name).toBe(profile.name);
+    });
 
   await deleteUser(user);
 });

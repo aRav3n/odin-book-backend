@@ -5,9 +5,11 @@ require("dotenv").config();
 
 const {
   addProfile,
+  deleteUserProfile,
   getProfile,
   updateExistingProfile,
 } = require("../db/queries");
+
 const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
@@ -65,38 +67,61 @@ async function readProfile(req, res) {
   return res.status(200).json(profile);
 }
 
-async function updateProfile(req, res) {
-  const id = Number(req.body.id);
-  const userId = Number(req.user.user.id);
-  const name = req.body.name;
-  const website = req.body.website || "";
-  const about = req.body.about || "";
+const updateProfile = [
+  validateProfile,
+  async (req, res) => {
+    const id = Number(req.body.id);
+    const userId = Number(req.user.user.id);
+    const name = req.body.name;
+    const website = req.body.website || "";
+    const about = req.body.about || "";
 
-  if (!name || name.length === 0) {
-    return res
-      .status(400)
-      .json(generateIndividualErrorMessage("The name field cannot be blank."));
-  }
+    if (!name || name.length === 0) {
+      return res
+        .status(400)
+        .json(
+          generateIndividualErrorMessage("The name field cannot be blank.")
+        );
+    }
 
-  const updatedProfile = await updateExistingProfile(
-    id,
-    userId,
-    name,
-    website,
-    about
-  );
+    const updatedProfile = await updateExistingProfile(
+      id,
+      userId,
+      name,
+      website,
+      about
+    );
 
-  if (!updatedProfile) {
+    if (!updatedProfile) {
+      return res
+        .status(404)
+        .json(
+          generateIndividualErrorMessage(
+            "Could not find a profile that matches the provided user login, please sign in again and retry."
+          )
+        );
+    }
+
+    return res.status(200).json(updatedProfile);
+  },
+];
+
+async function deleteProfile(req, res) {
+  const profileId = Number(req.params.profileId);
+
+  const deletedProfile = await deleteUserProfile(profileId);
+
+  if (!deletedProfile) {
     return res
       .status(404)
       .json(
         generateIndividualErrorMessage(
-          "Could not find a profile that matches the provided user login, please sign in again and retry."
+          "Could not find that profile, it may have already been deleted."
         )
       );
   }
 
-  return res.status(200).json(updatedProfile);
+  return res.status(200).json(deletedProfile);
 }
 
-module.exports = { createProfile, readProfile, updateProfile };
+module.exports = { createProfile, readProfile, updateProfile, deleteProfile };

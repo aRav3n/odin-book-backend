@@ -54,7 +54,8 @@ router.put(
 router.delete(
   "/profile/:profileId",
   security.verifyTokenValid,
-  security.verifyTokenMatch
+  security.verifyTokenMatch,
+  profileController.deleteProfile
 );
 
 /*

@@ -31,6 +31,11 @@ async function addProfile(
   return newProfile;
 }
 
+async function deleteUserProfile(id: number) {
+  const deletedProfile = await prisma.profile.delete({ where: { id } });
+  return deletedProfile || false;
+}
+
 async function getProfile(id: number) {
   const profile = await prisma.profile.findFirst({
     where: { id },
@@ -136,8 +141,10 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 export {
   // profile queries
   addProfile,
+  deleteUserProfile,
   getProfile,
   updateExistingProfile,
+
   // user queries
   addUser,
   deleteSingleUser,
