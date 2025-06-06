@@ -5,6 +5,7 @@ const {
   getTokenFromReq,
   getUserInfoFromToken,
 } = require("./internalFunctions");
+const { getProfile } = require("../db/queries");
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -27,16 +28,35 @@ function sign(user) {
   return token;
 }
 
-function verifyTokenMatch(req, res, next) {
-  const requestedUserId = Number(req.params.userId);
-
-  if (req.user.user.id !== requestedUserId) {
+async function verifyTokenMatch(req, res, next) {
+  if (req.params.userId) {
+    const requestedUserId = Number(req.params.userId);
+    if (req.user.user.id !== requestedUserId) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "You have to be logged in to your account to access that."
+          )
+        );
+    }
+  } else if (req.params.profileId) {
+    const requestedProfileId = Number(req.params.profileId);
+    const profile = await getProfile(requestedProfileId);
+    if (req.user.user.id !== profile.userId) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "Access to that profile is not allowed from this account."
+          )
+        );
+    }
+  } else {
     return res
-      .status(403)
+      .status(400)
       .json(
-        generateIndividualErrorMessage(
-          "You have to be logged in to your account to access that."
-        )
+        generateIndividualErrorMessage("No valid req.params items were found.")
       );
   }
 

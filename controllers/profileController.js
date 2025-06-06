@@ -3,7 +3,11 @@ const bcrypt = require("bcryptjs");
 const security = require("./securityController");
 require("dotenv").config();
 
-const { addProfile, getProfile } = require("../db/queries");
+const {
+  addProfile,
+  getProfile,
+  updateExistingProfile,
+} = require("../db/queries");
 const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
@@ -61,4 +65,38 @@ async function readProfile(req, res) {
   return res.status(200).json(profile);
 }
 
-module.exports = { createProfile, readProfile };
+async function updateProfile(req, res) {
+  const id = Number(req.body.id);
+  const userId = Number(req.user.user.id);
+  const name = req.body.name;
+  const website = req.body.website || "";
+  const about = req.body.about || "";
+
+  if (!name || name.length === 0) {
+    return res
+      .status(400)
+      .json(generateIndividualErrorMessage("The name field cannot be blank."));
+  }
+
+  const updatedProfile = await updateExistingProfile(
+    id,
+    userId,
+    name,
+    website,
+    about
+  );
+
+  if (!updatedProfile) {
+    return res
+      .status(404)
+      .json(
+        generateIndividualErrorMessage(
+          "Could not find a profile that matches the provided user login, please sign in again and retry."
+        )
+      );
+  }
+
+  return res.status(200).json(updatedProfile);
+}
+
+module.exports = { createProfile, readProfile, updateProfile };

@@ -17,6 +17,7 @@ const {
   logUserIn,
   signUserUp,
 } = require("./internalTestFunctions");
+const { updateProfile } = require("../controllers/profileController");
 
 test("Create Profile route fails if req.body is blank", async () => {
   await request(app)
@@ -177,15 +178,67 @@ test("Read Profile succeeds when using a good authHeader and valid id", async ()
   await deleteUser(user);
 });
 
-test("Update Profile route fails if req.body is blank", async () => {});
+test("Update Profile route fails if req.body is blank", async () => {
+  const profileId = 0;
+  await request(app)
+    .put(`/profile/${profileId}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message:
+            "There was a problem with the form data submitted; fill it out again and re-submit.",
+        },
+      ],
+    })
+    .expect(400);
+});
 
-test("Update Profile route fails without authHeader", async () => {});
+test("Update Profile route fails without authHeader", async () => {
+  const profileId = 0;
+  await request(app)
+    .put(`/profile/${profileId}`)
+    .type("form")
+    .send({ ourOnlyHope: "Obi-Wan Kenobi" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You must be logged in to do that." }],
+    })
+    .expect(401);
+});
 
-test("Update Profile route fails with corrupted authHeader", async () => {});
+test("Update Profile route fails with corrupted authHeader", async () => {
+  const profileId = 0;
+  await request(app)
+    .put(`/profile/${profileId}`)
+    .type("form")
+    .send({ chosenOne: "I'm coming!" })
+    .set("Authorization", "Bearer broken_t0k3n")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Please sign in again and re-try that." }],
+    })
+    .expect(401);
+});
 
 test("Update Profile route fails when trying to update another user's profile", async () => {
   const { user: userOne, profile: profileOne } = await generateUserAndProfile();
   const { user: userTwo, profile: profileTwo } = await generateUserAndProfile();
+
+  await request(app)
+    .put(`/profile/${profileTwo.id}`)
+    .type("form")
+    .send({ chosenOne: "I'm coming!" })
+    .set("Authorization", `Bearer ${userOne.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Access to that profile is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
 
   await deleteUser(userOne);
   await deleteUser(userTwo);
@@ -194,17 +247,70 @@ test("Update Profile route fails when trying to update another user's profile", 
 test("Update Profile fails with id for nonexistent profile", async () => {
   const { user, profile } = await generateUserAndProfile();
 
+  await request(app)
+    .put(`/profile/${profile.id - 1}`)
+    .type("form")
+    .send({ niceShot: "Don't get cocky" })
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Access to that profile is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
   await deleteUser(user);
 });
 
 test("Update Profile route fails if req.body.name is blank", async () => {
   const { user, profile } = await generateUserAndProfile();
 
+  await request(app)
+    .put(`/profile/${profile.id}`)
+    .type("form")
+    .send({ niceShot: "Don't get cocky" })
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "The name field cannot be blank.",
+        },
+      ],
+    })
+    .expect(400);
+
   await deleteUser(user);
 });
 
 test("Update Profile succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
+  const profileUpdate = {
+    ...profile,
+    name: "Parvati Patil",
+    website: "https://harrypotter.fandom.com/wiki/Gryffindor",
+  };
+
+  await request(app)
+    .put(`/profile/${profile.id}`)
+    .type("form")
+    .send(profileUpdate)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .then((res) => {
+      const body = res.body;
+      expect(body.id).toBe(profileUpdate.id);
+      expect(body.userId).toBe(user.id);
+      expect(body.name).toBe(profileUpdate.name);
+      expect(body.name).not.toBe(profile.name);
+      expect(body.website).toBe(profileUpdate.website);
+      expect(body.website).not.toBe(profile.website);
+      expect(body.about).toBe(profileUpdate.about);
+      expect(200);
+    });
 
   await deleteUser(user);
 });

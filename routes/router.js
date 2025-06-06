@@ -48,7 +48,8 @@ router.put(
   "/profile/:profileId",
   security.checkThatBodyExists,
   security.verifyTokenValid,
-  security.verifyTokenMatch
+  security.verifyTokenMatch,
+  profileController.updateProfile
 );
 router.delete(
   "/profile/:profileId",

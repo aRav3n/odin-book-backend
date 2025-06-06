@@ -39,6 +39,20 @@ async function getProfile(id: number) {
   return profile || false;
 }
 
+async function updateExistingProfile(
+  id: number,
+  userId: number,
+  name: string,
+  website?: string,
+  about?: string
+) {
+  const updatedProfile = await prisma.profile.update({
+    where: { id, userId },
+    data: { name, website: website || "", about: about || "" },
+  });
+  return updatedProfile || null;
+}
+
 // user queries
 async function addUser(email: string, hash: string) {
   // if a user already exists with that email then return false
@@ -123,6 +137,7 @@ export {
   // profile queries
   addProfile,
   getProfile,
+  updateExistingProfile,
   // user queries
   addUser,
   deleteSingleUser,
