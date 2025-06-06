@@ -19,6 +19,20 @@ const {
 } = require("./internalTestFunctions");
 const { updateProfile } = require("../controllers/profileController");
 
+let profileStart;
+
+beforeEach(() => {
+  profileStart = Date.now();
+});
+
+afterEach(() => {
+  const duration = Date.now() - profileStart;
+  const testName = expect.getState().currentTestName;
+  if (duration >= 500) {
+    console.log(`${testName} - ${duration} ms`);
+  }
+});
+
 test("Create Profile route fails if req.body is blank", async () => {
   await request(app)
     .post("/profile")
@@ -315,7 +329,18 @@ test("Update Profile succeeds when using a good authHeader and valid id", async 
   await deleteUser(user);
 });
 
-test("Delete Profile route fails without authHeader", async () => {});
+test("Delete Profile route fails without authHeader", async () => {
+  const profileId = 0;
+  await request(app)
+    .delete(`/profile/${profileId}`)
+    .type("form")
+    .send({ secretToHappiness: "Appreciating the small things." })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You must be logged in to do that." }],
+    })
+    .expect(401);
+});
 
 test("Delete Profile route fails with corrupted authHeader", async () => {});
 

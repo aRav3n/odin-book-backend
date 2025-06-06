@@ -59,6 +59,20 @@ const testUserTwo = {
   token: null,
 };
 
+let userStart;
+
+beforeEach(() => {
+  userStart = Date.now();
+});
+
+afterEach(() => {
+  const duration = Date.now() - userStart;
+  const testName = expect.getState().currentTestName;
+  if (duration >= 500) {
+    console.log(`${testName} - ${duration} ms`);
+  }
+});
+
 test("Signup route fails if req.body doesn't exist", async () => {
   await request(app)
     .post("/user")
