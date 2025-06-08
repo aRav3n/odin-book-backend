@@ -25,6 +25,11 @@ async function createPostForProfile(profileId: number, text: string) {
   return post || null;
 }
 
+async function readPostFromDatabase(id: number) {
+  const post = await prisma.post.findFirst({ where: { id } });
+  return post;
+}
+
 // profile queries
 async function addProfile(
   userId: number,
@@ -149,6 +154,7 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 export {
   // post queries
   createPostForProfile,
+  readPostFromDatabase,
 
   // profile queries
   addProfile,

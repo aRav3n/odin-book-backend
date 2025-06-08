@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createPostForProfile = createPostForProfile;
+exports.readPostFromDatabase = readPostFromDatabase;
 exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
@@ -40,6 +41,12 @@ function createPostForProfile(profileId, text) {
             data: { profileId, text },
         });
         return post || null;
+    });
+}
+function readPostFromDatabase(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const post = yield prisma.post.findFirst({ where: { id } });
+        return post;
     });
 }
 // profile queries

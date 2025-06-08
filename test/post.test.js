@@ -10,6 +10,7 @@ app.use("/", router);
 
 const {
   generateUserAndProfile,
+  generateUserProfilePost,
   deleteUser,
 } = require("./internalTestFunctions");
 
@@ -152,6 +153,71 @@ test("Create Post route succeeds if all required info is correct", async () => {
       expect(res.body.profileId).toBe(profile.id);
       expect(200);
     });
+
+  deleteUser(user);
+});
+
+test("Read Post route fails with missing authHeader", async () => {
+  await request(app)
+    .get("/post/0")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Read Post route fails with corrupted authHeader", async () => {
+  await request(app)
+    .get("/post/0")
+    .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Read Post route fails if postId is missing", async () => {
+  await request(app)
+    .get("/post/")
+    .set("Authorization", "Bearer bad_token")
+    .expect("Content-Type", /json/)
+    .expect({ error: "Route not found" })
+    .expect(404);
+});
+
+test("Read Post route fails if postId is not a number", async () => {
+  const { user, profile } = await generateUserAndProfile();
+
+  await request(app)
+    .get("/post/notANumber")
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "postId must be a number" }] })
+    .expect(400);
+
+  deleteUser(user);
+});
+
+test("Read Post route fails if a post with the id of postId doesn't exist", async () => {
+  const { user, profile } = await generateUserAndProfile();
+
+  const res = await request(app)
+    .get("/post/0")
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No post with an id of 0 found." }] })
+    .expect(404);
+
+  deleteUser(user);
+});
+
+test("Read Post route succeeds with good authHeader and correct postId", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+
+  await request(app)
+    .get(`/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(post)
+    .expect(200);
 
   deleteUser(user);
 });

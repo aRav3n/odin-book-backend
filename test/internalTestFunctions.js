@@ -91,11 +91,33 @@ async function generateUserAndProfile() {
   return { user, profile: newProfile };
 }
 
+async function generateUserProfilePost() {
+  const { user, profile } = await generateUserAndProfile();
+
+  const text =
+    "You're going to form a new squadron? Just like that? Wave your hand and it appears? Well, I thought I'd tell High Command so they'll know what they need to give me. ―Wes Janson and Wedge Antilles";
+
+  const res = await request(app)
+    .post("/post")
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({
+      profileId: profile.id,
+      text,
+    })
+    .expect(200);
+
+  const post = res.body;
+
+  return { user, profile, post };
+}
+
 module.exports = {
   deleteUser,
   generateSignedInUser,
   generateUserAndProfile,
   generateUserProfileObject,
+  generateUserProfilePost,
   generateUserObject,
   logInAndDelete,
   logUserIn,
