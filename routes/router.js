@@ -3,6 +3,7 @@ const router = Router();
 
 const security = require("../controllers/securityController");
 
+const postController = require("../controllers/postController");
 const profileController = require("../controllers/profileController");
 const userController = require("../controllers/userController");
 
@@ -58,11 +59,28 @@ router.delete(
   profileController.deleteProfile
 );
 
+router.post(
+  "/post",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  postController.createPost
+);
+router.get("/post/:postId", security.verifyTokenValid, postController.readPost);
+router.put(
+  "/post/:postId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  postController.updatePost
+);
+router.delete(
+  "/post/:postId",
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  postController.deletePost
+);
 /*
-router.post("/post");
-router.get("/post/:postId");
-router.put("/post/:postId");
-router.delete("/post/:postId");
 
 router.get("/comment/post/:postId");
 router.post("/comment/post/:postId");

@@ -157,9 +157,9 @@ test("Read Profile route fails with corrupted authHeader", async () => {
 test("Read Profile fails with id for nonexistent profile", async () => {
   const { user, profile } = await generateUserAndProfile();
 
-  const profileId = profile.id;
+  const profileId = 0;
   await request(app)
-    .get(`/profile/${profileId - 1}`)
+    .get(`/profile/${profileId}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect({

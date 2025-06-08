@@ -17,6 +17,14 @@ const prisma = new PrismaClient({
   // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends(withAccelerate());
 
+// post queries
+async function createPostForProfile(profileId: number, text: string) {
+  const post = await prisma.post.create({
+    data: { profileId, text },
+  });
+  return post || null;
+}
+
 // profile queries
 async function addProfile(
   userId: number,
@@ -139,6 +147,9 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 }
 
 export {
+  // post queries
+  createPostForProfile,
+
   // profile queries
   addProfile,
   deleteUserProfile,

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createPostForProfile = createPostForProfile;
 exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
@@ -32,6 +33,15 @@ const prisma = new prisma_1.PrismaClient({
     },
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
+// post queries
+function createPostForProfile(profileId, text) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const post = yield prisma.post.create({
+            data: { profileId, text },
+        });
+        return post || null;
+    });
+}
 // profile queries
 function addProfile(userId, name, about, website) {
     return __awaiter(this, void 0, void 0, function* () {

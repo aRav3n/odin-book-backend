@@ -1,7 +1,4 @@
 const { validationResult } = require("express-validator");
-const bcrypt = require("bcryptjs");
-const security = require("./securityController");
-require("dotenv").config();
 
 const {
   addProfile,

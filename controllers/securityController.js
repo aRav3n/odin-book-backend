@@ -40,8 +40,9 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
-  } else if (req.params.profileId) {
-    const requestedProfileId = Number(req.params.profileId);
+  } else if (req.params.profileId || req.body.profileId) {
+    const requestedProfileId =
+      Number(req.params.profileId) || Number(req.body.profileId);
     const profile = await getProfile(requestedProfileId);
     if (req.user.user.id !== profile.userId) {
       return res
@@ -56,10 +57,11 @@ async function verifyTokenMatch(req, res, next) {
     return res
       .status(400)
       .json(
-        generateIndividualErrorMessage("No valid req.params items were found.")
+        generateIndividualErrorMessage(
+          "No valid req.params or profileId items were found."
+        )
       );
   }
-
   next();
 }
 
