@@ -111,7 +111,7 @@ async function updateExistingProfile(
 ) {
   const updatedProfile = await prisma.profile.update({
     where: { id, userId },
-    data: { name, website: website || "", about: about || "" },
+    data: { name, website: website, about: about },
   });
   return updatedProfile || null;
 }

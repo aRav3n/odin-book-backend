@@ -122,7 +122,7 @@ function updateExistingProfile(id, userId, name, website, about) {
     return __awaiter(this, void 0, void 0, function* () {
         const updatedProfile = yield prisma.profile.update({
             where: { id, userId },
-            data: { name, website: website || "", about: about || "" },
+            data: { name, website: website, about: about },
         });
         return updatedProfile || null;
     });

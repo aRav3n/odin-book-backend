@@ -64,27 +64,27 @@ API
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
     /comment
       /post/:postId
-        GET
-          Requires: authHeader (just to verify logged in, doesn't have to match profileId)
-          Success returns: 200, { [ profile.name, likes ] }
-          Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
         POST
-          Requires: authHeader, { text }
-          Success returns: 200, { profile.name, text, replies, likes }
+          Requires: authHeader (just to verify logged in), { text }
+          Success returns: 200, { id, profile.name, text, replies, likes }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
+        GET
+          Requires: authHeader (just to verify logged in)
+          Success returns: 200, { [ { profile.name, likes } ] }
+          Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
       /reply/:commentId
-        GET
-          Requires: authHeader (just to verify logged in, doesn't have to match profileId)
-          Success returns: 200, { [ profile.name, likes ] }
-          Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
         POST
-          Requires: authHeader, { text }
-          Success returns: 200, { profile.name, text, replies, likes }
+          Requires: authHeader (just to verify logged in), { text }
+          Success returns: 200, { id, profile.name, text, replies, likes }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
-      /self/:commentId
+        GET
+          Requires: authHeader (just to verify logged in)
+          Success returns: 200, { [ { profile.name, likes } ] }
+          Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
+      /:commentId
         PUT
           Requires: authHeader, { newText }
-          Success returns: 200, { profile.name, text, likes, replies }
+          Success returns: 200, { id, profile.name, text, likes, replies }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE
           Requires: authHeader

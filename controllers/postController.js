@@ -11,7 +11,6 @@ const {
   generateIndividualErrorMessage,
   validatePost,
 } = require("./internalFunctions");
-const { json } = require("stream/consumers");
 
 const createPost = [
   validatePost,
@@ -40,8 +39,13 @@ const createPost = [
 ];
 
 async function deletePost(req, res) {
-  const postId = Number(req.params.postId);
-  return res.status(333).json({ message: "temp message" });
+  const post = Number(req.params.postId);
+  if (!post) {
+    return res
+      .status(400)
+      .json(generateIndividualErrorMessage("That post was not found."));
+  }
+  return res.status(200).json({ success: true });
 }
 
 async function readPost(req, res) {

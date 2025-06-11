@@ -3,10 +3,12 @@ const router = Router();
 
 const security = require("../controllers/securityController");
 
+const commentController = require("../controllers/commentController");
 const postController = require("../controllers/postController");
 const profileController = require("../controllers/profileController");
 const userController = require("../controllers/userController");
 
+// user routes
 router.post("/user", security.checkThatBodyExists, userController.createUser);
 router.post(
   "/user/login",
@@ -34,6 +36,7 @@ router.delete(
   userController.deleteUser
 );
 
+// profile routes
 router.post(
   "/profile",
   security.checkThatBodyExists,
@@ -59,6 +62,7 @@ router.delete(
   profileController.deleteProfile
 );
 
+// post routes
 router.post(
   "/post/:profileId",
   security.checkThatBodyExists,
@@ -81,14 +85,44 @@ router.delete(
   postController.deletePost
 );
 
-/*
-router.get("/comment/post/:postId");
-router.post("/comment/post/:postId");
-router.get("/comment/reply/:commentId");
-router.post("/comment/reply/:commentId");
-router.put("/comment/self/:commentId");
-router.delete("/comment/self/:commentId");
+// comment routes
+router.post(
+  "/comment/post/:postId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  commentController.createComment
+);
+router.get(
+  "/comment/post/:postId",
+  security.verifyTokenValid,
+  commentController.readComments
+);
+router.post(
+  "/comment/reply/:commentId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  commentController.createComment
+);
+router.get(
+  "/comment/reply/:commentId",
+  security.verifyTokenValid,
+  commentController.readComments
+);
+router.put(
+  "/comment/:commentId",
+  security.checkThatBodyExists,
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  commentController.updateComment
+);
+router.delete(
+  "/comment/:commentId",
+  security.verifyTokenValid,
+  security.verifyTokenMatch,
+  commentController.deleteComment
+);
 
+/*
 router.post("/follow");
 router.get("/follow/profile/followers/:profileId");
 router.get("/follow/profile/following/:profileId");

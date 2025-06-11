@@ -1,3 +1,7 @@
+/* to run only this test:
+  clear & npx tsc & npx jest test/post.test.js
+*/
+
 const router = require("../routes/router");
 
 const request = require("supertest");
@@ -428,6 +432,44 @@ test("Delete Post route fails :postId is nonexistent", async () => {
   deleteUser(user);
 });
 
-test("Delete Post route fails if authHeader doesn't match post owner", async () => {});
+test("Delete Post route fails if authHeader doesn't match post owner", async () => {
+  const {
+    user: userOne,
+    profile: profileOne,
+    post: postOne,
+  } = await generateUserProfilePost();
+  const {
+    user: userTwo,
+    profile: profileTwo,
+    post: postTwo,
+  } = await generateUserAndProfile();
 
-test("Delete Post route succeeds if authHeader matches :postId owner", async () => {});
+  await request(app)
+    .delete(`/post/${postOne.id}`)
+    .set("Authorization", `Bearer ${userTwo.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Access to that post is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  deleteUser(userOne);
+  deleteUser(userTwo);
+});
+
+test("Delete Post route succeeds if authHeader matches :postId owner", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+
+  await request(app)
+    .delete(`/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ success: true })
+    .expect(200);
+
+  deleteUser(user);
+});
