@@ -60,7 +60,7 @@ router.delete(
 );
 
 router.post(
-  "/post",
+  "/post/:profileId",
   security.checkThatBodyExists,
   security.verifyTokenValid,
   security.verifyTokenMatch,
@@ -80,8 +80,8 @@ router.delete(
   security.verifyTokenMatch,
   postController.deletePost
 );
-/*
 
+/*
 router.get("/comment/post/:postId");
 router.post("/comment/post/:postId");
 router.get("/comment/reply/:commentId");
@@ -101,12 +101,26 @@ router.delete("/like/:likeId");
 */
 
 router.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
+  const errorObject = {
+    errors: [
+      {
+        message: "Route not found",
+      },
+    ],
+  };
+  res.status(404).json(errorObject);
 });
 
 router.use((err, req, res, next) => {
+  const errorObject = {
+    errors: [
+      {
+        message: "Internal Server Error",
+      },
+    ],
+  };
   console.error(err.stack);
-  res.status(500).json({ error: "Internal Server Error" });
+  res.status(500).json(errorObject);
 });
 
 module.exports = router;

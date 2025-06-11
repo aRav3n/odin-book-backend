@@ -31,7 +31,7 @@ function sign(user) {
 async function verifyTokenMatch(req, res, next) {
   const userId = Number(req.params.userId) || false;
   const profileId =
-    Number(req.params.profileId) || Number(req.body.profileId) || false;
+    Number(req.params.profileId) || false;
   const postId = Number(req.params.postId) || false;
   const commentId = Number(req.params.commentId) || false;
   const followId = Number(req.params.followId) || false;
@@ -80,7 +80,7 @@ async function verifyTokenMatch(req, res, next) {
       .status(400)
       .json(
         generateIndividualErrorMessage(
-          "No valid req.params or profileId items were found."
+          "No valid req.params were found."
         )
       );
   }

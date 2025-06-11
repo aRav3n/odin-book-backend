@@ -67,6 +67,14 @@ async function updatePostText(id: number, text: string) {
   return post;
 }
 
+async function deletePostFromDatabase(id: number) {
+  const post = await prisma.post.delete({ where: { id } });
+  if (!post) {
+    return false;
+  }
+  return true;
+}
+
 // profile queries
 async function addProfile(
   userId: number,
@@ -196,6 +204,7 @@ export {
   createPostForProfile,
   readPostFromDatabase,
   updatePostText,
+  deletePostFromDatabase,
 
   // profile queries
   addProfile,

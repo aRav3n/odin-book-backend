@@ -322,7 +322,7 @@ test("Get Email route fails when trying to access other user's info", async () =
   const loggedInUser = await logUserIn(user);
 
   await request(app)
-    .get("/user/0")
+    .get("/user/1")
     .set("Authorization", `Bearer ${loggedInUser.token}`)
     .expect("Content-Type", /json/)
     .expect({
@@ -417,7 +417,7 @@ test("Update Account route fails when trying to access other user's info", async
   const loggedInUser = await logUserIn(user);
 
   await request(app)
-    .put("/user/0")
+    .put("/user/1")
     .set("Authorization", `Bearer ${loggedInUser.token}`)
     .type("form")
     .send({

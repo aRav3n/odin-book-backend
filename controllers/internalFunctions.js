@@ -40,13 +40,6 @@ function getUserInfoFromToken(token, secretKey) {
 const trimFields = [body("email").trim(), body("password").trim()];
 
 const validatePost = [
-  body("profileId")
-    .trim()
-    .exists({ checkFalsy: true })
-    .withMessage("Profile ID must be included")
-    .bail()
-    .isNumeric()
-    .withMessage("Profile ID must be a number"),
   body("text")
     .trim()
     .exists({ checkFalsy: true })

@@ -13,6 +13,7 @@ exports.checkOwnerFromDatabase = checkOwnerFromDatabase;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
+exports.deletePostFromDatabase = deletePostFromDatabase;
 exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
@@ -83,6 +84,15 @@ function updatePostText(id, text) {
     return __awaiter(this, void 0, void 0, function* () {
         const post = yield prisma.post.update({ where: { id }, data: { text } });
         return post;
+    });
+}
+function deletePostFromDatabase(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const post = yield prisma.post.delete({ where: { id } });
+        if (!post) {
+            return false;
+        }
+        return true;
     });
 }
 // profile queries

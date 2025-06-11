@@ -22,10 +22,8 @@ const createPost = [
       return res.status(400).json(errorObject);
     }
 
-    const post = await createPostForProfile(
-      Number(req.body.profileId),
-      req.body.text
-    );
+    const profileId = Number(req.params.profileId);
+    const post = await createPostForProfile(profileId, req.body.text);
 
     if (!post) {
       return res
@@ -41,7 +39,10 @@ const createPost = [
   },
 ];
 
-async function deletePost(req, res) {}
+async function deletePost(req, res) {
+  const postId = Number(req.params.postId);
+  return res.status(333).json({ message: "temp message" });
+}
 
 async function readPost(req, res) {
   const id = Number(req.params.postId);

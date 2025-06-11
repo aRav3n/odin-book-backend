@@ -44,9 +44,9 @@ API
           Success: 200
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
     /post
-      /
+      /:profileId
         POST
-          Requires: authHeader, { profileId, text }
+          Requires: authHeader, { text }
           Success returns: 200
           Fail returns: 401 if not correct authHeader, 400 otherwise
       /:postId

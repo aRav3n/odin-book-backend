@@ -98,7 +98,7 @@ async function generateUserProfilePost() {
     "You're going to form a new squadron? Just like that? Wave your hand and it appears? Well, I thought I'd tell High Command so they'll know what they need to give me. ―Wes Janson and Wedge Antilles";
 
   const res = await request(app)
-    .post("/post")
+    .post(`/post/${profile.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .type("form")
     .send({
