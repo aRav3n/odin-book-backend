@@ -5,7 +5,7 @@ const {
   getTokenFromReq,
   getUserInfoFromToken,
 } = require("./internalFunctions");
-const { getProfile } = require("../db/queries");
+const { getProfile, checkOwnerFromDatabase } = require("../db/queries");
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -29,7 +29,15 @@ function sign(user) {
 }
 
 async function verifyTokenMatch(req, res, next) {
-  if (req.params.userId) {
+  const userId = Number(req.params.userId) || false;
+  const profileId =
+    Number(req.params.profileId) || Number(req.body.profileId) || false;
+  const postId = Number(req.params.postId) || false;
+  const commentId = Number(req.params.commentId) || false;
+  const followId = Number(req.params.followId) || false;
+  const likeId = Number(req.params.likeId) || false;
+
+  if (userId) {
     const requestedUserId = Number(req.params.userId);
     if (req.user.user.id !== requestedUserId) {
       return res
@@ -40,16 +48,30 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
-  } else if (req.params.profileId || req.body.profileId) {
-    const requestedProfileId =
-      Number(req.params.profileId) || Number(req.body.profileId);
-    const profile = await getProfile(requestedProfileId);
-    if (req.user.user.id !== profile.userId) {
+  } else if (profileId) {
+    const owner = await checkOwnerFromDatabase(
+      req.user.user.id,
+      profileId,
+      null
+    );
+    if (!owner) {
       return res
         .status(403)
         .json(
           generateIndividualErrorMessage(
             "Access to that profile is not allowed from this account."
+          )
+        );
+    }
+  } else if (postId) {
+    const owner = await checkOwnerFromDatabase(req.user.user.id, null, postId);
+
+    if (!owner) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "Access to that post is not allowed from this account."
           )
         );
     }

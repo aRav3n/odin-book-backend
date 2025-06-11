@@ -17,6 +17,38 @@ const prisma = new PrismaClient({
   // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends(withAccelerate());
 
+// security queries
+async function checkOwnerFromDatabase(
+  userId: number,
+  profileId?: number,
+  postId?: number
+) {
+  if (profileId) {
+    const profile = await prisma.profile.findFirst({
+      where: { id: profileId },
+    });
+    if (profile) {
+      const userIdOfProfile = profile.userId;
+      if (userIdOfProfile === userId) {
+        return true;
+      }
+    }
+  }
+  if (postId) {
+    const post = await prisma.post.findFirst({ where: { id: postId } });
+    if (post) {
+      const profile = await prisma.profile.findFirst({
+        where: { id: post?.profileId },
+      });
+      if (profile?.userId === userId) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 // post queries
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
@@ -27,6 +59,11 @@ async function createPostForProfile(profileId: number, text: string) {
 
 async function readPostFromDatabase(id: number) {
   const post = await prisma.post.findFirst({ where: { id } });
+  return post;
+}
+
+async function updatePostText(id: number, text: string) {
+  const post = await prisma.post.update({ where: { id }, data: { text } });
   return post;
 }
 
@@ -152,9 +189,13 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 }
 
 export {
+  // security queries
+  checkOwnerFromDatabase,
+
   // post queries
   createPostForProfile,
   readPostFromDatabase,
+  updatePostText,
 
   // profile queries
   addProfile,

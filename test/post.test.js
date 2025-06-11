@@ -85,7 +85,7 @@ test("Create Post route fails if the profile with profileId doesn't belong to th
     .expect("Content-Type", /json/)
     .type("form")
     .send({
-      profileId: profile.id - 1,
+      profileId: 1,
       text: "Help me Obi-Wan, you're my only hope.",
     })
     .expect({
@@ -217,6 +217,149 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect(post)
+    .expect(200);
+
+  deleteUser(user);
+});
+
+test("Update Post route fails if req.body is blank", async () => {
+  await request(app)
+    .put("/post/0")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message:
+            "There was a problem with the form data submitted; fill it out again and re-submit.",
+        },
+      ],
+    })
+    .expect(400);
+});
+
+test("Update Post route fails with missing authHeader", async () => {
+  await request(app)
+    .put("/post/0")
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Update Post route fails with corrupted authHeader", async () => {
+  await request(app)
+    .put("/post/0")
+    .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Update Post route fails if postId is missing", async () => {
+  await request(app)
+    .put("/post/")
+    .set("Authorization", "Bearer bad_token")
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({ error: "Route not found" })
+    .expect(404);
+});
+
+test("Update Post route fails if postId is not a number", async () => {
+  const { user, profile } = await generateUserAndProfile();
+
+  await request(app)
+    .put("/post/notANumber")
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        { message: "No valid req.params or profileId items were found." },
+      ],
+    })
+    .expect(400);
+
+  deleteUser(user);
+});
+
+test("Update Post route fails if a post with the id of postId doesn't exist", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const postId = 1;
+
+  const res = await request(app)
+    .put(`/post/${postId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        { message: "Access to that post is not allowed from this account." },
+      ],
+    })
+    .expect(403);
+
+  deleteUser(user);
+});
+
+test("Update Post route fails if text nonexistent", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+
+  await request(app)
+    .put(`/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect({
+      errors: [{ message: "Post text must be included" }],
+    })
+    .expect(400);
+
+  deleteUser(user);
+});
+
+test("Update Post route fails if text blank", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+
+  await request(app)
+    .put(`/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .type("form")
+    .send({ profileId: profile.id, text: "" })
+    .expect({ errors: [{ message: "Post text must be included" }] })
+    .expect(400);
+
+  deleteUser(user);
+});
+
+test("Update Post route succeeds with good authHeader and correct postId", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+  const text = "Updated text";
+
+  const res = await request(app)
+    .put(`/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text })
+    .expect("Content-Type", /json/)
+    .expect({ ...post, text })
+    .expect(200);
+
+  const updatedPost = res.body;
+
+  await request(app)
+    .get(`/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(updatedPost)
     .expect(200);
 
   deleteUser(user);

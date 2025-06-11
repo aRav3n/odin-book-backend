@@ -55,7 +55,7 @@ API
           Success returns: 200, { createdAt, profileId, text, profileName, profileId, likes, comments }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         PUT
-          Requires: authHeader
+          Requires: authHeader,  { text }
           Success returns: 200, { createdAt, profileId, text, profileName, profileId, likes, comments }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE
