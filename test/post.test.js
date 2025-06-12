@@ -145,9 +145,7 @@ test("Create Post route fails if text nonexistent", async () => {
     .expect("Content-Type", /json/)
     .type("form")
     .send({ soCute: "Bye bye" })
-    .expect({
-      errors: [{ message: "Post text must be included" }],
-    })
+    .expect({ errors: [{ message: "Text must be included" }] })
     .expect(400);
 
   await deleteUser(user);
@@ -162,7 +160,22 @@ test("Create Post route fails if text blank", async () => {
     .expect("Content-Type", /json/)
     .type("form")
     .send({ text: "" })
-    .expect({ errors: [{ message: "Post text must be included" }] })
+    .expect({ errors: [{ message: "Text must be included" }] })
+    .expect(400);
+
+  await deleteUser(user);
+});
+
+test("Create Post route fails if text is not a string", async () => {
+  const { user, profile } = await generateUserAndProfile();
+
+  await request(app)
+    .post(`/post/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .type("form")
+    .send({ text: true })
+    .expect({ errors: [{ message: "Text must be a string" }] })
     .expect(400);
 
   await deleteUser(user);
@@ -244,8 +257,13 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
     .get(`/post/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
-    .expect(post)
-    .expect(200);
+    .expect(200)
+    .then((res) => {
+      expect(res.body.id).toBe(post.id);
+      expect(res.body.createdAt).toBe(post.createdAt);
+      expect(res.body.profileId).toBe(profile.id);
+      expect(res.body.text).toBe(post.text);
+    });
 
   await deleteUser(user);
 });
@@ -380,8 +398,13 @@ test("Update Post route succeeds with good authHeader and correct postId", async
     .get(`/post/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
-    .expect(updatedPost)
-    .expect(200);
+    .expect(200)
+    .then((res) => {
+      expect(res.body.id).toBe(updatedPost.id);
+      expect(res.body.createdAt).toBe(updatedPost.createdAt);
+      expect(res.body.profileId).toBe(profile.id);
+      expect(res.body.text).toBe(text);
+    });
 
   await deleteUser(user);
 });

@@ -1,9 +1,9 @@
 const { validationResult } = require("express-validator");
 
 const {
-  createPostForProfile,
   readPostFromDatabase,
-  updatePostText,
+  getProfile,
+  createCommentOnPost,
 } = require("../db/queries");
 
 const {
@@ -12,17 +12,67 @@ const {
   validatePost,
 } = require("./internalFunctions");
 
-async function createComment(req, res) {
-  const postId = Number(req.params.postId) || null;
-  const commentId = Number(req.params.commentId) || null;
+const createComment = [
+  validatePost,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorObject = generateErrorMessageFromArray(errors);
+      return res.status(400).json(errorObject);
+    }
 
-  if (!postId && !commentId) {
-    return res.status 
-  }
+    const profileId = req.profileId || null;
+    if (!profileId) {
+      return res
+        .status(400)
+        .json(generateIndividualErrorMessage("Profile ID is needed."));
+    }
 
-  // success returns 200 & { id, profile.name, text, replies, likes }
-  return res.status(333).json({ message: "temp message" });
-}
+    const profile = await getProfile(profileId);
+    if (!profile) {
+      return res
+        .status(404)
+        .json(
+          generateIndividualErrorMessage(
+            `A profile with an id of ${profileId} was not found.`
+          )
+        );
+    }
+
+    if (req.postId) {
+      const post = await readPostFromDatabase(req.postId);
+      if (!post) {
+        return res
+          .status(404)
+          .json(
+            generateIndividualErrorMessage(
+              `A post with the id of ${req.postId} was not found.`
+            )
+          );
+      }
+      const comment = await createCommentOnPost(
+        req.postId,
+        profileId,
+        req.body.text
+      );
+      if (!comment) {
+        return res
+          .status(500)
+          .json(
+            generateIndividualErrorMessage(
+              "There was an error saving that comment, please try again."
+            )
+          );
+      }
+
+      return res.status(200).json(comment);
+    } else if (req.commentId) {
+    }
+
+    // success returns 200 & { id, profile.name, text, replies, likes }
+    return res.status(333).json({ message: "temp message" });
+  },
+];
 
 async function deleteComment(req, res) {
   // success returns 200 & { success: true }

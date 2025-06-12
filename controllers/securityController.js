@@ -30,22 +30,40 @@ function checkThatParamsAreValid(req, res, next) {
   const followId = Number(req.params.followId) || false;
   const likeId = Number(req.params.likeId) || false;
 
-  if (userId) {
-    req.userId = userId;
-  } else if (profileId) {
-    req.profileId = profileId;
-  } else if (postId) {
-    req.postId = postId;
-  } else if (commentId) {
-    req.commentId = commentId;
-  } else if (followId) {
-    req.followId = followId;
-  } else if (likeId) {
-    req.likeId = likeId;
-  } else {
+  if (!userId && !profileId && !postId && !commentId && !followId && !likeId) {
     return res
       .status(400)
       .json(generateIndividualErrorMessage("No valid req.params were found."));
+  } else if (
+    (!userId && req.params.userId) ||
+    (!profileId && req.params.profileId) ||
+    (!postId && req.params.postId) ||
+    (!commentId && req.params.commentId) ||
+    (!followId && req.params.followId) ||
+    (!likeId && req.params.likeId)
+  ) {
+    return res
+      .status(400)
+      .json(generateIndividualErrorMessage("Your req.params were invalid."));
+  }
+
+  if (userId) {
+    req.userId = userId;
+  }
+  if (profileId) {
+    req.profileId = profileId;
+  }
+  if (postId) {
+    req.postId = postId;
+  }
+  if (commentId) {
+    req.commentId = commentId;
+  }
+  if (followId) {
+    req.followId = followId;
+  }
+  if (likeId) {
+    req.likeId = likeId;
   }
   next();
 }

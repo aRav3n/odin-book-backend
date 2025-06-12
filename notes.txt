@@ -74,7 +74,7 @@ API
           Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
       /reply/:commentId
         POST
-          Requires: authHeader (just to verify logged in), { text }
+          Requires: authHeader (just to verify logged in), { profileId, text }
           Success returns: 200, { id, profile.name, text, replies, likes }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         GET
@@ -83,7 +83,7 @@ API
           Fail returns: 401 if bad authHeader, 404 for bad id, 400 otherwise
       /:commentId
         PUT
-          Requires: authHeader, { newText }
+          Requires: authHeader, { text }
           Success returns: 200, { id, profile.name, text, likes, replies }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE

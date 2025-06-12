@@ -17,36 +17,17 @@ const prisma = new PrismaClient({
   // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends(withAccelerate());
 
-// security queries
-async function checkOwnerFromDatabase(
-  userId: number,
-  profileId?: number,
-  postId?: number
+// comment queries
+async function createCommentOnPost(
+  postId: number,
+  profileId: number,
+  text: string
 ) {
-  if (profileId) {
-    const profile = await prisma.profile.findFirst({
-      where: { id: profileId },
-    });
-    if (profile) {
-      const userIdOfProfile = profile.userId;
-      if (userIdOfProfile === userId) {
-        return true;
-      }
-    }
-  }
-  if (postId) {
-    const post = await prisma.post.findFirst({ where: { id: postId } });
-    if (post) {
-      const profile = await prisma.profile.findFirst({
-        where: { id: post?.profileId },
-      });
-      if (profile?.userId === userId) {
-        return true;
-      }
-    }
-  }
+  const comment = await prisma.comment.create({
+    data: { postId, profileId, text },
+  });
 
-  return false;
+  return comment || null;
 }
 
 // post queries
@@ -58,7 +39,14 @@ async function createPostForProfile(profileId: number, text: string) {
 }
 
 async function readPostFromDatabase(id: number) {
-  const post = await prisma.post.findFirst({ where: { id } });
+  const post = await prisma.post.findFirst({
+    where: { id },
+    include: {
+      _count: {
+        select: { comments: true, likes: true },
+      },
+    },
+  });
   return post;
 }
 
@@ -114,6 +102,38 @@ async function updateExistingProfile(
     data: { name, website: website, about: about },
   });
   return updatedProfile || null;
+}
+
+// security queries
+async function checkOwnerFromDatabase(
+  userId: number,
+  profileId?: number,
+  postId?: number
+) {
+  if (profileId) {
+    const profile = await prisma.profile.findFirst({
+      where: { id: profileId },
+    });
+    if (profile) {
+      const userIdOfProfile = profile.userId;
+      if (userIdOfProfile === userId) {
+        return true;
+      }
+    }
+  }
+  if (postId) {
+    const post = await prisma.post.findFirst({ where: { id: postId } });
+    if (post) {
+      const profile = await prisma.profile.findFirst({
+        where: { id: post?.profileId },
+      });
+      if (profile?.userId === userId) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 // user queries
@@ -197,8 +217,8 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 }
 
 export {
-  // security queries
-  checkOwnerFromDatabase,
+  // comment queries
+  createCommentOnPost,
 
   // post queries
   createPostForProfile,
@@ -211,6 +231,9 @@ export {
   deleteUserProfile,
   getProfile,
   updateExistingProfile,
+
+  // security queries
+  checkOwnerFromDatabase,
 
   // user queries
   addUser,

@@ -103,7 +103,7 @@ router.delete(
 
 // comment routes
 router.post(
-  "/comment/post/:postId",
+  "/comment/post/:postId/from/:profileId",
   checkThatBodyExists,
   checkThatParamsAreValid,
   verifyTokenValid,
@@ -116,7 +116,7 @@ router.get(
   commentController.readComments
 );
 router.post(
-  "/comment/reply/:commentId",
+  "/comment/reply/:commentId/from/:profileId",
   checkThatBodyExists,
   checkThatParamsAreValid,
   verifyTokenValid,
@@ -145,13 +145,13 @@ router.delete(
 );
 
 /*
-router.post("/follow");
+router.post("/follow/:profileId/from/:followerId");
 router.get("/follow/profile/followers/:profileId");
 router.get("/follow/profile/following/:profileId");
 router.put("/follow/:followId");
 router.delete("/follow/:followId");
 
-router.post("/like/comment/:commentId");
+router.post("/like/comment/:commentId/from/:profileId");
 router.post("/like/post/:postId");
 router.delete("/like/:likeId");
 */

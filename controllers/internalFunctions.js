@@ -43,7 +43,22 @@ const validatePost = [
   body("text")
     .trim()
     .exists({ checkFalsy: true })
-    .withMessage("Post text must be included"),
+    .withMessage("Text must be included")
+    .bail()
+    .notEmpty()
+    .withMessage("Text must not be blank.")
+    .bail()
+    .not()
+    .isBoolean()
+    .withMessage("Text must be a string")
+    .bail()
+    .not()
+    .isObject()
+    .withMessage("Text must be a string")
+    .bail()
+    .not()
+    .isArray()
+    .withMessage("Text must be a string"),
 ];
 
 const validateProfile = [

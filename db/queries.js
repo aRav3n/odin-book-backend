@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkOwnerFromDatabase = checkOwnerFromDatabase;
+exports.createCommentOnPost = createCommentOnPost;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -18,6 +18,7 @@ exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
 exports.updateExistingProfile = updateExistingProfile;
+exports.checkOwnerFromDatabase = checkOwnerFromDatabase;
 exports.addUser = addUser;
 exports.deleteSingleUser = deleteSingleUser;
 exports.getUser = getUser;
@@ -37,32 +38,13 @@ const prisma = new prisma_1.PrismaClient({
     },
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
-// security queries
-function checkOwnerFromDatabase(userId, profileId, postId) {
+// comment queries
+function createCommentOnPost(postId, profileId, text) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (profileId) {
-            const profile = yield prisma.profile.findFirst({
-                where: { id: profileId },
-            });
-            if (profile) {
-                const userIdOfProfile = profile.userId;
-                if (userIdOfProfile === userId) {
-                    return true;
-                }
-            }
-        }
-        if (postId) {
-            const post = yield prisma.post.findFirst({ where: { id: postId } });
-            if (post) {
-                const profile = yield prisma.profile.findFirst({
-                    where: { id: post === null || post === void 0 ? void 0 : post.profileId },
-                });
-                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        const comment = yield prisma.comment.create({
+            data: { postId, profileId, text },
+        });
+        return comment || null;
     });
 }
 // post queries
@@ -76,7 +58,14 @@ function createPostForProfile(profileId, text) {
 }
 function readPostFromDatabase(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const post = yield prisma.post.findFirst({ where: { id } });
+        const post = yield prisma.post.findFirst({
+            where: { id },
+            include: {
+                _count: {
+                    select: { comments: true, likes: true },
+                },
+            },
+        });
         return post;
     });
 }
@@ -125,6 +114,34 @@ function updateExistingProfile(id, userId, name, website, about) {
             data: { name, website: website, about: about },
         });
         return updatedProfile || null;
+    });
+}
+// security queries
+function checkOwnerFromDatabase(userId, profileId, postId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (profileId) {
+            const profile = yield prisma.profile.findFirst({
+                where: { id: profileId },
+            });
+            if (profile) {
+                const userIdOfProfile = profile.userId;
+                if (userIdOfProfile === userId) {
+                    return true;
+                }
+            }
+        }
+        if (postId) {
+            const post = yield prisma.post.findFirst({ where: { id: postId } });
+            if (post) {
+                const profile = yield prisma.profile.findFirst({
+                    where: { id: post === null || post === void 0 ? void 0 : post.profileId },
+                });
+                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
+                    return true;
+                }
+            }
+        }
+        return false;
     });
 }
 // user queries
