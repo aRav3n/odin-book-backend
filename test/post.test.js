@@ -32,12 +32,22 @@ afterEach(() => {
   }
 });
 
-test("Create Post route fails if :profileId is missing", async () => {
+test("Create Post route fails if :profileId is not present", async () => {
   await request(app)
     .post("/post")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Route not found" }] })
     .expect(404);
+});
+
+test("Create Post route fails if :profileId is not a number", async () => {
+  await request(app)
+    .post("/post/xyz")
+    .type("form")
+    .send({ whoIsBack: "Backstreet" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
 });
 
 test("Create Post route fails if req.body is empty", async () => {
@@ -99,7 +109,7 @@ test("Create Post route fails if :profileId is not a number", async () => {
     .expect({ errors: [{ message: "No valid req.params were found." }] })
     .expect(400);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Create Post route fails if the profile with profileId doesn't belong to the user with the authHeader", async () => {
@@ -123,7 +133,7 @@ test("Create Post route fails if the profile with profileId doesn't belong to th
     })
     .expect(403);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Create Post route fails if text nonexistent", async () => {
@@ -140,7 +150,7 @@ test("Create Post route fails if text nonexistent", async () => {
     })
     .expect(400);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Create Post route fails if text blank", async () => {
@@ -155,7 +165,7 @@ test("Create Post route fails if text blank", async () => {
     .expect({ errors: [{ message: "Post text must be included" }] })
     .expect(400);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Create Post route succeeds if all required info is correct", async () => {
@@ -178,12 +188,28 @@ test("Create Post route succeeds if all required info is correct", async () => {
       expect(200);
     });
 
-  deleteUser(user);
+  await deleteUser(user);
+});
+
+test("Read Post route fails if postId is missing", async () => {
+  await request(app)
+    .get("/post/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Read Post route fails if postId is not a number", async () => {
+  await request(app)
+    .get("/post/xyz")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
 });
 
 test("Read Post route fails with missing authHeader", async () => {
   await request(app)
-    .get("/post/0")
+    .get("/post/1")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "You must be logged in to do that." }] })
     .expect(401);
@@ -191,46 +217,24 @@ test("Read Post route fails with missing authHeader", async () => {
 
 test("Read Post route fails with corrupted authHeader", async () => {
   await request(app)
-    .get("/post/0")
+    .get("/post/1")
     .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
     .expect(401);
 });
 
-test("Read Post route fails if postId is missing", async () => {
-  await request(app)
-    .get("/post/")
-    .set("Authorization", "Bearer bad_token")
-    .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Route not found" }] })
-    .expect(404);
-});
-
-test("Read Post route fails if postId is not a number", async () => {
-  const { user, profile } = await generateUserAndProfile();
-
-  await request(app)
-    .get("/post/notANumber")
-    .set("Authorization", `Bearer ${user.token}`)
-    .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "postId must be a number" }] })
-    .expect(400);
-
-  deleteUser(user);
-});
-
 test("Read Post route fails if a post with the id of postId doesn't exist", async () => {
   const { user, profile } = await generateUserAndProfile();
 
-  const res = await request(app)
-    .get("/post/0")
+  await request(app)
+    .get("/post/-1")
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No post with an id of 0 found." }] })
+    .expect({ errors: [{ message: "No post with an id of -1 found." }] })
     .expect(404);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Read Post route succeeds with good authHeader and correct postId", async () => {
@@ -243,12 +247,12 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
     .expect(post)
     .expect(200);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Update Post route fails if req.body is blank", async () => {
   await request(app)
-    .put("/post/0")
+    .put("/post/1")
     .expect("Content-Type", /json/)
     .expect({
       errors: [
@@ -261,28 +265,7 @@ test("Update Post route fails if req.body is blank", async () => {
     .expect(400);
 });
 
-test("Update Post route fails with missing authHeader", async () => {
-  await request(app)
-    .put("/post/0")
-    .type("form")
-    .send({ soCute: "Bye bye" })
-    .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "You must be logged in to do that." }] })
-    .expect(401);
-});
-
-test("Update Post route fails with corrupted authHeader", async () => {
-  await request(app)
-    .put("/post/0")
-    .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
-    .type("form")
-    .send({ soCute: "Bye bye" })
-    .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
-    .expect(401);
-});
-
-test("Update Post route fails if postId is missing", async () => {
+test("Update Post route fails if :postId is missing", async () => {
   await request(app)
     .put("/post/")
     .set("Authorization", "Bearer bad_token")
@@ -293,12 +276,9 @@ test("Update Post route fails if postId is missing", async () => {
     .expect(404);
 });
 
-test("Update Post route fails if postId is not a number", async () => {
-  const { user, profile } = await generateUserAndProfile();
-
+test("Update Post route fails if :postId is not a number", async () => {
   await request(app)
-    .put("/post/notANumber")
-    .set("Authorization", `Bearer ${user.token}`)
+    .put("/post/xyz")
     .type("form")
     .send({ soCute: "Bye bye" })
     .expect("Content-Type", /json/)
@@ -306,8 +286,27 @@ test("Update Post route fails if postId is not a number", async () => {
       errors: [{ message: "No valid req.params were found." }],
     })
     .expect(400);
+});
 
-  deleteUser(user);
+test("Update Post route fails with missing authHeader", async () => {
+  await request(app)
+    .put("/post/1")
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Update Post route fails with corrupted authHeader", async () => {
+  await request(app)
+    .put("/post/1")
+    .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
+    .type("form")
+    .send({ soCute: "Bye bye" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
 });
 
 test("Update Post route fails if a post with the id of postId doesn't exist", async () => {
@@ -327,7 +326,7 @@ test("Update Post route fails if a post with the id of postId doesn't exist", as
     })
     .expect(403);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Update Post route fails if text nonexistent", async () => {
@@ -344,7 +343,7 @@ test("Update Post route fails if text nonexistent", async () => {
     })
     .expect(400);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Update Post route fails if text blank", async () => {
@@ -359,7 +358,7 @@ test("Update Post route fails if text blank", async () => {
     .expect({ errors: [{ message: "Post text must be included" }] })
     .expect(400);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Update Post route succeeds with good authHeader and correct postId", async () => {
@@ -384,7 +383,23 @@ test("Update Post route succeeds with good authHeader and correct postId", async
     .expect(updatedPost)
     .expect(200);
 
-  deleteUser(user);
+  await deleteUser(user);
+});
+
+test("Delete Post route fails if :postId is not present", async () => {
+  await request(app)
+    .delete("/post/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Delete Post route fails if :postId is not a number", async () => {
+  await request(app)
+    .delete("/post/xyz")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
 });
 
 test("Delete Post route fails without authHeader", async () => {
@@ -416,7 +431,7 @@ test("Delete Post route fails if :postId is not a number", async () => {
     .expect({ errors: [{ message: "No valid req.params were found." }] })
     .expect(400);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Delete Post route fails :postId is nonexistent", async () => {
@@ -429,7 +444,7 @@ test("Delete Post route fails :postId is nonexistent", async () => {
     .expect({ errors: [{ message: "Route not found" }] })
     .expect(404);
 
-  deleteUser(user);
+  await deleteUser(user);
 });
 
 test("Delete Post route fails if authHeader doesn't match post owner", async () => {
@@ -457,8 +472,8 @@ test("Delete Post route fails if authHeader doesn't match post owner", async () 
     })
     .expect(403);
 
-  deleteUser(userOne);
-  deleteUser(userTwo);
+  await deleteUser(userOne);
+  await deleteUser(userTwo);
 });
 
 test("Delete Post route succeeds if authHeader matches :postId owner", async () => {
@@ -468,8 +483,8 @@ test("Delete Post route succeeds if authHeader matches :postId owner", async () 
     .delete(`/post/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
-    .expect({ success: true })
+    .expect(post)
     .expect(200);
 
-  deleteUser(user);
+  await deleteUser(user);
 });

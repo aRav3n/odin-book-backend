@@ -4,6 +4,7 @@ const {
   createPostForProfile,
   readPostFromDatabase,
   updatePostText,
+  deletePostFromDatabase,
 } = require("../db/queries");
 
 const {
@@ -21,8 +22,7 @@ const createPost = [
       return res.status(400).json(errorObject);
     }
 
-    const profileId = Number(req.params.profileId);
-    const post = await createPostForProfile(profileId, req.body.text);
+    const post = await createPostForProfile(req.profileId, req.body.text);
 
     if (!post) {
       return res
@@ -39,29 +39,25 @@ const createPost = [
 ];
 
 async function deletePost(req, res) {
-  const post = Number(req.params.postId);
+  const post = await deletePostFromDatabase(req.postId);
   if (!post) {
     return res
       .status(400)
       .json(generateIndividualErrorMessage("That post was not found."));
   }
-  return res.status(200).json({ success: true });
+  
+  return res.status(200).json(post);
 }
 
 async function readPost(req, res) {
-  const id = Number(req.params.postId);
-  if (isNaN(id)) {
-    return res
-      .status(400)
-      .json(generateIndividualErrorMessage("postId must be a number"));
-  }
-
-  const post = await readPostFromDatabase(id);
+  const post = await readPostFromDatabase(req.postId);
   if (!post) {
     return res
       .status(404)
       .json(
-        generateIndividualErrorMessage(`No post with an id of ${id} found.`)
+        generateIndividualErrorMessage(
+          `No post with an id of ${req.postId} found.`
+        )
       );
   }
 
@@ -76,17 +72,18 @@ async function updatePost(req, res) {
       .json(generateIndividualErrorMessage("Post text must be included"));
   }
 
-  const postId = Number(req.params.postId);
-  const post = await readPostFromDatabase(postId);
+  const post = await readPostFromDatabase(req.postId);
   if (!post) {
     return res
       .status(404)
       .json(
-        generateIndividualErrorMessage(`No post with an id of ${id} found.`)
+        generateIndividualErrorMessage(
+          `No post with an id of ${req.postId} found.`
+        )
       );
   }
 
-  const updatedPost = await updatePostText(postId, text);
+  const updatedPost = await updatePostText(req.postId, text);
   return res.status(200).json(updatedPost);
 }
 

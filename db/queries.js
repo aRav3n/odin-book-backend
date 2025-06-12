@@ -92,7 +92,7 @@ function deletePostFromDatabase(id) {
         if (!post) {
             return false;
         }
-        return true;
+        return post;
     });
 }
 // profile queries

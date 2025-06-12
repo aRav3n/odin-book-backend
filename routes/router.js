@@ -1,7 +1,13 @@
 const { Router } = require("express");
 const router = Router();
 
-const security = require("../controllers/securityController");
+const {
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  sign,
+  verifyTokenMatch,
+  verifyTokenValid,
+} = require("../controllers/securityController");
 
 const commentController = require("../controllers/commentController");
 const postController = require("../controllers/postController");
@@ -9,116 +15,132 @@ const profileController = require("../controllers/profileController");
 const userController = require("../controllers/userController");
 
 // user routes
-router.post("/user", security.checkThatBodyExists, userController.createUser);
-router.post(
-  "/user/login",
-  security.checkThatBodyExists,
-  userController.loginUser
-);
+router.post("/user", checkThatBodyExists, userController.createUser);
+router.post("/user/login", checkThatBodyExists, userController.loginUser);
 router.get(
   "/user/:userId",
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   userController.getEmail
 );
 router.put(
   "/user/:userId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   userController.updateUser
 );
 router.delete(
   "/user/:userId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   userController.deleteUser
 );
 
 // profile routes
 router.post(
   "/profile",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
+  checkThatBodyExists,
+  verifyTokenValid,
   profileController.createProfile
 );
 router.get(
   "/profile/:profileId",
-  security.verifyTokenValid,
+  checkThatParamsAreValid,
+  verifyTokenValid,
   profileController.readProfile
 );
 router.put(
   "/profile/:profileId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   profileController.updateProfile
 );
 router.delete(
   "/profile/:profileId",
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   profileController.deleteProfile
 );
 
 // post routes
 router.post(
   "/post/:profileId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   postController.createPost
 );
-router.get("/post/:postId", security.verifyTokenValid, postController.readPost);
+router.get(
+  "/post/:postId",
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  postController.readPost
+);
 router.put(
   "/post/:postId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   postController.updatePost
 );
 router.delete(
   "/post/:postId",
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   postController.deletePost
 );
 
 // comment routes
 router.post(
   "/comment/post/:postId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
   commentController.createComment
 );
 router.get(
   "/comment/post/:postId",
-  security.verifyTokenValid,
+  checkThatParamsAreValid,
+  verifyTokenValid,
   commentController.readComments
 );
 router.post(
   "/comment/reply/:commentId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
   commentController.createComment
 );
 router.get(
   "/comment/reply/:commentId",
-  security.verifyTokenValid,
+  checkThatParamsAreValid,
+  verifyTokenValid,
   commentController.readComments
 );
 router.put(
   "/comment/:commentId",
-  security.checkThatBodyExists,
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatBodyExists,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   commentController.updateComment
 );
 router.delete(
   "/comment/:commentId",
-  security.verifyTokenValid,
-  security.verifyTokenMatch,
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  verifyTokenMatch,
   commentController.deleteComment
 );
 

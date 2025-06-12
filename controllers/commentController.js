@@ -16,6 +16,10 @@ async function createComment(req, res) {
   const postId = Number(req.params.postId) || null;
   const commentId = Number(req.params.commentId) || null;
 
+  if (!postId && !commentId) {
+    return res.status 
+  }
+
   // success returns 200 & { id, profile.name, text, replies, likes }
   return res.status(333).json({ message: "temp message" });
 }

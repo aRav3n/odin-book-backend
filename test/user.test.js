@@ -1,3 +1,7 @@
+/* to run only this test:
+  clear & npx tsc & npx jest test/profile.test.js
+*/
+
 const router = require("../routes/router");
 
 const request = require("supertest");
@@ -73,7 +77,7 @@ afterEach(() => {
   }
 });
 
-test("Signup route fails if req.body doesn't exist", async () => {
+test("Signup User route fails if req.body doesn't exist", async () => {
   await request(app)
     .post("/user")
     .expect("Content-Type", /json/)
@@ -88,7 +92,7 @@ test("Signup route fails if req.body doesn't exist", async () => {
     .expect(400);
 });
 
-test("Signup route fails with bad email", async () => {
+test("Signup User route fails with bad email", async () => {
   await request(app)
     .post("/user")
     .type("form")
@@ -98,7 +102,7 @@ test("Signup route fails with bad email", async () => {
     .expect(400);
 });
 
-test("Signup route fails with bad password", async () => {
+test("Signup User route fails with bad password", async () => {
   await request(app)
     .post("/user")
     .type("form")
@@ -110,7 +114,7 @@ test("Signup route fails with bad password", async () => {
     .expect(400);
 });
 
-test("Signup route fails with bad password confirmation", async () => {
+test("Signup User route fails with bad password confirmation", async () => {
   await request(app)
     .post("/user")
     .type("form")
@@ -122,7 +126,7 @@ test("Signup route fails with bad password confirmation", async () => {
     .expect(400);
 });
 
-test("Signup route fails with multiple messages for multiple errors", async () => {
+test("Signup User route fails with multiple messages for multiple errors", async () => {
   await request(app)
     .post("/user")
     .type("form")
@@ -138,7 +142,7 @@ test("Signup route fails with multiple messages for multiple errors", async () =
     .expect(400);
 });
 
-test("Signup route fails if user already exists", async () => {
+test("Signup User route fails if user already exists", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -155,7 +159,7 @@ test("Signup route fails if user already exists", async () => {
   await logInAndDelete(user);
 });
 
-test("Signup route succeeds with good email and good password", async () => {
+test("Signup User route succeeds with good email and good password", async () => {
   const user = generateUserObject();
 
   await request(app)
@@ -174,7 +178,7 @@ test("Signup route succeeds with good email and good password", async () => {
   await logInAndDelete(user);
 });
 
-test("Login route fails if req.body doesn't exist", async () => {
+test("Login User route fails if req.body doesn't exist", async () => {
   await request(app)
     .post("/user/login")
     .expect("Content-Type", /json/)
@@ -189,7 +193,7 @@ test("Login route fails if req.body doesn't exist", async () => {
     .expect(400);
 });
 
-test("Login route fails if no email and no password", async () => {
+test("Login User route fails if no email and no password", async () => {
   await request(app)
     .post("/user/login")
     .type("form")
@@ -201,7 +205,7 @@ test("Login route fails if no email and no password", async () => {
     .expect(403);
 });
 
-test("Login route fails if no email", async () => {
+test("Login User route fails if no email", async () => {
   const user = generateUserObject();
 
   await request(app)
@@ -215,7 +219,7 @@ test("Login route fails if no email", async () => {
     .expect(403);
 });
 
-test("Login route fails if no password", async () => {
+test("Login User route fails if no password", async () => {
   const user = generateUserObject();
 
   await request(app)
@@ -229,7 +233,7 @@ test("Login route fails if no password", async () => {
     .expect(403);
 });
 
-test("Login route fails if wrong email", async () => {
+test("Login User route fails if wrong email", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -246,7 +250,7 @@ test("Login route fails if wrong email", async () => {
   await logInAndDelete(user);
 });
 
-test("Login route fails if wrong password", async () => {
+test("Login User route fails if wrong password", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -263,7 +267,7 @@ test("Login route fails if wrong password", async () => {
   await logInAndDelete(user);
 });
 
-test("Login route succeeds with correct email and correct password", async () => {
+test("Login User route succeeds with correct email and correct password", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -285,7 +289,23 @@ test("Login route succeeds with correct email and correct password", async () =>
   await deleteUser(user);
 });
 
-test("Get Email route fails when not logged in", async () => {
+test("Get User email route fails when :userId is not present", async () => {
+  await request(app)
+    .get("/user/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Get User email route fails when :userId is not a number", async () => {
+  await request(app)
+    .get("/user/xyz")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
+
+test("Get User email route fails when not logged in", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -300,7 +320,7 @@ test("Get Email route fails when not logged in", async () => {
   await logInAndDelete(user);
 });
 
-test("Get Email route fails with bad token", async () => {
+test("Get User email route fails with bad token", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -316,7 +336,7 @@ test("Get Email route fails with bad token", async () => {
   await logInAndDelete(user);
 });
 
-test("Get Email route fails when trying to access other user's info", async () => {
+test("Get User email route fails when trying to access other user's info", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
   const loggedInUser = await logUserIn(user);
@@ -335,7 +355,7 @@ test("Get Email route fails when trying to access other user's info", async () =
   await deleteUser(loggedInUser);
 });
 
-test("Get Email route succeeds with the correct token", async () => {
+test("Get User email route succeeds with the correct token", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
   const loggedInUser = await logUserIn(user);
@@ -368,6 +388,26 @@ test("Update Account route fails if req.body doesn't exist", async () => {
     .expect(400);
 
   await logInAndDelete(user);
+});
+
+test("Update Account route fails if :userId is not present", async () => {
+  await request(app)
+    .put("/user/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Update Account route fails if :userId is not a number", async () => {
+  await request(app)
+    .put("/user/xyz")
+    .type("form")
+    .send({
+      currentPassword: "password",
+    })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
 });
 
 test("Update Account route fails when not logged in", async () => {
@@ -514,7 +554,7 @@ test("Update Account route succeeds with correct info and token", async () => {
   await logInAndDelete(loggedInUser);
 });
 
-test("Delete route fails if req.body doesn't exist", async () => {
+test("Delete User route fails if req.body doesn't exist", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
   const loggedInUser = await logUserIn(user);
@@ -536,7 +576,27 @@ test("Delete route fails if req.body doesn't exist", async () => {
   await logInAndDelete(loggedInUser);
 });
 
-test("Delete route fails when not logged in", async () => {
+test("Delete User route fails if :userId is not present", async () => {
+  await request(app)
+    .delete("/user/")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Route not found" }],
+    })
+    .expect(404);
+});
+
+test("Delete User route fails if :userIs is not a number", async () => {
+  await request(app)
+    .delete("/user/xyz")
+    .type("form")
+    .send({ password: "password" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
+
+test("Delete User route fails when not logged in", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -553,7 +613,7 @@ test("Delete route fails when not logged in", async () => {
   await logInAndDelete(user);
 });
 
-test("Delete route fails with corrupted token", async () => {
+test("Delete User route fails with corrupted token", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -571,7 +631,7 @@ test("Delete route fails with corrupted token", async () => {
   await logInAndDelete(user);
 });
 
-test("Delete route fails when trying to delete another user's account", async () => {
+test("Delete User route fails when trying to delete another user's account", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -593,7 +653,7 @@ test("Delete route fails when trying to delete another user's account", async ()
   await deleteUser(loggedInUser);
 });
 
-test("Delete route fails with no password entered", async () => {
+test("Delete User route fails with no password entered", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -615,7 +675,7 @@ test("Delete route fails with no password entered", async () => {
   await deleteUser(loggedInUser);
 });
 
-test("Delete route fails with wrong password entered", async () => {
+test("Delete User route fails with wrong password entered", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 
@@ -633,7 +693,7 @@ test("Delete route fails with wrong password entered", async () => {
   await deleteUser(loggedInUser);
 });
 
-test("Delete route succeeds with correct authHeader and correct password", async () => {
+test("Delete User route succeeds with correct authHeader and correct password", async () => {
   const user = generateUserObject();
   user.id = await signUserUp(user);
 

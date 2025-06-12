@@ -1,3 +1,7 @@
+/* to run only this test:
+  clear & npx tsc & npx jest test/profile.test.js
+*/
+
 const router = require("../routes/router");
 
 const request = require("supertest");
@@ -129,8 +133,24 @@ test("Create Profile route succeeds when using a good authHeader and name, websi
   await deleteUser(user);
 });
 
+test("Read Profile route fails if :profileId is not present", async () => {
+  await request(app)
+    .get("/profile/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Read Profile route fails if :profileId is not a number", async () => {
+  await request(app)
+    .get("/profile/xyz")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
+
 test("Read Profile route fails without authHeader", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .get(`/profile/${profileId}`)
     .type("form")
@@ -143,7 +163,7 @@ test("Read Profile route fails without authHeader", async () => {
 });
 
 test("Read Profile route fails with corrupted authHeader", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .get(`/profile/${profileId}`)
     .set("Authorization", "Bearer broken_t0k3n")
@@ -157,7 +177,7 @@ test("Read Profile route fails with corrupted authHeader", async () => {
 test("Read Profile fails with id for nonexistent profile", async () => {
   const { user, profile } = await generateUserAndProfile();
 
-  const profileId = 0;
+  const profileId = -1;
   await request(app)
     .get(`/profile/${profileId}`)
     .set("Authorization", `Bearer ${user.token}`)
@@ -192,7 +212,7 @@ test("Read Profile succeeds when using a good authHeader and valid id", async ()
 });
 
 test("Update Profile route fails if req.body is blank", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .put(`/profile/${profileId}`)
     .expect("Content-Type", /json/)
@@ -207,8 +227,28 @@ test("Update Profile route fails if req.body is blank", async () => {
     .expect(400);
 });
 
+test("Update Profile route fails if :profileId is not present", async () => {
+  await request(app)
+    .put("/profile/")
+    .type("form")
+    .send({ ourOnlyHope: "Obi-Wan Kenobi" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Update Profile route fails if :profileId is not a number", async () => {
+  await request(app)
+    .put("/profile/xyz")
+    .type("form")
+    .send({ ourOnlyHope: "Obi-Wan Kenobi" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
+
 test("Update Profile route fails without authHeader", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .put(`/profile/${profileId}`)
     .type("form")
@@ -221,7 +261,7 @@ test("Update Profile route fails without authHeader", async () => {
 });
 
 test("Update Profile route fails with corrupted authHeader", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .put(`/profile/${profileId}`)
     .type("form")
@@ -328,8 +368,29 @@ test("Update Profile succeeds when using a good authHeader and valid id", async 
   await deleteUser(user);
 });
 
+test("Delete Profile route fails if :profileId is not present", async () => {
+  await request(app)
+    .delete("/profile/")
+    .type("form")
+    .send({ secretToHappiness: "Appreciating the small things." })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Delete Profile route fails if :profileId is not a number", async () => {
+  const profileId = "xyz";
+  await request(app)
+    .delete(`/profile/${profileId}`)
+    .type("form")
+    .send({ secretToHappiness: "Appreciating the small things." })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
+
 test("Delete Profile route fails without authHeader", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .delete(`/profile/${profileId}`)
     .type("form")
@@ -342,7 +403,7 @@ test("Delete Profile route fails without authHeader", async () => {
 });
 
 test("Delete Profile route fails with corrupted authHeader", async () => {
-  const profileId = 0;
+  const profileId = 1;
   await request(app)
     .delete(`/profile/${profileId}`)
     .set("Authorization", "Bearer broken_t0k3n")

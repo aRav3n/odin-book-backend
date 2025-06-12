@@ -22,6 +22,34 @@ function checkThatBodyExists(req, res, next) {
   next();
 }
 
+function checkThatParamsAreValid(req, res, next) {
+  const userId = Number(req.params.userId) || false;
+  const profileId = Number(req.params.profileId) || false;
+  const postId = Number(req.params.postId) || false;
+  const commentId = Number(req.params.commentId) || false;
+  const followId = Number(req.params.followId) || false;
+  const likeId = Number(req.params.likeId) || false;
+
+  if (userId) {
+    req.userId = userId;
+  } else if (profileId) {
+    req.profileId = profileId;
+  } else if (postId) {
+    req.postId = postId;
+  } else if (commentId) {
+    req.commentId = commentId;
+  } else if (followId) {
+    req.followId = followId;
+  } else if (likeId) {
+    req.likeId = likeId;
+  } else {
+    return res
+      .status(400)
+      .json(generateIndividualErrorMessage("No valid req.params were found."));
+  }
+  next();
+}
+
 // external functions
 function sign(user) {
   const token = jwt.sign({ user }, secretKey);
@@ -29,17 +57,8 @@ function sign(user) {
 }
 
 async function verifyTokenMatch(req, res, next) {
-  const userId = Number(req.params.userId) || false;
-  const profileId =
-    Number(req.params.profileId) || false;
-  const postId = Number(req.params.postId) || false;
-  const commentId = Number(req.params.commentId) || false;
-  const followId = Number(req.params.followId) || false;
-  const likeId = Number(req.params.likeId) || false;
-
-  if (userId) {
-    const requestedUserId = Number(req.params.userId);
-    if (req.user.user.id !== requestedUserId) {
+  if (req.userId) {
+    if (req.user.user.id !== req.userId) {
       return res
         .status(403)
         .json(
@@ -48,10 +67,10 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
-  } else if (profileId) {
+  } else if (req.profileId) {
     const owner = await checkOwnerFromDatabase(
       req.user.user.id,
-      profileId,
+      req.profileId,
       null
     );
     if (!owner) {
@@ -63,8 +82,12 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
-  } else if (postId) {
-    const owner = await checkOwnerFromDatabase(req.user.user.id, null, postId);
+  } else if (req.postId) {
+    const owner = await checkOwnerFromDatabase(
+      req.user.user.id,
+      null,
+      req.postId
+    );
 
     if (!owner) {
       return res
@@ -75,14 +98,13 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
+  } else if (req.commentId) {
+  } else if (req.followId) {
+  } else if (req.likeId) {
   } else {
     return res
       .status(400)
-      .json(
-        generateIndividualErrorMessage(
-          "No valid req.params were found."
-        )
-      );
+      .json(generateIndividualErrorMessage("No valid req.params were found."));
   }
   next();
 }
@@ -113,6 +135,7 @@ function verifyTokenValid(req, res, next) {
 
 module.exports = {
   checkThatBodyExists,
+  checkThatParamsAreValid,
   sign,
   verifyTokenMatch,
   verifyTokenValid,

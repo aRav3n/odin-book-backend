@@ -48,8 +48,7 @@ const createProfile = [
 ];
 
 async function readProfile(req, res) {
-  const id = Number(req.params.profileId);
-  const profile = await getProfile(id);
+  const profile = await getProfile(req.profileId);
 
   if (!profile) {
     return res
@@ -104,9 +103,8 @@ const updateProfile = [
 ];
 
 async function deleteProfile(req, res) {
-  const profileId = Number(req.params.profileId);
 
-  const deletedProfile = await deleteUserProfile(profileId);
+  const deletedProfile = await deleteUserProfile(req.profileId);
 
   if (!deletedProfile) {
     return res

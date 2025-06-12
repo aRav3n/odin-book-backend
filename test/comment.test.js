@@ -32,18 +32,78 @@ afterEach(() => {
   }
 });
 
-test("Create Comment On Post route fails if :postId is missing", async () => {});
+test("Create Comment On Post route fails if :postId is missing", async () => {
+  await request(app)
+    .post("/comment/post/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Create Comment On Post route fails if req.body doesn't exist", async () => {});
+test("Create Comment On Post route fails if :postId is not a number", async () => {
+  await request(app)
+    .post("/comment/post/xyz")
+    .type("form")
+    .send({ whoIsBack: "Backstreet" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
 
-test("Create Comment On Post route fails if req.body is empty", async () => {});
+test("Create Comment On Post route fails if req.body doesn't exist", async () => {
+  const postId = 1;
+  await request(app)
+    .post(`/comment/post/${postId}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message:
+            "There was a problem with the form data submitted; fill it out again and re-submit.",
+        },
+      ],
+    })
+    .expect(400);
+});
 
-test("Create Comment On Post route fails if authHeader is missing", async () => {});
+test("Create Comment On Post route fails if authHeader is missing", async () => {
+  const postId = 1;
+  await request(app)
+    .post(`/comment/post/${postId}`)
+    .expect("Content-Type", /json/)
+    .type("form")
+    .send({})
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
 
-test("Create Comment On Post route fails if authHeader is corrupted", async () => {});
+test("Create Comment On Post route fails if token is corrupted", async () => {
+  const token = "Not_a_validHeader";
+  const postId = 1;
+  await request(app)
+    .post(`/comment/post/${postId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .type("form")
+    .send({})
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
 
-test("Create Comment On Post route fails if :postId is not a number", async () => {});
+test("Create Comment On Post route fails if :postId is not a number", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+  await request(app)
+    .post("/comment/post/xyz")
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .type("form")
+    .send({})
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+  await deleteUser(user);
+});
 
+/*
 test("Create Comment On Post route fails if :postId is for a nonexistent post", async () => {});
 
 test("Create Comment On Post route fails if req.body.text doesn't exist", async () => {});
@@ -69,8 +129,6 @@ test("Get Comments On Post route succeeds with correct requirements", async () =
 test("Create Comment Reply route fails if :commentId is missing", async () => {});
 
 test("Create Comment Reply route fails if req.body doesn't exist", async () => {});
-
-test("Create Comment Reply route fails if req.body is empty", async () => {});
 
 test("Create Comment Reply route fails if authHeader is missing", async () => {});
 
@@ -141,3 +199,4 @@ test("Delete Comment route fails if :commentId is not a number", async () => {})
 test("Delete Comment route fails if :commentId is for a nonexistent post", async () => {});
 
 test("Delete Comment route succeeds with correct requirements", async () => {});
+*/

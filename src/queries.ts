@@ -72,7 +72,7 @@ async function deletePostFromDatabase(id: number) {
   if (!post) {
     return false;
   }
-  return true;
+  return post;
 }
 
 // profile queries
