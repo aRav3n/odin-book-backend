@@ -9,8 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createCommentReply = createCommentReply;
 exports.createCommentOnPost = createCommentOnPost;
+exports.readCommentReplies = readCommentReplies;
 exports.readCommentsOnPost = readCommentsOnPost;
+exports.readSingleComment = readSingleComment;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -40,6 +43,18 @@ const prisma = new prisma_1.PrismaClient({
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
 // comment queries
+function createCommentReply(commentId, text, profileId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const comment = yield prisma.comment.create({
+            data: {
+                commentId,
+                text,
+                profileId,
+            },
+        });
+        return comment || null;
+    });
+}
 function createCommentOnPost(postId, profileId, text) {
     return __awaiter(this, void 0, void 0, function* () {
         const comment = yield prisma.comment.create({
@@ -48,10 +63,22 @@ function createCommentOnPost(postId, profileId, text) {
         return comment || null;
     });
 }
+function readCommentReplies(commentId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const comments = yield prisma.comment.findMany({ where: { commentId } });
+        return comments;
+    });
+}
 function readCommentsOnPost(postId) {
     return __awaiter(this, void 0, void 0, function* () {
         const comments = yield prisma.comment.findMany({ where: { postId } });
         return comments;
+    });
+}
+function readSingleComment(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const comment = yield prisma.comment.findFirst({ where: { id } });
+        return comment || null;
     });
 }
 // post queries

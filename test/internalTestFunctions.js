@@ -112,8 +112,25 @@ async function generateUserProfilePost() {
   return { user, profile, post };
 }
 
+async function generateCommentAndParents() {
+  const { user, profile, post } = await generateUserProfilePost();
+  const text = "You're not really the Dragon Reborn.";
+
+  const res = await request(app)
+    .post(`/comment/post/${post.id}/from/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text })
+    .expect(200);
+
+  const comment = res.body;
+
+  return { user, profile, post, comment };
+}
+
 module.exports = {
   deleteUser,
+  generateCommentAndParents,
   generateSignedInUser,
   generateUserAndProfile,
   generateUserProfileObject,

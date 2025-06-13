@@ -3,8 +3,11 @@ const { validationResult } = require("express-validator");
 const {
   readPostFromDatabase,
   getProfile,
+  createCommentReply,
   createCommentOnPost,
+  readCommentReplies,
   readCommentsOnPost,
+  readSingleComment,
 } = require("../db/queries");
 
 const {
@@ -68,10 +71,44 @@ const createComment = [
 
       return res.status(200).json(comment);
     } else if (req.commentId) {
+      const parentComment = await readSingleComment(req.commentId);
+      if (!parentComment) {
+        return res
+          .status(404)
+          .json(
+            generateIndividualErrorMessage(
+              `A comment with an id of ${req.commentId} was not found.`
+            )
+          );
+      }
+
+      const comment = await createCommentReply(
+        req.commentId,
+        req.body.text,
+        profileId
+      );
+
+      if (!comment) {
+        return res
+          .status(500)
+          .json(
+            generateIndividualErrorMessage(
+              "There was an issue with creating your comment, please try again."
+            )
+          );
+      }
+
+      return res.status(200).json(comment);
     }
 
     // success returns 200 & { id, profile.name, text, replies, likes }
-    return res.status(333).json({ message: "temp message" });
+    return res
+      .status(500)
+      .json(
+        generateIndividualErrorMessage(
+          "There was an error with commentController.createComment()"
+        )
+      );
   },
 ];
 

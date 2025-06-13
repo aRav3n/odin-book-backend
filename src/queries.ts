@@ -18,6 +18,22 @@ const prisma = new PrismaClient({
 }).$extends(withAccelerate());
 
 // comment queries
+async function createCommentReply(
+  commentId: number,
+  text: string,
+  profileId: number
+) {
+  const comment = await prisma.comment.create({
+    data: {
+      commentId,
+      text,
+      profileId,
+    },
+  });
+
+  return comment || null;
+}
+
 async function createCommentOnPost(
   postId: number,
   profileId: number,
@@ -30,9 +46,19 @@ async function createCommentOnPost(
   return comment || null;
 }
 
+async function readCommentReplies(commentId: number) {
+  const comments = await prisma.comment.findMany({ where: { commentId } });
+  return comments;
+}
+
 async function readCommentsOnPost(postId: number) {
   const comments = await prisma.comment.findMany({ where: { postId } });
   return comments;
+}
+
+async function readSingleComment(id: number) {
+  const comment = await prisma.comment.findFirst({ where: { id } });
+  return comment || null;
 }
 
 // post queries
@@ -223,8 +249,11 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 
 export {
   // comment queries
+  createCommentReply,
   createCommentOnPost,
+  readCommentReplies,
   readCommentsOnPost,
+  readSingleComment,
 
   // post queries
   createPostForProfile,
