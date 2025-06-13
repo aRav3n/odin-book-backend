@@ -44,7 +44,9 @@ function checkThatParamsAreValid(req, res, next) {
   ) {
     return res
       .status(400)
-      .json(generateIndividualErrorMessage("Your req.params were invalid."));
+      .json(
+        generateIndividualErrorMessage("Not all of your req.params were valid.")
+      );
   }
 
   if (userId) {
@@ -65,6 +67,7 @@ function checkThatParamsAreValid(req, res, next) {
   if (likeId) {
     req.likeId = likeId;
   }
+
   next();
 }
 

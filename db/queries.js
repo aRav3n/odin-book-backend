@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createCommentOnPost = createCommentOnPost;
+exports.readCommentsOnPost = readCommentsOnPost;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -45,6 +46,12 @@ function createCommentOnPost(postId, profileId, text) {
             data: { postId, profileId, text },
         });
         return comment || null;
+    });
+}
+function readCommentsOnPost(postId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const comments = yield prisma.comment.findMany({ where: { postId } });
+        return comments;
     });
 }
 // post queries

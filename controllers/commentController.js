@@ -4,6 +4,7 @@ const {
   readPostFromDatabase,
   getProfile,
   createCommentOnPost,
+  readCommentsOnPost,
 } = require("../db/queries");
 
 const {
@@ -80,8 +81,24 @@ async function deleteComment(req, res) {
 }
 
 async function readComments(req, res) {
-  const postId = Number(req.params.postId) || null;
-  const commentId = Number(req.params.commentId) || null;
+  const postId = req.postId || null;
+  const commentId = req.commentId || null;
+
+  if (postId) {
+    const post = await readPostFromDatabase(postId);
+    if (!post) {
+      return res
+        .status(404)
+        .json(
+          generateIndividualErrorMessage(
+            "That post was not found in the database."
+          )
+        );
+    }
+
+    const comments = await readCommentsOnPost(postId);
+    return res.status(200).json(comments);
+  }
 
   // success returns 200 & { [ { profile.name, likes } ] }
   return res.status(333).json({ message: "temp message" });

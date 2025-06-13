@@ -54,7 +54,7 @@ test("Create Comment On Post route fails if :postId is not a number", async () =
     .type("form")
     .send({ whoIsBack: "Backstreet" })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Your req.params were invalid." }] })
+    .expect({ errors: [{ message: "Not all of your req.params were valid." }] })
     .expect(400);
 });
 
@@ -64,7 +64,7 @@ test("Create Comment On Post route fails if :profileId is not a number", async (
     .type("form")
     .send({ whoIsBack: "Backstreet" })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Your req.params were invalid." }] })
+    .expect({ errors: [{ message: "Not all of your req.params were valid." }] })
     .expect(400);
 });
 
@@ -227,20 +227,81 @@ test("Create Comment On Post route succeeds with correct requirements", async ()
   await deleteUser(user);
 });
 
+test("Get Comments On Post route fails if :postId is missing", async () => {
+  const postId = "";
+  await request(app)
+    .get(`/comment/post/${postId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Get Comments On Post route fails if :postId is not a number", async () => {
+  const postId = "xyz";
+  await request(app)
+    .get(`/comment/post/${postId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
+
+test("Get Comments On Post route fails if authHeader is missing", async () => {
+  const postId = -1;
+  await request(app)
+    .get(`/comment/post/${postId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Get Comments On Post route fails if authHeader is corrupted", async () => {
+  const postId = -1;
+  const token = "corruptedToken369";
+  await request(app)
+    .get(`/comment/post/${postId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Get Comments On Post route fails if :postId is for a nonexistent post", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const postId = -1;
+
+  await request(app)
+    .get(`/comment/post/${postId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "That post was not found in the database." }],
+    })
+    .expect(404);
+
+  await deleteUser(user);
+});
+
+test("Get Comments On Post route succeeds with correct requirements", async () => {
+  const { user, profile, post } = await generateUserProfilePost();
+
+  await request(app)
+    .get(`/comment/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect([])
+    .expect(200);
+
+  await deleteUser(user);
+});
+
 /*
-test("Get Comments On Post route fails if :postId is missing", async () => {});
-
-test("Get Comments On Post route fails if authHeader is missing", async () => {});
-
-test("Get Comments On Post route fails if authHeader is corrupted", async () => {});
-
-test("Get Comments On Post route fails if :postId is not a number", async () => {});
-
-test("Get Comments On Post route fails if :postId is for a nonexistent post", async () => {});
-
-test("Get Comments On Post route succeeds with correct requirements", async () => {});
-
 test("Create Comment Reply route fails if :commentId is missing", async () => {});
+
+test("Create Comment Reply route fails if :profileId is missing", async () => {});
+
+test("Create Comment Reply route fails if :commentId is not a number", async () => {});
+
+test("Create Comment Reply route fails if :profileId is not a number", async () => {});
 
 test("Create Comment Reply route fails if req.body doesn't exist", async () => {});
 
@@ -248,9 +309,9 @@ test("Create Comment Reply route fails if authHeader is missing", async () => {}
 
 test("Create Comment Reply route fails if authHeader is corrupted", async () => {});
 
-test("Create Comment Reply route fails if :commentId is not a number", async () => {});
+test("Create Comment Reply route fails if :commentId is for a nonexistent comment", async () => {});
 
-test("Create Comment Reply route fails if :commentId is for a nonexistent post", async () => {});
+test("Create Comment Reply route fails if :profileId is for a nonexistent profile", async () => {});
 
 test("Create Comment Reply route fails if req.body.text doesn't exist", async () => {});
 

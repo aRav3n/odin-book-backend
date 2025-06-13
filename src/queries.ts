@@ -30,6 +30,11 @@ async function createCommentOnPost(
   return comment || null;
 }
 
+async function readCommentsOnPost(postId: number) {
+  const comments = await prisma.comment.findMany({ where: { postId } });
+  return comments;
+}
+
 // post queries
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
@@ -219,6 +224,7 @@ async function updateUserInfo(id: number, email: string, hash: string) {
 export {
   // comment queries
   createCommentOnPost,
+  readCommentsOnPost,
 
   // post queries
   createPostForProfile,
