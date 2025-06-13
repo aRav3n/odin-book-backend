@@ -65,13 +65,37 @@ function createCommentOnPost(postId, profileId, text) {
 }
 function readCommentReplies(commentId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const comments = yield prisma.comment.findMany({ where: { commentId } });
+        const comments = yield prisma.comment.findMany({
+            where: { commentId },
+            select: {
+                id: true,
+                text: true,
+                profileId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
         return comments;
     });
 }
 function readCommentsOnPost(postId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const comments = yield prisma.comment.findMany({ where: { postId } });
+        const comments = yield prisma.comment.findMany({
+            where: { postId },
+            select: {
+                id: true,
+                text: true,
+                profileId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
         return comments;
     });
 }

@@ -284,13 +284,26 @@ test("Get Comments On Post route fails if :postId is for a nonexistent post", as
 
 test("Get Comments On Post route succeeds with correct requirements", async () => {
   const { user, profile, post } = await generateUserProfilePost();
+  const text = "I'm commenting on this post before anyone else does!";
+
+  await request(app)
+    .post(`/comment/post/${post.id}/from/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text })
+    .expect(200);
 
   await request(app)
     .get(`/comment/post/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
-    .expect([])
-    .expect(200);
+    .expect(200)
+    .then((res) => {
+      expect(res.body[0].id).toBeGreaterThan(0);
+      expect(res.body[0].text).toBe(text);
+      expect(res.body[0].profileId).toBe(profile.id);
+      expect(res.body[0].Profile.name).toBe(profile.name);
+    });
 
   await deleteUser(user);
 });
@@ -535,21 +548,135 @@ test("Create Comment Reply route succeeds for a comment on a comment on a commen
   await deleteUser(user);
 });
 
+test("Get Comment Replies route fails if :commentId is missing", async () => {
+  await request(app)
+    .get("/comment/reply/")
+    .expect(404)
+    .expect({
+      errors: [
+        {
+          message: "Route not found",
+        },
+      ],
+    });
+});
+
+test("Get Comment Replies route fails if :commentId is not a number", async () => {
+  const commentId = "xyz";
+  await request(app)
+    .get(`/comment/reply/${commentId}`)
+    .expect(400)
+    .expect({
+      errors: [
+        {
+          message: "No valid req.params were found.",
+        },
+      ],
+    });
+});
+
+test("Get Comment Replies route fails if authHeader is missing", async () => {
+  const commentId = -1;
+  await request(app)
+    .get(`/comment/reply/${commentId}`)
+    .expect(401)
+    .expect({
+      errors: [
+        {
+          message: "You must be logged in to do that.",
+        },
+      ],
+    });
+});
+
+test("Get Comment Replies route fails if authHeader is corrupted", async () => {
+  const commentId = -1;
+  const token = "notAToken";
+
+  await request(app)
+    .get(`/comment/reply/${commentId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect(401)
+    .expect({
+      errors: [
+        {
+          message: "Please sign in again and re-try that.",
+        },
+      ],
+    });
+});
+
+test("Get Comment Replies route fails if parent comment doesn't exist", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const commentId = -1;
+
+  await request(app)
+    .get(`/comment/reply/${commentId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect(404)
+    .expect({
+      errors: [
+        {
+          message: "That comment was not found in the database.",
+        },
+      ],
+    });
+});
+
+test("Get Comment Replies route succeeds with correct requirements", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+
+  await request(app)
+    .get(`/comment/reply/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect(200)
+    .expect([]);
+
+  await deleteUser(user);
+});
+
+test("Get Comment Replies route succeeds for a comment that has replies", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+
+  const text = "This is a comment reply.";
+  const textAlso = "This is the reply you are looking for.";
+
+  await request(app)
+    .post(`/comment/reply/${comment.id}/from/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text })
+    .expect(200);
+
+  await request(app)
+    .post(`/comment/reply/${comment.id}/from/${profile.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text: textAlso })
+    .expect(200);
+
+  await request(app)
+    .get(`/comment/reply/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect(200)
+    .then((res) => {
+      const array = res.body;
+
+      expect(array[0].id).toBeGreaterThan(0);
+      expect(array[0].text).toBe(text);
+      expect(array[0].profileId).toBe(profile.id);
+      expect(array[0].Profile.name).toBe(profile.name);
+
+      expect(array[1].id).toBeGreaterThan(0);
+      expect(array[1].text).toBe(textAlso);
+      expect(array[1].profileId).toBe(profile.id);
+      expect(array[1].Profile.name).toBe(profile.name);
+    });
+
+  await deleteUser(user);
+});
+
 /*
-test("Get Comment Replies route fails if :commentId is missing", async () => {});
-
-test("Get Comment Replies route fails if authHeader is missing", async () => {});
-
-test("Get Comment Replies route fails if authHeader is corrupted", async () => {});
-
-test("Get Comment Replies route fails if :commentId is not a number", async () => {});
-
-test("Get Comment Replies route fails if :commentId is for a nonexistent post", async () => {});
-
-test("Get Comment Replies route succeeds with correct requirements", async () => {});
-
-test("Get Comment Replies route succeeds for a comment on a comment on a comment", async () => {});
-
 test("Update Comment route fails if :commentId is missing", async () => {});
 
 test("Update Comment route fails if req.body doesn't exist", async () => {});

@@ -47,12 +47,38 @@ async function createCommentOnPost(
 }
 
 async function readCommentReplies(commentId: number) {
-  const comments = await prisma.comment.findMany({ where: { commentId } });
+  const comments = await prisma.comment.findMany({
+    where: { commentId },
+    select: {
+      id: true,
+      text: true,
+      profileId: true,
+      Profile: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
   return comments;
 }
 
 async function readCommentsOnPost(postId: number) {
-  const comments = await prisma.comment.findMany({ where: { postId } });
+  const comments = await prisma.comment.findMany({
+    where: { postId },
+    select: {
+      id: true,
+      text: true,
+      profileId: true,
+      Profile: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
   return comments;
 }
 

@@ -137,8 +137,20 @@ async function readComments(req, res) {
     return res.status(200).json(comments);
   }
 
-  // success returns 200 & { [ { profile.name, likes } ] }
-  return res.status(333).json({ message: "temp message" });
+  const comment = await readSingleComment(commentId);
+  if (!comment) {
+    return res
+      .status(404)
+      .json(
+        generateIndividualErrorMessage(
+          "That comment was not found in the database."
+        )
+      );
+  }
+
+  const replies = await readCommentReplies(commentId);
+
+  return res.status(200).json(replies);
 }
 
 async function updateComment(req, res) {
