@@ -8,6 +8,7 @@ const {
   readCommentReplies,
   readCommentsOnPost,
   readSingleComment,
+  updateCommentInDatabase,
 } = require("../db/queries");
 
 const {
@@ -153,9 +154,34 @@ async function readComments(req, res) {
   return res.status(200).json(replies);
 }
 
-async function updateComment(req, res) {
-  // success returns 200 & { id, profile.name, text, likes, replies }
-  return res.status(333).json({ message: "temp message" });
-}
+const updateComment = [
+  validatePost,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorObject = generateErrorMessageFromArray(errors);
+      return res.status(400).json(errorObject);
+    }
+
+    // existence of the comment is already verified in securityController.verifyTokenMatch => queries.checkOwnership
+
+    const commentWithUpdates = await updateCommentInDatabase(
+      req.commentId,
+      req.body.text
+    );
+
+    if (!commentWithUpdates) {
+      return res
+        .status(500)
+        .json(
+          generateIndividualErrorMessage(
+            "There was an error updating that comment, please try again."
+          )
+        );
+    }
+
+    return res.status(200).json(commentWithUpdates);
+  },
+];
 
 module.exports = { createComment, readComments, updateComment, deleteComment };

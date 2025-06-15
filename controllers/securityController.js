@@ -5,7 +5,11 @@ const {
   getTokenFromReq,
   getUserInfoFromToken,
 } = require("./internalFunctions");
-const { getProfile, checkOwnerFromDatabase } = require("../db/queries");
+const {
+  getProfile,
+  checkOwnerFromDatabase,
+  readSingleComment,
+} = require("../db/queries");
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -92,6 +96,7 @@ async function verifyTokenMatch(req, res, next) {
     const owner = await checkOwnerFromDatabase(
       req.user.user.id,
       req.profileId,
+      null,
       null
     );
     if (!owner) {
@@ -107,7 +112,8 @@ async function verifyTokenMatch(req, res, next) {
     const owner = await checkOwnerFromDatabase(
       req.user.user.id,
       null,
-      req.postId
+      req.postId,
+      null
     );
 
     if (!owner) {
@@ -120,6 +126,22 @@ async function verifyTokenMatch(req, res, next) {
         );
     }
   } else if (req.commentId) {
+    const owner = await checkOwnerFromDatabase(
+      req.user.user.id,
+      null,
+      null,
+      req.commentId
+    );
+
+    if (!owner) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "Access to that post is not allowed from this account."
+          )
+        );
+    }
   } else if (req.followId) {
   } else if (req.likeId) {
   } else {

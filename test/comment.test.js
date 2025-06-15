@@ -676,31 +676,192 @@ test("Get Comment Replies route succeeds for a comment that has replies", async 
   await deleteUser(user);
 });
 
+test("Update Comment route fails if :commentId is missing", async () => {
+  await request(app)
+    .put("/comment/")
+    .expect(404)
+    .expect({
+      errors: [
+        {
+          message: "Route not found",
+        },
+      ],
+    });
+});
+
+test("Update Comment route fails if req.body doesn't exist", async () => {
+  const commentId = -1;
+
+  await request(app)
+    .put(`/comment/${commentId}`)
+    .expect(400)
+    .expect({
+      errors: [
+        {
+          message:
+            "There was a problem with the form data submitted; fill it out again and re-submit.",
+        },
+      ],
+    });
+});
+
+test("Update Comment route fails if authHeader is missing", async () => {
+  const commentId = -1;
+
+  await request(app)
+    .put(`/comment/${commentId}`)
+    .type("form")
+    .send({})
+    .expect(401)
+    .expect({
+      errors: [
+        {
+          message: "You must be logged in to do that.",
+        },
+      ],
+    });
+});
+
+test("Update Comment route fails if authHeader is corrupted", async () => {
+  const commentId = -1;
+
+  await request(app)
+    .put(`/comment/${commentId}`)
+    .set("Authorization", "Bearer badToken")
+    .type("form")
+    .send({})
+    .expect(401)
+    .expect({
+      errors: [
+        {
+          message: "Please sign in again and re-try that.",
+        },
+      ],
+    });
+});
+
+test("Update Comment route fails if :commentId is not a number", async () => {
+  const commentId = "xyz";
+
+  const { user, profile, post, comment } = await generateCommentAndParents();
+  await request(app)
+    .put(`/comment/${commentId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({})
+    .expect(400)
+    .expect({
+      errors: [
+        {
+          message: "No valid req.params were found.",
+        },
+      ],
+    });
+
+  await deleteUser(user);
+});
+
+test("Update Comment route fails if user in authHeader isn't :commentId owner", async () => {
+  const commentId = -1;
+
+  const { user, profile, post, comment } = await generateCommentAndParents();
+  await request(app)
+    .put(`/comment/${commentId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({})
+    .expect(403)
+    .expect({
+      errors: [
+        {
+          message: "Access to that post is not allowed from this account.",
+        },
+      ],
+    });
+
+  await deleteUser(user);
+});
+
+test("Update Comment route fails if :commentId is for a nonexistent comment", async () => {
+  const commentId = -1;
+  const text = "Sample text.";
+
+  const { user, profile, post, comment } = await generateCommentAndParents();
+  await request(app)
+    .put(`/comment/${commentId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text })
+    .expect({
+      errors: [
+        {
+          message: "Access to that post is not allowed from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(user);
+});
+
+test("Update Comment route fails if req.body.text doesn't exist", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+
+  await request(app)
+    .put(`/comment/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({})
+    .expect(400)
+    .expect({ errors: [{ message: "Text must be included" }] });
+
+  await deleteUser(user);
+});
+
+test("Update Comment route fails if req.body.text is empty", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+
+  await request(app)
+    .put(`/comment/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text: "" })
+    .expect(400)
+    .expect({ errors: [{ message: "Text must be included" }] });
+
+  await deleteUser(user);
+});
+
+test("Update Comment route fails if req.body.text is not a string", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+
+  await request(app)
+    .put(`/comment/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text: true })
+    .expect(400)
+    .expect({ errors: [{ message: "Text must be a string" }] });
+
+  await deleteUser(user);
+});
+
+test("Update Comment route succeeds with correct requirements", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+  const text = "Comment update.";
+
+  await request(app)
+    .put(`/comment/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ text })
+    .expect(200)
+    .expect({ ...comment, text });
+
+  await deleteUser(user);
+});
+
 /*
-test("Update Comment route fails if :commentId is missing", async () => {});
-
-test("Update Comment route fails if req.body doesn't exist", async () => {});
-
-test("Update Comment route fails if req.body is empty", async () => {});
-
-test("Update Comment route fails if authHeader is missing", async () => {});
-
-test("Update Comment route fails if authHeader is corrupted", async () => {});
-
-test("Update Comment route fails if user in authHeader isn't :commentId owner", async () => {});
-
-test("Update Comment route fails if :commentId is not a number", async () => {});
-
-test("Update Comment route fails if :commentId is for a nonexistent post", async () => {});
-
-test("Update Comment route fails if req.body.newText doesn't exist", async () => {});
-
-test("Update Comment route fails if req.body.newText is empty", async () => {});
-
-test("Update Comment route fails if req.body.text is not a string", async () => {});
-
-test("Update Comment route succeeds with correct requirements", async () => {});
-
 test("Delete Comment route fails if :commentId is missing", async () => {});
 
 test("Delete Comment route fails if authHeader is missing", async () => {});

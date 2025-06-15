@@ -87,6 +87,14 @@ async function readSingleComment(id: number) {
   return comment || null;
 }
 
+async function updateCommentInDatabase(id: number, text: string) {
+  const commentWithUpdates = await prisma.comment.update({
+    where: { id },
+    data: { text },
+  });
+  return commentWithUpdates || null;
+}
+
 // post queries
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
@@ -165,7 +173,8 @@ async function updateExistingProfile(
 async function checkOwnerFromDatabase(
   userId: number,
   profileId?: number,
-  postId?: number
+  postId?: number,
+  commentId?: number
 ) {
   if (profileId) {
     const profile = await prisma.profile.findFirst({
@@ -182,7 +191,18 @@ async function checkOwnerFromDatabase(
     const post = await prisma.post.findFirst({ where: { id: postId } });
     if (post) {
       const profile = await prisma.profile.findFirst({
-        where: { id: post?.profileId },
+        where: { id: post.profileId },
+      });
+      if (profile?.userId === userId) {
+        return true;
+      }
+    }
+  }
+  if (commentId) {
+    const comment = await readSingleComment(commentId);
+    if (comment) {
+      const profile = await prisma.profile.findFirst({
+        where: { id: comment.profileId },
       });
       if (profile?.userId === userId) {
         return true;
@@ -280,6 +300,7 @@ export {
   readCommentReplies,
   readCommentsOnPost,
   readSingleComment,
+  updateCommentInDatabase,
 
   // post queries
   createPostForProfile,

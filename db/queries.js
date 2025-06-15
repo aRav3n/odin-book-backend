@@ -14,6 +14,7 @@ exports.createCommentOnPost = createCommentOnPost;
 exports.readCommentReplies = readCommentReplies;
 exports.readCommentsOnPost = readCommentsOnPost;
 exports.readSingleComment = readSingleComment;
+exports.updateCommentInDatabase = updateCommentInDatabase;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -105,6 +106,15 @@ function readSingleComment(id) {
         return comment || null;
     });
 }
+function updateCommentInDatabase(id, text) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const commentWithUpdates = yield prisma.comment.update({
+            where: { id },
+            data: { text },
+        });
+        return commentWithUpdates || null;
+    });
+}
 // post queries
 function createPostForProfile(profileId, text) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -175,7 +185,7 @@ function updateExistingProfile(id, userId, name, website, about) {
     });
 }
 // security queries
-function checkOwnerFromDatabase(userId, profileId, postId) {
+function checkOwnerFromDatabase(userId, profileId, postId, commentId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (profileId) {
             const profile = yield prisma.profile.findFirst({
@@ -192,7 +202,18 @@ function checkOwnerFromDatabase(userId, profileId, postId) {
             const post = yield prisma.post.findFirst({ where: { id: postId } });
             if (post) {
                 const profile = yield prisma.profile.findFirst({
-                    where: { id: post === null || post === void 0 ? void 0 : post.profileId },
+                    where: { id: post.profileId },
+                });
+                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
+                    return true;
+                }
+            }
+        }
+        if (commentId) {
+            const comment = yield readSingleComment(commentId);
+            if (comment) {
+                const profile = yield prisma.profile.findFirst({
+                    where: { id: comment.profileId },
                 });
                 if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
                     return true;
