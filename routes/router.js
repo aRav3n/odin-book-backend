@@ -20,7 +20,6 @@ router.post("/user/login", checkThatBodyExists, userController.loginUser);
 router.get(
   "/user/:userId",
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   userController.getEmail
 );
@@ -28,7 +27,6 @@ router.put(
   "/user/:userId",
   checkThatBodyExists,
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   userController.updateUser
 );
@@ -36,7 +34,6 @@ router.delete(
   "/user/:userId",
   checkThatBodyExists,
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   userController.deleteUser
 );
@@ -58,14 +55,12 @@ router.put(
   "/profile/:profileId",
   checkThatBodyExists,
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   profileController.updateProfile
 );
 router.delete(
   "/profile/:profileId",
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   profileController.deleteProfile
 );
@@ -75,7 +70,6 @@ router.post(
   "/post/:profileId",
   checkThatBodyExists,
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   postController.createPost
 );
@@ -89,14 +83,12 @@ router.put(
   "/post/:postId",
   checkThatBodyExists,
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   postController.updatePost
 );
 router.delete(
   "/post/:postId",
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   postController.deletePost
 );
@@ -132,24 +124,42 @@ router.put(
   "/comment/:commentId",
   checkThatBodyExists,
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   commentController.updateComment
 );
 router.delete(
   "/comment/:commentId",
   checkThatParamsAreValid,
-  verifyTokenValid,
   verifyTokenMatch,
   commentController.deleteComment
 );
 
 /*
-router.post("/follow/:profileId/from/:followerId");
-router.get("/follow/profile/followers/:profileId");
-router.get("/follow/profile/following/:profileId");
-router.put("/follow/:followId");
-router.delete("/follow/:followId");
+router.post(
+  "/follow/:profileId/from/:followerId",
+  checkThatParamsAreValid,
+  verifyTokenMatch
+);
+router.get(
+  "/follow/profile/followers/:profileId",
+  checkThatParamsAreValid,
+  verifyTokenValid
+);
+router.get(
+  "/follow/profile/following/:profileId",
+  checkThatParamsAreValid,
+  verifyTokenValid
+);
+router.put(
+  "/follow/:followId",
+  checkThatParamsAreValid,
+  verifyTokenMatch
+);
+router.delete(
+  "/follow/:followId",
+  checkThatParamsAreValid,
+  verifyTokenMatch
+);
 
 router.post("/like/comment/:commentId/from/:profileId");
 router.post("/like/post/:postId");

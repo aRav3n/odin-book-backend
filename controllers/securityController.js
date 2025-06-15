@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const {
+  checkTokenForIssues,
   generateIndividualErrorMessage,
   getTokenFromReq,
   getUserInfoFromToken,
@@ -75,13 +76,18 @@ function checkThatParamsAreValid(req, res, next) {
   next();
 }
 
-// external functions
 function sign(user) {
   const token = jwt.sign({ user }, secretKey);
   return token;
 }
 
 async function verifyTokenMatch(req, res, next) {
+  const infoObject = checkTokenForIssues(req, secretKey);
+  if (infoObject.errorMessage) {
+    return res.status(infoObject.status).json(infoObject.errorMessage);
+  }
+  req.user = infoObject.tokenUserInfo;
+
   if (req.userId) {
     if (req.user.user.id !== req.userId) {
       return res
@@ -153,26 +159,11 @@ async function verifyTokenMatch(req, res, next) {
 }
 
 function verifyTokenValid(req, res, next) {
-  const token = getTokenFromReq(req);
-  if (!token) {
-    return res
-      .status(401)
-      .json(
-        generateIndividualErrorMessage("You must be logged in to do that.")
-      );
+  const infoObject = checkTokenForIssues(req, secretKey);
+  if (infoObject.errorMessage) {
+    return res.status(infoObject.status).json(infoObject.errorMessage);
   }
-
-  const tokenUserInfo = getUserInfoFromToken(token, secretKey);
-
-  if (!tokenUserInfo) {
-    return res
-      .status(401)
-      .json(
-        generateIndividualErrorMessage("Please sign in again and re-try that.")
-      );
-  }
-
-  req.user = tokenUserInfo;
+  req.user = infoObject.tokenUserInfo;
   next();
 }
 

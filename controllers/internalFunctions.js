@@ -1,6 +1,35 @@
 const { body } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
+function checkTokenForIssues(req, secretKey) {
+  const infoObject = {
+    status: 200,
+    errorMessage: null,
+    tokenUserInfo: null,
+  };
+
+  const token = getTokenFromReq(req);
+  if (!token) {
+    infoObject.status = 401;
+    infoObject.errorMessage = generateIndividualErrorMessage(
+      "You must be logged in to do that."
+    );
+    return infoObject;
+  }
+
+  const userInfo = getUserInfoFromToken(token, secretKey);
+  if (!userInfo) {
+    infoObject.status = 401;
+    infoObject.errorMessage = generateIndividualErrorMessage(
+      "Please sign in again and re-try that."
+    );
+    return infoObject;
+  }
+
+  infoObject.tokenUserInfo = userInfo;
+  return infoObject;
+}
+
 function generateErrorMessageFromArray(errorArray) {
   const object = {
     errors: errorArray.array().map((err) => ({
@@ -127,6 +156,7 @@ const validateUser = [
 ];
 
 module.exports = {
+  checkTokenForIssues,
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
   getTokenFromReq,
