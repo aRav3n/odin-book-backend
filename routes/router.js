@@ -10,6 +10,7 @@ const {
 } = require("../controllers/securityController");
 
 const commentController = require("../controllers/commentController");
+const followController = require("../controllers/followController");
 const postController = require("../controllers/postController");
 const profileController = require("../controllers/profileController");
 const userController = require("../controllers/userController");
@@ -134,33 +135,38 @@ router.delete(
   commentController.deleteComment
 );
 
-/*
 router.post(
   "/follow/:profileId/from/:followerId",
   checkThatParamsAreValid,
-  verifyTokenMatch
+  verifyTokenMatch,
+  followController.createFollow
 );
 router.get(
   "/follow/profile/followers/:profileId",
   checkThatParamsAreValid,
-  verifyTokenValid
+  verifyTokenValid,
+  followController.readProfileFollowers
 );
 router.get(
   "/follow/profile/following/:profileId",
   checkThatParamsAreValid,
-  verifyTokenValid
+  verifyTokenValid,
+  followController.readProfileFollowing
 );
 router.put(
   "/follow/:followId",
   checkThatParamsAreValid,
-  verifyTokenMatch
+  verifyTokenMatch,
+  followController.updateFollow
 );
 router.delete(
   "/follow/:followId",
   checkThatParamsAreValid,
-  verifyTokenMatch
+  verifyTokenMatch,
+  followController.deleteFollow
 );
 
+/*
 router.post("/like/comment/:commentId/from/:profileId");
 router.post("/like/post/:postId");
 router.delete("/like/:likeId");
