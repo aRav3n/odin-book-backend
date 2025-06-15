@@ -15,6 +15,7 @@ exports.readCommentReplies = readCommentReplies;
 exports.readCommentsOnPost = readCommentsOnPost;
 exports.readSingleComment = readSingleComment;
 exports.updateCommentInDatabase = updateCommentInDatabase;
+exports.deleteCommentFromDatabase = deleteCommentFromDatabase;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -113,6 +114,12 @@ function updateCommentInDatabase(id, text) {
             data: { text },
         });
         return commentWithUpdates || null;
+    });
+}
+function deleteCommentFromDatabase(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const oldComment = yield prisma.comment.delete({ where: { id } });
+        return oldComment || null;
     });
 }
 // post queries

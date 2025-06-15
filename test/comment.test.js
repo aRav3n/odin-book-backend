@@ -861,18 +861,84 @@ test("Update Comment route succeeds with correct requirements", async () => {
   await deleteUser(user);
 });
 
-/*
-test("Delete Comment route fails if :commentId is missing", async () => {});
+test("Delete Comment route fails if :commentId is missing", async () => {
+  await request(app)
+    .delete("/comment/")
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Delete Comment route fails if authHeader is missing", async () => {});
+test("Delete Comment route fails if :commentId is not a number", async () => {
+  const commentId = "xyz";
 
-test("Delete Comment route fails if authHeader is corrupted", async () => {});
+  await request(app)
+    .delete(`/comment/${commentId}`)
+    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect(400);
+});
 
-test("Delete Comment route fails if user in authHeader isn't :commentId owner", async () => {});
+test("Delete Comment route fails if authHeader is missing", async () => {
+  const commentId = -1;
 
-test("Delete Comment route fails if :commentId is not a number", async () => {});
+  await request(app)
+    .delete(`/comment/${commentId}`)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
 
-test("Delete Comment route fails if :commentId is for a nonexistent post", async () => {});
+test("Delete Comment route fails if authHeader is corrupted", async () => {
+  const commentId = -1;
+  const token = "notAToken";
 
-test("Delete Comment route succeeds with correct requirements", async () => {});
-*/
+  await request(app)
+    .delete(`/comment/${commentId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Delete Comment route fails if user in authHeader isn't :commentId owner or comment doesn't exist", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const commentId = -1;
+
+  await request(app)
+    .delete(`/comment/${commentId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect({
+      errors: [
+        { message: "Access to that post is not allowed from this account." },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(user);
+});
+
+test("Delete Comment route succeeds with correct requirements", async () => {
+  const { user, profile, post, comment } = await generateCommentAndParents();
+
+  await request(app)
+    .get(`/comment/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect(200)
+    .then((res) => {
+      const resComment = res.body[0];
+      expect(resComment.id).toBe(comment.id);
+      expect(resComment.text).toBe(comment.text);
+      expect(resComment.Profile.name).toBe(profile.name);
+    });
+
+  await request(app)
+    .delete(`/comment/${comment.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect(comment)
+    .expect(200);
+
+  await request(app)
+    .get(`/comment/post/${post.id}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect([])
+    .expect(200);
+
+  await deleteUser(user);
+});

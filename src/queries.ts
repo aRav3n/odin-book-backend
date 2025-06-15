@@ -95,6 +95,11 @@ async function updateCommentInDatabase(id: number, text: string) {
   return commentWithUpdates || null;
 }
 
+async function deleteCommentFromDatabase(id: number) {
+  const oldComment = await prisma.comment.delete({ where: { id } });
+  return oldComment || null;
+}
+
 // post queries
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
@@ -274,6 +279,7 @@ export {
   readCommentsOnPost,
   readSingleComment,
   updateCommentInDatabase,
+  deleteCommentFromDatabase,
 
   // post queries
   createPostForProfile,

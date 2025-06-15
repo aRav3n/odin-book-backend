@@ -9,6 +9,7 @@ const {
   readCommentsOnPost,
   readSingleComment,
   updateCommentInDatabase,
+  deleteCommentFromDatabase,
 } = require("../db/queries");
 
 const {
@@ -114,8 +115,18 @@ const createComment = [
 ];
 
 async function deleteComment(req, res) {
-  // success returns 200 & { success: true }
-  return res.status(333).json({ message: "temp message" });
+  const comment = await deleteCommentFromDatabase(req.commentId);
+  if (!comment) {
+    return res
+      .status(500)
+      .json(
+        generateIndividualErrorMessage(
+          "There was an error deleting that comment, please try again."
+        )
+      );
+  }
+
+  return res.status(200).json(comment);
 }
 
 async function readComments(req, res) {
