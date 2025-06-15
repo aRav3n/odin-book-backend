@@ -215,14 +215,6 @@ async function checkOwnerFromDatabase(
 
 // user queries
 async function addUser(email: string, hash: string) {
-  // if a user already exists with that email then return false
-  const count = await prisma.user.count({
-    where: { email },
-  });
-  if (count > 0) {
-    return false;
-  }
-
   const user = await prisma.user.create({
     data: {
       email,
@@ -235,22 +227,11 @@ async function addUser(email: string, hash: string) {
 }
 
 async function deleteSingleUser(id: number) {
-  const user = await prisma.user.findFirst({
-    where: { id },
-  });
-  if (!user) {
-    return false;
-  }
-
   const deletedUser = await prisma.user.delete({
     where: { id },
   });
 
-  if (!deletedUser) {
-    return false;
-  }
-
-  return deletedUser;
+  return deletedUser || null;
 }
 
 async function getUser(email: string) {
@@ -258,11 +239,7 @@ async function getUser(email: string) {
     where: { email },
   });
 
-  if (!user) {
-    return null;
-  }
-
-  return user;
+  return user || null;
 }
 
 async function getUserEmail(id: number) {
@@ -278,7 +255,6 @@ async function getUserEmail(id: number) {
 }
 
 async function updateUserInfo(id: number, email: string, hash: string) {
-  const allUsers = await prisma.user.findMany({});
   const updatedUser = await prisma.user.update({
     where: { id },
     data: {
@@ -287,10 +263,7 @@ async function updateUserInfo(id: number, email: string, hash: string) {
     },
   });
 
-  if (updatedUser) {
-    return updatedUser;
-  }
-  return false;
+  return updatedUser || null;
 }
 
 export {

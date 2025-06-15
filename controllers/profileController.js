@@ -22,11 +22,6 @@ const createProfile = [
       return res.status(400).json(errorObject);
     }
 
-    if (!req.body.name || req.body.name.length === 0) {
-      return res
-        .status(400)
-        .json(generateIndividualErrorMessage("Name cannot be blank."));
-    }
     const userId = req.user.user.id;
     const about = req.body.about || "";
     const website = req.body.website || "";
@@ -66,19 +61,17 @@ async function readProfile(req, res) {
 const updateProfile = [
   validateProfile,
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorObject = generateErrorMessageFromArray(errors);
+      return res.status(400).json(errorObject);
+    }
+
     const id = Number(req.body.id);
     const userId = Number(req.user.user.id);
     const name = req.body.name;
     const website = req.body.website || "";
     const about = req.body.about || "";
-
-    if (!name || name.length === 0) {
-      return res
-        .status(400)
-        .json(
-          generateIndividualErrorMessage("The name field cannot be blank.")
-        );
-    }
 
     const updatedProfile = await updateExistingProfile(
       id,
@@ -103,7 +96,6 @@ const updateProfile = [
 ];
 
 async function deleteProfile(req, res) {
-
   const deletedProfile = await deleteUserProfile(req.profileId);
 
   if (!deletedProfile) {

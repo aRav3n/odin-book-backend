@@ -327,13 +327,7 @@ test("Update Profile route fails if req.body.name is blank", async () => {
     .send({ niceShot: "Don't get cocky" })
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
-    .expect({
-      errors: [
-        {
-          message: "The name field cannot be blank.",
-        },
-      ],
-    })
+    .expect({ errors: [{ message: "Name must exist." }] })
     .expect(400);
 
   await deleteUser(user);

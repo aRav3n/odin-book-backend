@@ -70,12 +70,7 @@ async function deleteUser(req, res) {
 
   const deletedUserAccount = await deleteSingleUser(user.id);
 
-  if (
-    !deletedUserAccount ||
-    deletedUserAccount.id !== user.id ||
-    deletedUserAccount.email !== user.email ||
-    deletedUserAccount.hash !== user.hash
-  ) {
+  if (!deletedUserAccount) {
     return res
       .status(404)
       .json(
@@ -108,14 +103,13 @@ async function getEmail(req, res) {
 const loginUser = [
   trimFields,
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorObject = generateErrorMessageFromArray(errors);
+      return res.status(400).json(errorObject);
+    }
     const email = req.body.email;
     const password = req.body.password;
-    if (!email || !password) {
-      const message = generateIndividualErrorMessage(
-        "You need an email and password to log in."
-      );
-      return res.status(403).json(message);
-    }
 
     const user = await getUser(email);
     if (!user) {

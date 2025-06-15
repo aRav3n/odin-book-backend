@@ -40,11 +40,6 @@ const createPost = [
 
 async function deletePost(req, res) {
   const post = await deletePostFromDatabase(req.postId);
-  if (!post) {
-    return res
-      .status(400)
-      .json(generateIndividualErrorMessage("That post was not found."));
-  }
   
   return res.status(200).json(post);
 }
@@ -70,17 +65,6 @@ async function updatePost(req, res) {
     return res
       .status(400)
       .json(generateIndividualErrorMessage("Post text must be included"));
-  }
-
-  const post = await readPostFromDatabase(req.postId);
-  if (!post) {
-    return res
-      .status(404)
-      .json(
-        generateIndividualErrorMessage(
-          `No post with an id of ${req.postId} found.`
-        )
-      );
   }
 
   const updatedPost = await updatePostText(req.postId, text);

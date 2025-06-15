@@ -1,5 +1,5 @@
 /* to run only this test:
-  clear & npx tsc & npx jest test/profile.test.js
+  clear & npx tsc & npx jest test/user.test.js
 */
 
 const router = require("../routes/router");
@@ -200,9 +200,12 @@ test("Login User route fails if no email and no password", async () => {
     .send({})
     .expect("Content-Type", /json/)
     .expect({
-      errors: [{ message: "You need an email and password to log in." }],
+      errors: [
+        { message: "Email is needed to log in." },
+        { message: "Password is needed to log in." },
+      ],
     })
-    .expect(403);
+    .expect(400);
 });
 
 test("Login User route fails if no email", async () => {
@@ -213,10 +216,8 @@ test("Login User route fails if no email", async () => {
     .type("form")
     .send({ password: user.password })
     .expect("Content-Type", /json/)
-    .expect({
-      errors: [{ message: "You need an email and password to log in." }],
-    })
-    .expect(403);
+    .expect({ errors: [{ message: "Email is needed to log in." }] })
+    .expect(400);
 });
 
 test("Login User route fails if no password", async () => {
@@ -227,10 +228,8 @@ test("Login User route fails if no password", async () => {
     .type("form")
     .send({ email: user.email })
     .expect("Content-Type", /json/)
-    .expect({
-      errors: [{ message: "You need an email and password to log in." }],
-    })
-    .expect(403);
+    .expect({ errors: [{ message: "Password is needed to log in." }] })
+    .expect(400);
 });
 
 test("Login User route fails if wrong email", async () => {

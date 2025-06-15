@@ -37,7 +37,16 @@ function getUserInfoFromToken(token, secretKey) {
   return user;
 }
 
-const trimFields = [body("email").trim(), body("password").trim()];
+const trimFields = [
+  body("email")
+    .trim()
+    .exists({ checkFalsy: true })
+    .withMessage("Email is needed to log in."),
+  body("password")
+    .trim()
+    .exists({ checkFalsy: true })
+    .withMessage("Password is needed to log in."),
+];
 
 const validatePost = [
   body("text")

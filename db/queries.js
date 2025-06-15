@@ -226,13 +226,6 @@ function checkOwnerFromDatabase(userId, profileId, postId, commentId) {
 // user queries
 function addUser(email, hash) {
     return __awaiter(this, void 0, void 0, function* () {
-        // if a user already exists with that email then return false
-        const count = yield prisma.user.count({
-            where: { email },
-        });
-        if (count > 0) {
-            return false;
-        }
         const user = yield prisma.user.create({
             data: {
                 email,
@@ -245,19 +238,10 @@ function addUser(email, hash) {
 }
 function deleteSingleUser(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const user = yield prisma.user.findFirst({
-            where: { id },
-        });
-        if (!user) {
-            return false;
-        }
         const deletedUser = yield prisma.user.delete({
             where: { id },
         });
-        if (!deletedUser) {
-            return false;
-        }
-        return deletedUser;
+        return deletedUser || null;
     });
 }
 function getUser(email) {
@@ -265,10 +249,7 @@ function getUser(email) {
         const user = yield prisma.user.findFirst({
             where: { email },
         });
-        if (!user) {
-            return null;
-        }
-        return user;
+        return user || null;
     });
 }
 function getUserEmail(id) {
@@ -284,7 +265,6 @@ function getUserEmail(id) {
 }
 function updateUserInfo(id, email, hash) {
     return __awaiter(this, void 0, void 0, function* () {
-        const allUsers = yield prisma.user.findMany({});
         const updatedUser = yield prisma.user.update({
             where: { id },
             data: {
@@ -292,9 +272,6 @@ function updateUserInfo(id, email, hash) {
                 hash,
             },
         });
-        if (updatedUser) {
-            return updatedUser;
-        }
-        return false;
+        return updatedUser || null;
     });
 }
