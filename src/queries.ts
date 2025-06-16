@@ -17,6 +17,60 @@ const prisma = new PrismaClient({
   // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends(withAccelerate());
 
+// security queries
+async function checkOwnerFromDatabase(
+  userId: number,
+  profileId?: number,
+  postId?: number,
+  commentId?: number,
+  followerId?: number
+) {
+  if (profileId && !followerId) {
+    const profile = await prisma.profile.findFirst({
+      where: { id: profileId },
+    });
+    if (profile) {
+      const userIdOfProfile = profile.userId;
+      if (userIdOfProfile === userId) {
+        return true;
+      }
+    }
+  }
+  if (postId) {
+    const post = await prisma.post.findFirst({ where: { id: postId } });
+    if (post) {
+      const profile = await prisma.profile.findFirst({
+        where: { id: post.profileId },
+      });
+      if (profile?.userId === userId) {
+        return true;
+      }
+    }
+  }
+  if (commentId) {
+    const comment = await readSingleComment(commentId);
+    if (comment) {
+      const profile = await prisma.profile.findFirst({
+        where: { id: comment.profileId },
+      });
+      if (profile?.userId === userId) {
+        return true;
+      }
+    }
+  }
+  if (followerId) {
+    const followerProfile = await prisma.profile.findFirst({
+      where: { id: followerId },
+    });
+
+    if (followerProfile?.userId === userId) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // comment queries
 async function createCommentReply(
   commentId: number,
@@ -100,6 +154,17 @@ async function deleteCommentFromDatabase(id: number) {
   return oldComment || null;
 }
 
+// follow queries
+async function createNewFollow(followerId: number, followingId: number) {
+  const newFollow = await prisma.follow.create({
+    data: {
+      followerId,
+      followingId,
+    },
+  });
+  return newFollow || null;
+}
+
 // post queries
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
@@ -174,50 +239,6 @@ async function updateExistingProfile(
   return updatedProfile || null;
 }
 
-// security queries
-async function checkOwnerFromDatabase(
-  userId: number,
-  profileId?: number,
-  postId?: number,
-  commentId?: number
-) {
-  if (profileId) {
-    const profile = await prisma.profile.findFirst({
-      where: { id: profileId },
-    });
-    if (profile) {
-      const userIdOfProfile = profile.userId;
-      if (userIdOfProfile === userId) {
-        return true;
-      }
-    }
-  }
-  if (postId) {
-    const post = await prisma.post.findFirst({ where: { id: postId } });
-    if (post) {
-      const profile = await prisma.profile.findFirst({
-        where: { id: post.profileId },
-      });
-      if (profile?.userId === userId) {
-        return true;
-      }
-    }
-  }
-  if (commentId) {
-    const comment = await readSingleComment(commentId);
-    if (comment) {
-      const profile = await prisma.profile.findFirst({
-        where: { id: comment.profileId },
-      });
-      if (profile?.userId === userId) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
 // user queries
 async function addUser(email: string, hash: string) {
   const user = await prisma.user.create({
@@ -280,6 +301,9 @@ export {
   readSingleComment,
   updateCommentInDatabase,
   deleteCommentFromDatabase,
+
+  // follow queries
+  createNewFollow,
 
   // post queries
   createPostForProfile,

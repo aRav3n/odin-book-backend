@@ -135,6 +135,7 @@ router.delete(
   commentController.deleteComment
 );
 
+// follow routes
 router.post(
   "/follow/:profileId/from/:followerId",
   checkThatParamsAreValid,

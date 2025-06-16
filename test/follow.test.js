@@ -33,23 +33,152 @@ afterEach(() => {
   }
 });
 
-test("Create Follow route fails if profileId is missing", async () => {});
+test("Create Follow route fails if profileId is missing", async () => {
+  const token = "notAToken";
+  const profileId = "";
+  const followerId = "xyz";
 
-test("Create Follow route fails if followerId is missing", async () => {});
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Create Follow route fails if profileId isn't a number", async () => {});
+test("Create Follow route fails if followerId is missing", async () => {
+  const token = "notAToken";
+  const profileId = "xyz";
+  const followerId = "";
 
-test("Create Follow route fails if followerId isn't a number", async () => {});
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Create Follow route fails if authHeader is missing", async () => {});
+test("Create Follow route fails if profileId isn't a number", async () => {
+  const token = "notAToken";
+  const profileId = "xyz";
+  const followerId = -1;
 
-test("Create Follow route fails if authHeader is corrupted", async () => {});
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
+    .expect(400);
+});
 
-test("Create Follow route fails if authHeader user's profileId !== followerId", async () => {});
+test("Create Follow route fails if followerId isn't a number", async () => {
+  const token = "notAToken";
+  const profileId = -1;
+  const followerId = "xyz";
 
-test("Create Follow route fails if profileId is for a nonexistent profile", async () => {});
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param followerId must be a number." }] })
+    .expect(400);
+});
 
-test("Create Follow route succeeds if all information provided is correct", async () => {});
+test("Create Follow route fails if authHeader is missing", async () => {
+  const token = "notAToken";
+  const profileId = -1;
+  const followerId = -1;
+
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    // .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Create Follow route fails if authHeader is corrupted", async () => {
+  const token = "notAToken";
+  const profileId = -1;
+  const followerId = -1;
+
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Create Follow route fails if authHeader user's profile.id !== followerId", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const profileId = -1;
+  const followerId = -1;
+
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message:
+            "Action forbidden: You may only follow users from your own account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(user);
+});
+
+// nonexistent followerId profile is taken care of during "Create Follow route fails if authHeader user's profile.id !== followerId"
+test("Create Follow route fails if profileId is for a nonexistent profile", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const profileId = -1;
+  const followerId = profile.id;
+
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "Unable to find the profile you are attempting to follow.",
+        },
+      ],
+    })
+    .expect(404);
+
+  await deleteUser(user);
+});
+
+test("Create Follow route succeeds if all information provided is correct", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const { user: followingUser, profile: followingProfile } =
+    await generateUserAndProfile();
+
+  const profileId = followingProfile.id;
+  const followerId = profile.id;
+
+  await request(app)
+    .post(`/follow/${profileId}/from/${followerId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body.id).toBeGreaterThan(0);
+      expect(res.body.updatedAt).toBeDefined();
+      expect(res.body.accepted).toBeFalsy();
+      expect(res.body.followerId).toBe(followerId);
+      expect(res.body.followingId).toBe(profileId);
+    });
+
+  await deleteUser(user);
+  await deleteUser(followingUser);
+});
 
 /*
 test("Read Followers route fails if profileId is missing", async () => {});

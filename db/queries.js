@@ -16,6 +16,7 @@ exports.readCommentsOnPost = readCommentsOnPost;
 exports.readSingleComment = readSingleComment;
 exports.updateCommentInDatabase = updateCommentInDatabase;
 exports.deleteCommentFromDatabase = deleteCommentFromDatabase;
+exports.createNewFollow = createNewFollow;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -44,6 +45,53 @@ const prisma = new prisma_1.PrismaClient({
     },
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
+// security queries
+function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (profileId && !followerId) {
+            const profile = yield prisma.profile.findFirst({
+                where: { id: profileId },
+            });
+            if (profile) {
+                const userIdOfProfile = profile.userId;
+                if (userIdOfProfile === userId) {
+                    return true;
+                }
+            }
+        }
+        if (postId) {
+            const post = yield prisma.post.findFirst({ where: { id: postId } });
+            if (post) {
+                const profile = yield prisma.profile.findFirst({
+                    where: { id: post.profileId },
+                });
+                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
+                    return true;
+                }
+            }
+        }
+        if (commentId) {
+            const comment = yield readSingleComment(commentId);
+            if (comment) {
+                const profile = yield prisma.profile.findFirst({
+                    where: { id: comment.profileId },
+                });
+                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
+                    return true;
+                }
+            }
+        }
+        if (followerId) {
+            const followerProfile = yield prisma.profile.findFirst({
+                where: { id: followerId },
+            });
+            if ((followerProfile === null || followerProfile === void 0 ? void 0 : followerProfile.userId) === userId) {
+                return true;
+            }
+        }
+        return false;
+    });
+}
 // comment queries
 function createCommentReply(commentId, text, profileId) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -122,6 +170,18 @@ function deleteCommentFromDatabase(id) {
         return oldComment || null;
     });
 }
+// follow queries
+function createNewFollow(followerId, followingId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const newFollow = yield prisma.follow.create({
+            data: {
+                followerId,
+                followingId,
+            },
+        });
+        return newFollow || null;
+    });
+}
 // post queries
 function createPostForProfile(profileId, text) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -189,45 +249,6 @@ function updateExistingProfile(id, userId, name, website, about) {
             data: { name, website: website, about: about },
         });
         return updatedProfile || null;
-    });
-}
-// security queries
-function checkOwnerFromDatabase(userId, profileId, postId, commentId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (profileId) {
-            const profile = yield prisma.profile.findFirst({
-                where: { id: profileId },
-            });
-            if (profile) {
-                const userIdOfProfile = profile.userId;
-                if (userIdOfProfile === userId) {
-                    return true;
-                }
-            }
-        }
-        if (postId) {
-            const post = yield prisma.post.findFirst({ where: { id: postId } });
-            if (post) {
-                const profile = yield prisma.profile.findFirst({
-                    where: { id: post.profileId },
-                });
-                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
-                    return true;
-                }
-            }
-        }
-        if (commentId) {
-            const comment = yield readSingleComment(commentId);
-            if (comment) {
-                const profile = yield prisma.profile.findFirst({
-                    where: { id: comment.profileId },
-                });
-                if ((profile === null || profile === void 0 ? void 0 : profile.userId) === userId) {
-                    return true;
-                }
-            }
-        }
-        return false;
     });
 }
 // user queries

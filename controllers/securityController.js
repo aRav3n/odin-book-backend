@@ -73,6 +73,24 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
+  } else if (req.followerId) {
+    const owner = await checkOwnerFromDatabase(
+      req.user.user.id,
+      null,
+      null,
+      null,
+      req.followerId
+    );
+
+    if (!owner) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "Action forbidden: You may only follow users from your own account."
+          )
+        );
+    }
   } else if (req.profileId) {
     const owner = await checkOwnerFromDatabase(
       req.user.user.id,
@@ -123,7 +141,6 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
-  } else if (req.followId) {
   } else if (req.likeId) {
   } else {
     return res

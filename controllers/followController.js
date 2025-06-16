@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 
 const {
+  createNewFollow,
   readPostFromDatabase,
   getProfile,
   createCommentReply,
@@ -18,7 +19,34 @@ const {
   validatePost,
 } = require("./internalFunctions");
 
-const createFollow = [, async (req, res) => {}];
+async function createFollow(req, res) {
+  const followingProfile = await getProfile(Number(req.params.profileId));
+  if (!followingProfile) {
+    return res
+      .status(404)
+      .json(
+        generateIndividualErrorMessage(
+          "Unable to find the profile you are attempting to follow."
+        )
+      );
+  }
+
+  const follow = await createNewFollow(
+    Number(req.params.followerId),
+    Number(req.params.profileId)
+  );
+  if (!follow) {
+    return res
+      .status(500)
+      .json(
+        generateIndividualErrorMessage(
+          "There was an error following that profile, please try again."
+        )
+      );
+  }
+
+  return res.status(200).json(follow);
+}
 
 async function readProfileFollowers(req, res) {}
 
