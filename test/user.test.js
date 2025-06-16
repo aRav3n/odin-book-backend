@@ -300,7 +300,7 @@ test("Get User email route fails when :userId is not a number", async () => {
   await request(app)
     .get("/user/xyz")
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param userId must be a number." }] })
     .expect(400);
 });
 
@@ -405,7 +405,7 @@ test("Update Account route fails if :userId is not a number", async () => {
       currentPassword: "password",
     })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param userId must be a number." }] })
     .expect(400);
 });
 
@@ -591,7 +591,7 @@ test("Delete User route fails if :userIs is not a number", async () => {
     .type("form")
     .send({ password: "password" })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param userId must be a number." }] })
     .expect(400);
 });
 

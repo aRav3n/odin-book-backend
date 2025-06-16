@@ -5,6 +5,7 @@ const {
   generateIndividualErrorMessage,
   getTokenFromReq,
   getUserInfoFromToken,
+  generateErrorMessageFromArray,
 } = require("./internalFunctions");
 const {
   getProfile,
@@ -28,49 +29,23 @@ function checkThatBodyExists(req, res, next) {
 }
 
 function checkThatParamsAreValid(req, res, next) {
-  const userId = Number(req.params.userId) || false;
-  const profileId = Number(req.params.profileId) || false;
-  const postId = Number(req.params.postId) || false;
-  const commentId = Number(req.params.commentId) || false;
-  const followId = Number(req.params.followId) || false;
-  const likeId = Number(req.params.likeId) || false;
+  let paramCount = 0;
+  const errorArray = [];
+  for (const param in req.params) {
+    paramCount++;
+    if (isNaN(req.params[param])) {
+      errorArray.push(`The param ${param} must be a number.`);
+    } else {
+      req[param] = Number(req.params[param]);
+    }
+  }
 
-  if (!userId && !profileId && !postId && !commentId && !followId && !likeId) {
+  if (paramCount === 0) {
     return res
       .status(400)
       .json(generateIndividualErrorMessage("No valid req.params were found."));
-  } else if (
-    (!userId && req.params.userId) ||
-    (!profileId && req.params.profileId) ||
-    (!postId && req.params.postId) ||
-    (!commentId && req.params.commentId) ||
-    (!followId && req.params.followId) ||
-    (!likeId && req.params.likeId)
-  ) {
-    return res
-      .status(400)
-      .json(
-        generateIndividualErrorMessage("Not all of your req.params were valid.")
-      );
-  }
-
-  if (userId) {
-    req.userId = userId;
-  }
-  if (profileId) {
-    req.profileId = profileId;
-  }
-  if (postId) {
-    req.postId = postId;
-  }
-  if (commentId) {
-    req.commentId = commentId;
-  }
-  if (followId) {
-    req.followId = followId;
-  }
-  if (likeId) {
-    req.likeId = likeId;
+  } else if (errorArray.length > 0) {
+    return res.status(400).json(generateErrorMessageFromArray(errorArray));
   }
 
   next();

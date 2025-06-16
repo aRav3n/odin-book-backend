@@ -145,7 +145,7 @@ test("Read Profile route fails if :profileId is not a number", async () => {
   await request(app)
     .get("/profile/xyz")
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
     .expect(400);
 });
 
@@ -243,7 +243,7 @@ test("Update Profile route fails if :profileId is not a number", async () => {
     .type("form")
     .send({ ourOnlyHope: "Obi-Wan Kenobi" })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
     .expect(400);
 });
 
@@ -379,7 +379,7 @@ test("Delete Profile route fails if :profileId is not a number", async () => {
     .type("form")
     .send({ secretToHappiness: "Appreciating the small things." })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
     .expect(400);
 });
 

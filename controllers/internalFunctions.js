@@ -31,13 +31,25 @@ function checkTokenForIssues(req, secretKey) {
 }
 
 function generateErrorMessageFromArray(errorArray) {
-  const object = {
-    errors: errorArray.array().map((err) => ({
-      message: err.msg,
-    })),
-  };
+  if (
+    typeof errorArray === "object" &&
+    typeof errorArray.array === "function"
+  ) {
+    const object = {
+      errors: errorArray.array().map((err) => ({
+        message: err.msg,
+      })),
+    };
 
-  return object;
+    return object;
+  } else {
+    const object = {
+      errors: errorArray.map((err) => ({
+        message: err,
+      })),
+    };
+    return object;
+  }
 }
 
 function generateIndividualErrorMessage(message) {

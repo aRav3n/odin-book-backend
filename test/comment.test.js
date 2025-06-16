@@ -55,7 +55,7 @@ test("Create Comment On Post route fails if :postId is not a number", async () =
     .type("form")
     .send({ whoIsBack: "Backstreet" })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Not all of your req.params were valid." }] })
+    .expect({ errors: [{ message: "The param postId must be a number." }] })
     .expect(400);
 });
 
@@ -65,7 +65,7 @@ test("Create Comment On Post route fails if :profileId is not a number", async (
     .type("form")
     .send({ whoIsBack: "Backstreet" })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Not all of your req.params were valid." }] })
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
     .expect(400);
 });
 
@@ -242,7 +242,7 @@ test("Get Comments On Post route fails if :postId is not a number", async () => 
   await request(app)
     .get(`/comment/post/${postId}`)
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param postId must be a number." }] })
     .expect(400);
 });
 
@@ -354,7 +354,7 @@ test("Create Comment Reply route fails if :commentId is not a number", async () 
     .type("form")
     .send({ text })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Not all of your req.params were valid." }] })
+    .expect({ errors: [{ message: "The param commentId must be a number." }] })
     .expect(400);
 });
 
@@ -368,7 +368,7 @@ test("Create Comment Reply route fails if :profileId is not a number", async () 
     .type("form")
     .send({ text })
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Not all of your req.params were valid." }] })
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
     .expect(400);
 });
 
@@ -569,7 +569,7 @@ test("Get Comment Replies route fails if :commentId is not a number", async () =
     .expect({
       errors: [
         {
-          message: "No valid req.params were found.",
+          message: "The param commentId must be a number.",
         },
       ],
     });
@@ -753,7 +753,7 @@ test("Update Comment route fails if :commentId is not a number", async () => {
     .expect({
       errors: [
         {
-          message: "No valid req.params were found.",
+          message: "The param commentId must be a number.",
         },
       ],
     });
@@ -873,7 +873,7 @@ test("Delete Comment route fails if :commentId is not a number", async () => {
 
   await request(app)
     .delete(`/comment/${commentId}`)
-    .expect({ errors: [{ message: "No valid req.params were found." }] })
+    .expect({ errors: [{ message: "The param commentId must be a number." }] })
     .expect(400);
 });
 
