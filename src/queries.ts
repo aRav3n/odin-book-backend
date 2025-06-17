@@ -167,23 +167,47 @@ async function createNewFollow(followerId: number, followingId: number) {
 }
 
 async function readFollowers(profileId: number) {
-  const followers = await prisma.profile.findFirst({
-    where: { id: profileId },
+  const profileCount = await prisma.profile.count({ where: { id: profileId } });
+  if (profileCount === 0) {
+    return null;
+  }
+
+  const followers = await prisma.follow.findMany({
+    where: {
+      followingId: profileId,
+    },
     select: {
-      followers: {
+      follower: {
         select: {
-          follower: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
+          id: true,
+          name: true,
         },
       },
     },
   });
 
   return followers;
+}
+
+async function readFollowing(profileId: number) {
+  const profile = await prisma.profile.count({ where: { id: profileId } });
+  if (!profile) return null;
+
+  const following = await prisma.follow.findMany({
+    where: { followerId: profileId },
+    select: {
+      following: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  
+
+  return following;
 }
 
 // post queries
@@ -281,6 +305,11 @@ async function deleteSingleUser(id: number) {
   return deletedUser || null;
 }
 
+async function deleteAllUsers() {
+  const deleted = await prisma.user.deleteMany({});
+  return deleted;
+}
+
 async function getUser(email: string) {
   const user = await prisma.user.findFirst({
     where: { email },
@@ -326,6 +355,7 @@ export {
   // follow queries
   createNewFollow,
   readFollowers,
+  readFollowing,
 
   // post queries
   createPostForProfile,
@@ -345,6 +375,7 @@ export {
   // user queries
   addUser,
   deleteSingleUser,
+  deleteAllUsers,
   getUser,
   getUserEmail,
   updateUserInfo,

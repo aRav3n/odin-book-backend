@@ -137,7 +137,7 @@ router.delete(
 
 // follow routes
 router.post(
-  "/follow/:profileId/from/:followerId",
+  "/follow/:followingId/from/:followerId",
   checkThatParamsAreValid,
   verifyTokenMatch,
   followController.createFollow

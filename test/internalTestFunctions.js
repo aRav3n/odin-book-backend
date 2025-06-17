@@ -9,6 +9,17 @@ const { v4: uuidv4 } = require("uuid");
 app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
+const { deleteAllUsers, deleteSingleUser } = require("../db/queries");
+
+async function deleteEveryone() {
+  const deleted = await deleteAllUsers();
+  return deleted;
+}
+
+async function deleteUser(user) {
+  await deleteSingleUser(user.id);
+}
+
 function generateUserObject() {
   const email = `${uuidv4()}@email.com`;
   return {
@@ -18,15 +29,6 @@ function generateUserObject() {
     confirmPassword: "123456",
     token: null,
   };
-}
-
-async function deleteUser(user) {
-  await request(app)
-    .delete(`/user/${user.id}`)
-    .set("Authorization", `Bearer ${user.token}`)
-    .type("form")
-    .send({ password: user.password })
-    .expect(200);
 }
 
 async function logUserIn(user) {
@@ -60,9 +62,9 @@ async function logInAndDelete(user) {
   await deleteUser(loggedInUser);
 }
 
-function generateUserProfileObject() {
+function generateUserProfileObject(customName) {
   const userId = null;
-  const name = "Padma Patil";
+  const name = customName || "Padma Patil";
   const website = "https://harrypotter.fandom.com/wiki/Ravenclaw";
   const about = "";
 
@@ -76,9 +78,9 @@ async function generateSignedInUser() {
   return loggedInUser;
 }
 
-async function generateUserAndProfile() {
+async function generateUserAndProfile(customName) {
   const user = await generateSignedInUser();
-  const profile = generateUserProfileObject();
+  const profile = generateUserProfileObject(customName);
 
   const res = await request(app)
     .post("/profile")
@@ -91,8 +93,8 @@ async function generateUserAndProfile() {
   return { user, profile: newProfile };
 }
 
-async function generateUserProfilePost() {
-  const { user, profile } = await generateUserAndProfile();
+async function generateUserProfilePost(customName) {
+  const { user, profile } = await generateUserAndProfile(customName);
 
   const text =
     "You're going to form a new squadron? Just like that? Wave your hand and it appears? Well, I thought I'd tell High Command so they'll know what they need to give me. ―Wes Janson and Wedge Antilles";
@@ -112,8 +114,8 @@ async function generateUserProfilePost() {
   return { user, profile, post };
 }
 
-async function generateCommentAndParents() {
-  const { user, profile, post } = await generateUserProfilePost();
+async function generateCommentAndParents(customName) {
+  const { user, profile, post } = await generateUserProfilePost(customName);
   const text = "You're not really the Dragon Reborn.";
 
   const res = await request(app)
@@ -129,6 +131,7 @@ async function generateCommentAndParents() {
 }
 
 module.exports = {
+  deleteEveryone,
   deleteUser,
   generateCommentAndParents,
   generateSignedInUser,

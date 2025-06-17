@@ -18,6 +18,7 @@ exports.updateCommentInDatabase = updateCommentInDatabase;
 exports.deleteCommentFromDatabase = deleteCommentFromDatabase;
 exports.createNewFollow = createNewFollow;
 exports.readFollowers = readFollowers;
+exports.readFollowing = readFollowing;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -29,6 +30,7 @@ exports.updateExistingProfile = updateExistingProfile;
 exports.checkOwnerFromDatabase = checkOwnerFromDatabase;
 exports.addUser = addUser;
 exports.deleteSingleUser = deleteSingleUser;
+exports.deleteAllUsers = deleteAllUsers;
 exports.getUser = getUser;
 exports.getUserEmail = getUserEmail;
 exports.updateUserInfo = updateUserInfo;
@@ -185,22 +187,43 @@ function createNewFollow(followerId, followingId) {
 }
 function readFollowers(profileId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const followers = yield prisma.profile.findFirst({
-            where: { id: profileId },
+        const profileCount = yield prisma.profile.count({ where: { id: profileId } });
+        if (profileCount === 0) {
+            return null;
+        }
+        const followers = yield prisma.follow.findMany({
+            where: {
+                followingId: profileId,
+            },
             select: {
-                followers: {
+                follower: {
                     select: {
-                        follower: {
-                            select: {
-                                id: true,
-                                name: true,
-                            },
-                        },
+                        id: true,
+                        name: true,
                     },
                 },
             },
         });
         return followers;
+    });
+}
+function readFollowing(profileId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const profile = yield prisma.profile.count({ where: { id: profileId } });
+        if (!profile)
+            return null;
+        const following = yield prisma.follow.findMany({
+            where: { followerId: profileId },
+            select: {
+                following: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+            },
+        });
+        return following;
     });
 }
 // post queries
@@ -291,6 +314,12 @@ function deleteSingleUser(id) {
             where: { id },
         });
         return deletedUser || null;
+    });
+}
+function deleteAllUsers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const deleted = yield prisma.user.deleteMany({});
+        return deleted;
     });
 }
 function getUser(email) {
