@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 
 const {
   createNewFollow,
+  readFollowers,
   readPostFromDatabase,
   getProfile,
   createCommentReply,
@@ -20,8 +21,9 @@ const {
 } = require("./internalFunctions");
 
 async function createFollow(req, res) {
-  const followingProfile = await getProfile(Number(req.params.profileId));
-  if (!followingProfile) {
+  // followerId follows profileId
+  const profileToFollow = await getProfile(req.profileId);
+  if (!profileToFollow) {
     return res
       .status(404)
       .json(
@@ -31,10 +33,7 @@ async function createFollow(req, res) {
       );
   }
 
-  const follow = await createNewFollow(
-    Number(req.params.followerId),
-    Number(req.params.profileId)
-  );
+  const follow = await createNewFollow(req.followerId, profileToFollow.id);
   if (!follow) {
     return res
       .status(500)
@@ -48,7 +47,16 @@ async function createFollow(req, res) {
   return res.status(200).json(follow);
 }
 
-async function readProfileFollowers(req, res) {}
+async function readProfileFollowers(req, res) {
+  const profileAndFollowers = await readFollowers(req.profileId);
+  if (!profileAndFollowers) {
+    return res
+      .status(404)
+      .json(generateIndividualErrorMessage("Unable to find that profile."));
+  }
+
+  return res.status(200).json(profileAndFollowers.followers);
+}
 
 async function readProfileFollowing(req, res) {}
 

@@ -162,7 +162,28 @@ async function createNewFollow(followerId: number, followingId: number) {
       followingId,
     },
   });
+
   return newFollow || null;
+}
+
+async function readFollowers(profileId: number) {
+  const followers = await prisma.profile.findFirst({
+    where: { id: profileId },
+    select: {
+      followers: {
+        select: {
+          follower: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return followers;
 }
 
 // post queries
@@ -304,6 +325,7 @@ export {
 
   // follow queries
   createNewFollow,
+  readFollowers,
 
   // post queries
   createPostForProfile,

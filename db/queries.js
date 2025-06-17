@@ -17,6 +17,7 @@ exports.readSingleComment = readSingleComment;
 exports.updateCommentInDatabase = updateCommentInDatabase;
 exports.deleteCommentFromDatabase = deleteCommentFromDatabase;
 exports.createNewFollow = createNewFollow;
+exports.readFollowers = readFollowers;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -180,6 +181,26 @@ function createNewFollow(followerId, followingId) {
             },
         });
         return newFollow || null;
+    });
+}
+function readFollowers(profileId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const followers = yield prisma.profile.findFirst({
+            where: { id: profileId },
+            select: {
+                followers: {
+                    select: {
+                        follower: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        return followers;
     });
 }
 // post queries
