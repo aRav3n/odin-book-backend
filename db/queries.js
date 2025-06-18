@@ -21,6 +21,9 @@ exports.readFollowers = readFollowers;
 exports.readFollowing = readFollowing;
 exports.updateFollowAccept = updateFollowAccept;
 exports.deleteFollowInDatabase = deleteFollowInDatabase;
+exports.createLikeComment = createLikeComment;
+exports.createLikePost = createLikePost;
+exports.deleteLikeFromDatabase = deleteLikeFromDatabase;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -288,6 +291,16 @@ function deleteFollowInDatabase(followId) {
         const deletedFollow = yield prisma.follow.delete({ where: { id: followId } });
         return deletedFollow || null;
     });
+}
+// like queries
+function createLikeComment(commentId, profileId) {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+function createLikePost(postId, profileId) {
+    return __awaiter(this, void 0, void 0, function* () { });
+}
+function deleteLikeFromDatabase(likeId) {
+    return __awaiter(this, void 0, void 0, function* () { });
 }
 // post queries
 function createPostForProfile(profileId, text) {

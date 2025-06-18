@@ -272,6 +272,13 @@ async function deleteFollowInDatabase(followId: number) {
   return deletedFollow || null;
 }
 
+// like queries
+async function createLikeComment(commentId: number, profileId: number) {}
+
+async function createLikePost(postId: number, profileId: number) {}
+
+async function deleteLikeFromDatabase(likeId: number) {}
+
 // post queries
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
@@ -420,6 +427,11 @@ export {
   readFollowing,
   updateFollowAccept,
   deleteFollowInDatabase,
+
+  // like queries
+  createLikeComment,
+  createLikePost,
+  deleteLikeFromDatabase,
 
   // post queries
   createPostForProfile,

@@ -11,6 +11,7 @@ const {
 
 const commentController = require("../controllers/commentController");
 const followController = require("../controllers/followController");
+const likeController = require("../controllers/likeController");
 const postController = require("../controllers/postController");
 const profileController = require("../controllers/profileController");
 const userController = require("../controllers/userController");
@@ -167,11 +168,25 @@ router.delete(
   followController.deleteFollow
 );
 
-/*
-router.post("/like/comment/:commentId/from/:profileId");
-router.post("/like/post/:postId");
-router.delete("/like/:likeId");
-*/
+// like routes
+router.post(
+  "/like/comment/:likeCommentId/from/:profileId",
+  checkThatParamsAreValid,
+  verifyTokenMatch,
+  likeController.createLikeOnComment
+);
+router.post(
+  "/like/post/:likePostId/from/:profileId",
+  checkThatParamsAreValid,
+  verifyTokenMatch,
+  likeController.createLikeOnPost
+);
+router.delete(
+  "/like/:likeId",
+  checkThatParamsAreValid,
+  verifyTokenMatch,
+  likeController.deleteLike
+);
 
 router.use((req, res) => {
   const errorObject = {
