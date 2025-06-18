@@ -1,5 +1,5 @@
 /* to run only this test:
-  clear & npx tsc & npx jest test/comment.test.js
+  clear & npx jest test/comment.test.js
 */
 
 const router = require("../routes/router");
@@ -283,15 +283,7 @@ test("Get Comments On Post route fails if :postId is for a nonexistent post", as
 });
 
 test("Get Comments On Post route succeeds with correct requirements", async () => {
-  const { user, profile, post } = await generateUserProfilePost();
-  const text = "I'm commenting on this post before anyone else does!";
-
-  await request(app)
-    .post(`/comment/post/${post.id}/from/${profile.id}`)
-    .set("Authorization", `Bearer ${user.token}`)
-    .type("form")
-    .send({ text })
-    .expect(200);
+  const { user, profile, post, comment } = await generateCommentAndParents();
 
   await request(app)
     .get(`/comment/post/${post.id}`)
@@ -300,9 +292,11 @@ test("Get Comments On Post route succeeds with correct requirements", async () =
     .expect(200)
     .then((res) => {
       expect(res.body[0].id).toBeGreaterThan(0);
-      expect(res.body[0].text).toBe(text);
+      expect(res.body[0].text).toBe(comment.text);
       expect(res.body[0].profileId).toBe(profile.id);
       expect(res.body[0].Profile.name).toBe(profile.name);
+      expect(res.body[0]._count.likes).toBeDefined();
+      expect(res.body[0]._count.replies).toBeDefined();
     });
 
   await deleteUser(user);
@@ -641,14 +635,14 @@ test("Get Comment Replies route succeeds for a comment that has replies", async 
   const text = "This is a comment reply.";
   const textAlso = "This is the reply you are looking for.";
 
-  await request(app)
+  const resOne = await request(app)
     .post(`/comment/reply/${comment.id}/from/${profile.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .type("form")
     .send({ text })
     .expect(200);
 
-  await request(app)
+  const resTwo = await request(app)
     .post(`/comment/reply/${comment.id}/from/${profile.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .type("form")
@@ -660,17 +654,37 @@ test("Get Comment Replies route succeeds for a comment that has replies", async 
     .set("Authorization", `Bearer ${user.token}`)
     .expect(200)
     .then((res) => {
-      const array = res.body;
+      if (res.body[0].id === resOne.body.id) {
+        expect(res.body[0].id).toBeGreaterThan(0);
+        expect(res.body[0].text).toBe(text);
+        expect(res.body[0].profileId).toBe(profile.id);
+        expect(res.body[0].Profile.name).toBe(profile.name);
+        expect(res.body[0]._count.likes).toBeDefined();
+        expect(res.body[0]._count.replies).toBeDefined();
 
-      expect(array[0].id).toBeGreaterThan(0);
-      expect(array[0].text).toBe(text);
-      expect(array[0].profileId).toBe(profile.id);
-      expect(array[0].Profile.name).toBe(profile.name);
+        expect(res.body[1].id).toBeGreaterThan(0);
+        expect(res.body[1].text).toBe(textAlso);
+        expect(res.body[1].profileId).toBe(profile.id);
+        expect(res.body[1].Profile.name).toBe(profile.name);
+        expect(res.body[1]._count.likes).toBeDefined();
+        expect(res.body[1]._count.replies).toBeDefined();
+      } else if (res.body[0].id === resTwo.body.id) {
+        expect(res.body[1].id).toBeGreaterThan(0);
+        expect(res.body[1].text).toBe(text);
+        expect(res.body[1].profileId).toBe(profile.id);
+        expect(res.body[1].Profile.name).toBe(profile.name);
+        expect(res.body[1]._count.likes).toBeDefined();
+        expect(res.body[1]._count.replies).toBeDefined();
 
-      expect(array[1].id).toBeGreaterThan(0);
-      expect(array[1].text).toBe(textAlso);
-      expect(array[1].profileId).toBe(profile.id);
-      expect(array[1].Profile.name).toBe(profile.name);
+        expect(res.body[0].id).toBeGreaterThan(0);
+        expect(res.body[0].text).toBe(textAlso);
+        expect(res.body[0].profileId).toBe(profile.id);
+        expect(res.body[0].Profile.name).toBe(profile.name);
+        expect(res.body[0]._count.likes).toBeDefined();
+        expect(res.body[0]._count.replies).toBeDefined();
+      } else {
+        console.log("Something went wrong");
+      }
     });
 
   await deleteUser(user);

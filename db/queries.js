@@ -165,6 +165,12 @@ function readCommentReplies(commentId) {
                         name: true,
                     },
                 },
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    },
+                },
             },
         });
         return comments;
@@ -181,6 +187,12 @@ function readCommentsOnPost(postId) {
                 Profile: {
                     select: {
                         name: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
                     },
                 },
             },

@@ -150,6 +150,12 @@ async function readCommentReplies(commentId: number) {
           name: true,
         },
       },
+      _count: {
+        select: {
+          likes: true,
+          replies: true,
+        },
+      },
     },
   });
 
@@ -166,6 +172,12 @@ async function readCommentsOnPost(postId: number) {
       Profile: {
         select: {
           name: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          replies: true,
         },
       },
     },

@@ -263,6 +263,8 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
       expect(res.body.createdAt).toBe(post.createdAt);
       expect(res.body.profileId).toBe(profile.id);
       expect(res.body.text).toBe(post.text);
+      expect(res.body._count.comments).toBeDefined();
+      expect(res.body._count.likes).toBeDefined();
     });
 
   await deleteUser(user);
