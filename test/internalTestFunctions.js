@@ -130,10 +130,28 @@ async function generateCommentAndParents(customName) {
   return { user, profile, post, comment };
 }
 
+async function generateJamesFollowingLilly() {
+  const { user: lillyAccount, profile: lillyProfile } =
+    await generateUserAndProfile("Lilly Evans");
+  const { user: jamesAccount, profile: jamesProfile } =
+    await generateUserAndProfile("James Potter");
+
+  const res = await request(app)
+    .post(`/follow/${lillyProfile.id}/from/${jamesProfile.id}`)
+    .set("Authorization", `Bearer ${jamesAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200);
+
+  const follow = res.body;
+
+  return { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow };
+}
+
 module.exports = {
   deleteEveryone,
   deleteUser,
   generateCommentAndParents,
+  generateJamesFollowingLilly,
   generateSignedInUser,
   generateUserAndProfile,
   generateUserProfileObject,

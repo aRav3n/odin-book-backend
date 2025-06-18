@@ -89,6 +89,10 @@ const trimFields = [
     .withMessage("Password is needed to log in."),
 ];
 
+const validateFollow = [
+  body("accepted").isBoolean().withMessage("Accepted must be a boolean."),
+];
+
 const validatePost = [
   body("text")
     .trim()
@@ -174,6 +178,7 @@ module.exports = {
   getTokenFromReq,
   getUserInfoFromToken,
   trimFields,
+  validateFollow,
   validatePost,
   validateProfile,
   validateUpdate,

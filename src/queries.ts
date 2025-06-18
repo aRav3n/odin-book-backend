@@ -23,7 +23,8 @@ async function checkOwnerFromDatabase(
   profileId?: number,
   postId?: number,
   commentId?: number,
-  followerId?: number
+  followerId?: number,
+  followId?: number
 ) {
   if (profileId && !followerId) {
     const profile = await prisma.profile.findFirst({
@@ -66,6 +67,21 @@ async function checkOwnerFromDatabase(
     if (followerProfile?.userId === userId) {
       return true;
     }
+  }
+  if (followId) {
+    const follow = await prisma.follow.findFirst({
+      where: { id: followId },
+      select: {
+        following: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+    const followedUserId = follow?.following.userId;
+
+    return followedUserId === userId;
   }
 
   return false;
@@ -205,9 +221,21 @@ async function readFollowing(profileId: number) {
     },
   });
 
-  
-
   return following;
+}
+
+async function updateFollowAccept(followId: number, accepted: boolean) {
+  const update = await prisma.follow.update({
+    where: { id: followId },
+    data: { accepted },
+  });
+
+  return update || null;
+}
+
+async function deleteFollowInDatabase(followId: number) {
+  const deletedFollow = await prisma.follow.delete({ where: { id: followId } });
+  return deletedFollow || null;
 }
 
 // post queries
@@ -356,6 +384,8 @@ export {
   createNewFollow,
   readFollowers,
   readFollowing,
+  updateFollowAccept,
+  deleteFollowInDatabase,
 
   // post queries
   createPostForProfile,

@@ -109,11 +109,11 @@ API
       /:followId
         PUT
           Requires: authHeader, { acceptBool }
-          Success returns: 200
+          Success returns: 200, { success: true }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
         DELETE
           Requires: authHeader
-          Success returns: 200
+          Success returns: 200, { success: true }
           Fail returns: 401 if not correct authHeader, 404 for bad id, 400 otherwise
   CD (reading is done at the post or comment level)
     /like

@@ -19,6 +19,8 @@ exports.deleteCommentFromDatabase = deleteCommentFromDatabase;
 exports.createNewFollow = createNewFollow;
 exports.readFollowers = readFollowers;
 exports.readFollowing = readFollowing;
+exports.updateFollowAccept = updateFollowAccept;
+exports.deleteFollowInDatabase = deleteFollowInDatabase;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
 exports.updatePostText = updatePostText;
@@ -49,7 +51,7 @@ const prisma = new prisma_1.PrismaClient({
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
 // security queries
-function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId) {
+function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId, followId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (profileId && !followerId) {
             const profile = yield prisma.profile.findFirst({
@@ -91,6 +93,20 @@ function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId
             if ((followerProfile === null || followerProfile === void 0 ? void 0 : followerProfile.userId) === userId) {
                 return true;
             }
+        }
+        if (followId) {
+            const follow = yield prisma.follow.findFirst({
+                where: { id: followId },
+                select: {
+                    following: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                },
+            });
+            const followedUserId = follow === null || follow === void 0 ? void 0 : follow.following.userId;
+            return followedUserId === userId;
         }
         return false;
     });
@@ -224,6 +240,21 @@ function readFollowing(profileId) {
             },
         });
         return following;
+    });
+}
+function updateFollowAccept(followId, accepted) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const update = yield prisma.follow.update({
+            where: { id: followId },
+            data: { accepted },
+        });
+        return update || null;
+    });
+}
+function deleteFollowInDatabase(followId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const deletedFollow = yield prisma.follow.delete({ where: { id: followId } });
+        return deletedFollow || null;
     });
 }
 // post queries

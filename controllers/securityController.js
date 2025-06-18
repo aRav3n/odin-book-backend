@@ -41,6 +41,7 @@ function checkThatParamsAreValid(req, res, next) {
   }
 
   if (paramCount === 0) {
+    console.log({ paramCount });
     return res
       .status(400)
       .json(generateIndividualErrorMessage("No valid req.params were found."));
@@ -141,7 +142,25 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
-  } else if (req.likeId) {
+  } else if (req.followId) {
+    const owner = await checkOwnerFromDatabase(
+      req.user.user.id,
+      null,
+      null,
+      null,
+      null,
+      req.followId
+    );
+
+    if (!owner) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "You're not able to perform that action from this account."
+          )
+        );
+    }
   } else {
     return res
       .status(400)

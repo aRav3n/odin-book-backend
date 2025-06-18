@@ -14,9 +14,8 @@ app.use("/", router);
 
 const {
   deleteEveryone,
-  generateCommentAndParents,
+  generateJamesFollowingLilly,
   generateUserAndProfile,
-  generateUserProfilePost,
   deleteUser,
 } = require("./internalTestFunctions");
 
@@ -73,7 +72,9 @@ test("Create Follow route fails if profileId isn't a number", async () => {
     .post(`/follow/${profileId}/from/${followerId}`)
     .set("Authorization", `Bearer ${token}`)
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "The param followingId must be a number." }] })
+    .expect({
+      errors: [{ message: "The param followingId must be a number." }],
+    })
     .expect(400);
 });
 
@@ -360,7 +361,7 @@ test("Read Following route succeeds if all provided information is correct", asy
     .get(`/follow/profile/following/${severusProfile.id}`)
     .set("Authorization", `Bearer ${lillyAccount.token}`)
     .expect("Content-Type", /json/)
-    // .expect([])
+    .expect([])
     .expect(200)
     .then(async () => {
       await request(app)
@@ -392,21 +393,146 @@ test("Read Following route succeeds if all provided information is correct", asy
   await deleteUser(lillyAccount);
 });
 
+test("Update Follow route fails if followId is missing", async () => {
+  const token = "notAToken";
+  const followId = "";
+
+  await request(app)
+    .put(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Update Follow route fails if followId isn't a number", async () => {
+  const token = "notAToken";
+  const followId = "xyz";
+
+  await request(app)
+    .put(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param followId must be a number." }] })
+    .expect(400);
+});
+
+test("Update Follow route fails if authHeader is missing", async () => {
+  const followId = -1;
+
+  await request(app)
+    .put(`/follow/${followId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Update Follow route fails if authHeader is corrupted", async () => {
+  const token = "notAToken";
+  const followId = -1;
+
+  await request(app)
+    .put(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Update Follow route fails if followId is for a nonexistent follow", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const followId = -1;
+
+  await request(app)
+    .put(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ accepted: "notABoolean" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "You're not able to perform that action from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(user);
+});
+
+test("Update Follow route fails if authHeader user.id isn't followingId", async () => {
+  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+    await generateJamesFollowingLilly();
+
+  await request(app)
+    .put(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${jamesAccount.token}`)
+    .type("form")
+    .send({ accepted: "notABoolean" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "You're not able to perform that action from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(jamesAccount);
+  await deleteUser(lillyAccount);
+});
+
+test("Update Follow route fails if accepted is included but not a boolean", async () => {
+  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+    await generateJamesFollowingLilly();
+
+  await request(app)
+    .put(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${lillyAccount.token}`)
+    .type("form")
+    .send({ accepted: "notABoolean" })
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Accepted must be a boolean." }] })
+    .expect(400);
+
+  await deleteUser(jamesAccount);
+  await deleteUser(lillyAccount);
+});
+
+test("Update Follow route fails if accepted is missing", async () => {
+  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+    await generateJamesFollowingLilly();
+
+  await request(app)
+    .put(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${lillyAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Accepted must be a boolean." }] })
+    .expect(400);
+
+  await deleteUser(jamesAccount);
+  await deleteUser(lillyAccount);
+});
+
+test("Update Follow route succeeds if all information provided is correct", async () => {
+  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+    await generateJamesFollowingLilly();
+
+  await request(app)
+    .put(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${lillyAccount.token}`)
+    .type("form")
+    .send({ accepted: true })
+    .expect({ success: true })
+    .expect(200);
+
+  await deleteUser(jamesAccount);
+  await deleteUser(lillyAccount);
+});
+
 /*
-test("Update Follow route fails if followId is missing", async () => {});
-
-test("Update Follow route fails if followId isn't a number", async () => {});
-
-test("Update Follow route fails if authHeader is missing", async () => {});
-
-test("Update Follow route fails if authHeader is corrupted", async () => {});
-
-test("Update Follow route fails if followId is for a nonexistent follow", async () => {});
-
-test("Update Follow route fails if authHeader user.id isn't followingId", async () => {});
-
-test("Update Follow route succeeds if all information provided is correct", async () => {});
-
 test("Delete Follow route fails if followId is missing", async () => {});
 
 test("Delete Follow route fails if followId isn't a number", async () => {});
