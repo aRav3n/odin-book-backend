@@ -51,7 +51,7 @@ const prisma = new prisma_1.PrismaClient({
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
 // security queries
-function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId, followId) {
+function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId, followId, deleteFollowId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (profileId && !followerId) {
             const profile = yield prisma.profile.findFirst({
@@ -107,6 +107,26 @@ function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId
             });
             const followedUserId = follow === null || follow === void 0 ? void 0 : follow.following.userId;
             return followedUserId === userId;
+        }
+        if (deleteFollowId) {
+            const follow = yield prisma.follow.findFirst({
+                where: { id: deleteFollowId },
+                select: {
+                    following: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                    follower: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                },
+            });
+            const followedUserId = follow === null || follow === void 0 ? void 0 : follow.following.userId;
+            const followingUserId = follow === null || follow === void 0 ? void 0 : follow.follower.userId;
+            return userId === followedUserId || userId === followingUserId;
         }
         return false;
     });

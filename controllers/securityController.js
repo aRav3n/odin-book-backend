@@ -161,6 +161,26 @@ async function verifyTokenMatch(req, res, next) {
           )
         );
     }
+  } else if (req.deleteFollowId) {
+    const owner = await checkOwnerFromDatabase(
+      req.user.user.id,
+      null,
+      null,
+      null,
+      null,
+      null,
+      req.deleteFollowId
+    );
+
+    if (!owner) {
+      return res
+        .status(403)
+        .json(
+          generateIndividualErrorMessage(
+            "You're not able to perform that action from this account."
+          )
+        );
+    }
   } else {
     return res
       .status(400)

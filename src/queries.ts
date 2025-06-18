@@ -24,7 +24,8 @@ async function checkOwnerFromDatabase(
   postId?: number,
   commentId?: number,
   followerId?: number,
-  followId?: number
+  followId?: number,
+  deleteFollowId?: number
 ) {
   if (profileId && !followerId) {
     const profile = await prisma.profile.findFirst({
@@ -82,6 +83,27 @@ async function checkOwnerFromDatabase(
     const followedUserId = follow?.following.userId;
 
     return followedUserId === userId;
+  }
+  if (deleteFollowId) {
+    const follow = await prisma.follow.findFirst({
+      where: { id: deleteFollowId },
+      select: {
+        following: {
+          select: {
+            userId: true,
+          },
+        },
+        follower: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+    const followedUserId = follow?.following.userId;
+    const followingUserId = follow?.follower.userId;
+
+    return userId === followedUserId || userId === followingUserId;
   }
 
   return false;

@@ -89,7 +89,20 @@ const updateFollow = [
   },
 ];
 
-async function deleteFollow(req, res) {}
+async function deleteFollow(req, res) {
+  const goodDelete = await deleteFollowInDatabase(req.deleteFollowId);
+  if (!goodDelete) {
+    return res
+      .status(500)
+      .json(
+        generateIndividualErrorMessage(
+          "There was an error while deleting that follow, please try again."
+        )
+      );
+  }
+
+  return res.status(200).json({ success: true });
+}
 
 module.exports = {
   createFollow,

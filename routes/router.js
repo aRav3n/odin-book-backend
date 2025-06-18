@@ -161,7 +161,7 @@ router.put(
   followController.updateFollow
 );
 router.delete(
-  "/follow/:followId",
+  "/follow/:deleteFollowId",
   checkThatParamsAreValid,
   verifyTokenMatch,
   followController.deleteFollow

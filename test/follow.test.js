@@ -34,7 +34,8 @@ afterEach(() => {
 });
 
 afterAll(async () => {
-  // await deleteEveryone();
+  // const deleted = await deleteEveryone();
+  // console.log(deleted);
 });
 
 test("Create Follow route fails if profileId is missing", async () => {
@@ -532,18 +533,123 @@ test("Update Follow route succeeds if all information provided is correct", asyn
   await deleteUser(lillyAccount);
 });
 
-/*
-test("Delete Follow route fails if followId is missing", async () => {});
+test("Delete Follow route fails if followId is missing", async () => {
+  const token = "notAToken";
+  const followId = "";
 
-test("Delete Follow route fails if followId isn't a number", async () => {});
+  await request(app)
+    .delete(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Delete Follow route fails if authHeader is missing", async () => {});
+test("Delete Follow route fails if followId isn't a number", async () => {
+  const token = "notAToken";
+  const followId = "xyz";
 
-test("Delete Follow route fails if authHeader is corrupted", async () => {});
+  await request(app)
+    .delete(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "The param deleteFollowId must be a number." }],
+    })
+    .expect(400);
+});
 
-test("Delete Follow route fails if followId is for a nonexistent follow", async () => {});
+test("Delete Follow route fails if authHeader is missing", async () => {
+  const followId = -1;
 
-test("Delete Follow route fails if authHeader user.id isn't follow.followingId or follow.followerId", async () => {});
+  await request(app)
+    .delete(`/follow/${followId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
 
-test("Delete Follow route succeeds if all information provided is correct", async () => {});
-*/
+test("Delete Follow route fails if authHeader is corrupted", async () => {
+  const token = "notAToken";
+  const followId = -1;
+
+  await request(app)
+    .delete(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Delete Follow route fails if followId is for a nonexistent follow", async () => {
+  const { user, profile } = await generateUserAndProfile();
+  const followId = -1;
+
+  await request(app)
+    .delete(`/follow/${followId}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "You're not able to perform that action from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(user);
+});
+
+test("Delete Follow route fails if authHeader user.id isn't owner of follow.followingId or follow.followerId", async () => {
+  const { lillyAccount, jamesAccount, follow } =
+    await generateJamesFollowingLilly();
+  const { user: snapeAccount } = await generateUserAndProfile("Severus Snape");
+
+  await request(app)
+    .delete(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${snapeAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "You're not able to perform that action from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(lillyAccount);
+  await deleteUser(jamesAccount);
+  await deleteUser(snapeAccount);
+});
+
+test("Delete Follow route succeeds from followed user's account", async () => {
+  const { lillyAccount, jamesAccount, follow } =
+    await generateJamesFollowingLilly();
+
+  await request(app)
+    .delete(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${lillyAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ success: true })
+    .expect(200);
+
+  await deleteUser(lillyAccount);
+  await deleteUser(jamesAccount);
+});
+
+test("Delete Follow route succeeds from following user's account", async () => {
+  const { lillyAccount, jamesAccount, follow } =
+    await generateJamesFollowingLilly();
+
+  await request(app)
+    .delete(`/follow/${follow.id}`)
+    .set("Authorization", `Bearer ${jamesAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({ success: true })
+    .expect(200);
+
+  await deleteUser(lillyAccount);
+  await deleteUser(jamesAccount);
+});
