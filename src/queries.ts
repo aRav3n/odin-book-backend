@@ -273,7 +273,18 @@ async function deleteFollowInDatabase(followId: number) {
 }
 
 // like queries
-async function createLikeComment(commentId: number, profileId: number) {}
+async function createLikeComment(commentId: number, profileId: number) {
+  const commentCount = await prisma.comment.count({ where: { id: commentId } });
+  if (commentCount === 0) {
+    return false;
+  }
+
+  const like = await prisma.like.create({
+    data: { profileId, commentId },
+  });
+
+  return like || null;
+}
 
 async function createLikePost(postId: number, profileId: number) {}
 

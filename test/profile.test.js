@@ -287,7 +287,7 @@ test("Update Profile route fails when trying to update another user's profile", 
     .expect({
       errors: [
         {
-          message: "Access to that profile is not allowed from this account.",
+          message: "Access to that is not allowed from this account.",
         },
       ],
     })
@@ -309,7 +309,7 @@ test("Update Profile fails with id for nonexistent profile", async () => {
     .expect({
       errors: [
         {
-          message: "Access to that profile is not allowed from this account.",
+          message: "Access to that is not allowed from this account.",
         },
       ],
     })
@@ -419,7 +419,7 @@ test("Delete Profile route fails when trying to delete another user's profile", 
     .expect({
       errors: [
         {
-          message: "Access to that profile is not allowed from this account.",
+          message: "Access to that is not allowed from this account.",
         },
       ],
     })
@@ -439,7 +439,7 @@ test("Delete Profile fails with id for nonexistent profile", async () => {
     .expect({
       errors: [
         {
-          message: "Access to that profile is not allowed from this account.",
+          message: "Access to that is not allowed from this account.",
         },
       ],
     })
@@ -464,7 +464,7 @@ test("Delete Profile fails if profile has already been delete", async () => {
     .expect({
       errors: [
         {
-          message: "Access to that profile is not allowed from this account.",
+          message: "Access to that is not allowed from this account.",
         },
       ],
     })

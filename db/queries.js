@@ -294,7 +294,16 @@ function deleteFollowInDatabase(followId) {
 }
 // like queries
 function createLikeComment(commentId, profileId) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        const commentCount = yield prisma.comment.count({ where: { id: commentId } });
+        if (commentCount === 0) {
+            return false;
+        }
+        const like = yield prisma.like.create({
+            data: { profileId, commentId },
+        });
+        return like || null;
+    });
 }
 function createLikePost(postId, profileId) {
     return __awaiter(this, void 0, void 0, function* () { });

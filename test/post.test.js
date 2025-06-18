@@ -127,7 +127,7 @@ test("Create Post route fails if the profile with profileId doesn't belong to th
     .expect({
       errors: [
         {
-          message: "Access to that profile is not allowed from this account.",
+          message: "Access to that is not allowed from this account.",
         },
       ],
     })

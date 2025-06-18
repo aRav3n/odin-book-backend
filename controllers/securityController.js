@@ -104,7 +104,7 @@ async function verifyTokenMatch(req, res, next) {
         .status(403)
         .json(
           generateIndividualErrorMessage(
-            "Access to that profile is not allowed from this account."
+            "Access to that is not allowed from this account."
           )
         );
     }
