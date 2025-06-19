@@ -54,7 +54,7 @@ const prisma = new prisma_1.PrismaClient({
     // need to fix this line after Emmet paste to add dollar sign before extends
 }).$extends((0, extension_accelerate_1.withAccelerate)());
 // security queries
-function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId, followId, deleteFollowId) {
+function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId, followId, deleteFollowId, likeId) {
     return __awaiter(this, void 0, void 0, function* () {
         if (profileId && !followerId) {
             const profile = yield prisma.profile.findFirst({
@@ -130,6 +130,20 @@ function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId
             const followedUserId = follow === null || follow === void 0 ? void 0 : follow.following.userId;
             const followingUserId = follow === null || follow === void 0 ? void 0 : follow.follower.userId;
             return userId === followedUserId || userId === followingUserId;
+        }
+        if (likeId) {
+            const like = yield prisma.like.findFirst({
+                where: { id: likeId },
+                select: {
+                    Profile: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                },
+            });
+            const likeUserId = like === null || like === void 0 ? void 0 : like.Profile.userId;
+            return likeUserId === userId;
         }
         return false;
     });
@@ -318,7 +332,10 @@ function createLikePost(postId, profileId) {
     });
 }
 function deleteLikeFromDatabase(likeId) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        const like = yield prisma.like.delete({ where: { id: likeId } });
+        return like || null;
+    });
 }
 // post queries
 function createPostForProfile(profileId, text) {

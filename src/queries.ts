@@ -25,7 +25,8 @@ async function checkOwnerFromDatabase(
   commentId?: number,
   followerId?: number,
   followId?: number,
-  deleteFollowId?: number
+  deleteFollowId?: number,
+  likeId?: number
 ) {
   if (profileId && !followerId) {
     const profile = await prisma.profile.findFirst({
@@ -104,6 +105,21 @@ async function checkOwnerFromDatabase(
     const followingUserId = follow?.follower.userId;
 
     return userId === followedUserId || userId === followingUserId;
+  }
+  if (likeId) {
+    const like = await prisma.like.findFirst({
+      where: { id: likeId },
+      select: {
+        Profile: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+    const likeUserId = like?.Profile.userId;
+
+    return likeUserId === userId;
   }
 
   return false;
@@ -299,7 +315,10 @@ async function createLikePost(postId: number, profileId: number) {
   return like || null;
 }
 
-async function deleteLikeFromDatabase(likeId: number) {}
+async function deleteLikeFromDatabase(likeId: number) {
+  const like = await prisma.like.delete({ where: { id: likeId } });
+  return like || null;
+}
 
 // post queries
 async function createPostForProfile(profileId: number, text: string) {

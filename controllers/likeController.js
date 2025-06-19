@@ -41,7 +41,14 @@ async function createLikeOnPost(req, res) {
 }
 
 async function deleteLike(req, res) {
-  return res.status(333).json({});
+  const like = await deleteLikeFromDatabase(req.likeId);
+  if (!like) {
+    return res
+      .status(500)
+      .json(generateIndividualErrorMessage("Server error, please try again."));
+  }
+  
+  return res.status(200).json(like);
 }
 
 module.exports = { createLikeOnComment, createLikeOnPost, deleteLike };

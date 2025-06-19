@@ -32,10 +32,12 @@ afterEach(() => {
   }
 });
 
+/*
 afterAll(async () => {
-  // const deleted = await deleteEveryone();
-  // console.log(deleted);
+  const deleted = await deleteEveryone();
+  console.log(deleted);
 });
+*/
 
 // comment like creation tests
 test("Create Like On Comment route fails if likeCommentId is missing", async () => {
@@ -313,17 +315,145 @@ test("Create Like On Post route succeeds if all provided info is correct", async
   await deleteUser(lillyAccount);
 });
 
-/*
 // like deletion tests
-test("Delete Like route fails if likeId is missing", async () => {});
+test("Delete Like route fails if likeId is missing", async () => {
+  const token = "notAToken";
+  const likeId = "";
 
-test("Delete Like route fails if likeId is not a number", async () => {});
+  await request(app)
+    .delete(`/like/${likeId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Delete Like route fails if authHeader is missing", async () => {});
+test("Delete Like route fails if likeId is not a number", async () => {
+  const token = "notAToken";
+  const likeId = "xyz";
 
-test("Delete Like route fails if authHeader is corrupted", async () => {});
+  await request(app)
+    .delete(`/like/${likeId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param likeId must be a number." }] })
+    .expect(400);
+});
 
-test("Delete Like route fails if authHeader isn't for owner of like", async () => {});
+test("Delete Like route fails if authHeader is missing", async () => {
+  const likeId = -1;
 
-test("Delete Like route succeeds if all provided info is correct", async () => {});
-*/
+  await request(app)
+    .delete(`/like/${likeId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Delete Like route fails if authHeader is corrupted", async () => {
+  const token = "notAToken";
+  const likeId = -1;
+
+  await request(app)
+    .delete(`/like/${likeId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Delete Like route fails if trying to delete another user's like", async () => {
+  const {
+    user: lillyAccount,
+    profile: lillyProfile,
+    post: lillyPost,
+  } = await generateUserProfilePost("Lilly Potter (Evans)");
+  const { user: severusAccount, profile: severusSnape } =
+    await generateUserAndProfile("Severus Snape");
+
+  const likeRes = await request(app)
+    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200);
+
+  const like = likeRes.body;
+
+  await request(app)
+    .delete(`/like/${like.id}`)
+    .set("Authorization", `Bearer ${lillyAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "You're not able to perform that action from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(lillyAccount);
+  await deleteUser(severusAccount);
+});
+
+test("Delete Like route fails if trying to delete a like that doesn't exist", async () => {
+  const {
+    user: lillyAccount,
+    profile: lillyProfile,
+    post: lillyPost,
+  } = await generateUserProfilePost("Lilly Potter (Evans)");
+  const { user: severusAccount, profile: severusSnape } =
+    await generateUserAndProfile("Severus Snape");
+
+  const likeRes = await request(app)
+    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200);
+
+  const like = likeRes.body;
+
+  await request(app)
+    .delete(`/like/${like.id - 1000}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [
+        {
+          message: "You're not able to perform that action from this account.",
+        },
+      ],
+    })
+    .expect(403);
+
+  await deleteUser(lillyAccount);
+  await deleteUser(severusAccount);
+});
+
+test("Delete Like route succeeds if all provided info is correct", async () => {
+  const {
+    user: lillyAccount,
+    profile: lillyProfile,
+    post: lillyPost,
+  } = await generateUserProfilePost("Lilly Potter (Evans)");
+  const { user: severusAccount, profile: severusSnape } =
+    await generateUserAndProfile("Severus Snape");
+
+  const likeRes = await request(app)
+    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200);
+
+  const like = likeRes.body;
+
+  await request(app)
+    .delete(`/like/${like.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(like)
+    .expect(200);
+
+  await deleteUser(lillyAccount);
+  await deleteUser(severusAccount);
+});
