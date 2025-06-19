@@ -306,7 +306,16 @@ function createLikeComment(commentId, profileId) {
     });
 }
 function createLikePost(postId, profileId) {
-    return __awaiter(this, void 0, void 0, function* () { });
+    return __awaiter(this, void 0, void 0, function* () {
+        const postCount = yield prisma.post.count({ where: { id: postId } });
+        if (postCount === 0) {
+            return false;
+        }
+        const like = yield prisma.like.create({
+            data: { profileId, postId },
+        });
+        return like || null;
+    });
 }
 function deleteLikeFromDatabase(likeId) {
     return __awaiter(this, void 0, void 0, function* () { });

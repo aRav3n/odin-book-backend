@@ -11,21 +11,33 @@ const {
 } = require("./internalFunctions");
 
 async function createLikeOnComment(req, res) {
-  const comment = await createLikeComment(req.likeCommentId, req.profileId);
-  if (comment === false) {
+  const like = await createLikeComment(req.likeCommentId, req.profileId);
+  if (like === false) {
     return res
       .status(404)
       .json(generateIndividualErrorMessage("That comment was not found."));
-  } else if (!comment) {
+  } else if (!like) {
     return res
       .status(500)
       .json(generateIndividualErrorMessage("Server error, please try again."));
   }
-  return res.status(200).json(comment);
+  return res.status(200).json(like);
 }
 
 async function createLikeOnPost(req, res) {
-  return res.status(333).json({});
+  const like = await createLikePost(req.likePostId, req.profileId);
+
+  if (like === false) {
+    return res
+      .status(404)
+      .json(generateIndividualErrorMessage("That post was not found."));
+  } else if (!like) {
+    return res
+      .status(500)
+      .json(generateIndividualErrorMessage("Server error, please try again."));
+  }
+
+  return res.status(200).json(like);
 }
 
 async function deleteLike(req, res) {

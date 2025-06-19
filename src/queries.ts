@@ -286,7 +286,18 @@ async function createLikeComment(commentId: number, profileId: number) {
   return like || null;
 }
 
-async function createLikePost(postId: number, profileId: number) {}
+async function createLikePost(postId: number, profileId: number) {
+  const postCount = await prisma.post.count({ where: { id: postId } });
+  if (postCount === 0) {
+    return false;
+  }
+
+  const like = await prisma.like.create({
+    data: { profileId, postId },
+  });
+
+  return like || null;
+}
 
 async function deleteLikeFromDatabase(likeId: number) {}
 

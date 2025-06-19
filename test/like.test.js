@@ -15,6 +15,7 @@ const {
   generateUserAndProfile,
   deleteUser,
   generateCommentAndParents,
+  generateUserProfilePost,
 } = require("./internalTestFunctions");
 
 let likeStart;
@@ -32,8 +33,8 @@ afterEach(() => {
 });
 
 afterAll(async () => {
-  const deleted = await deleteEveryone();
-  console.log(deleted);
+  // const deleted = await deleteEveryone();
+  // console.log(deleted);
 });
 
 // comment like creation tests
@@ -175,26 +176,144 @@ test("Create Like On Comment route succeeds if all provided info is correct", as
   await deleteUser(lupinAccount);
 });
 
-/*
 // post like creation tests
-test("Create Like On Post route fails if likePostId is missing", async () => {});
+test("Create Like On Post route fails if likePostId is missing", async () => {
+  const token = "notAToken";
+  const likePostId = "";
+  const profileId = "xyz";
 
-test("Create Like On Post route fails if profileId is missing", async () => {});
+  await request(app)
+    .post(`/like/post/${likePostId}/from/${profileId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Create Like On Post route fails if likePostId is not a number", async () => {});
+test("Create Like On Post route fails if profileId is missing", async () => {
+  const token = "notAToken";
+  const likePostId = "xyz";
+  const profileId = "";
 
-test("Create Like On Post route fails if profileId is not a number", async () => {});
+  await request(app)
+    .post(`/like/post/${likePostId}/from/${profileId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
 
-test("Create Like On Post route fails if authHeader is missing", async () => {});
+test("Create Like On Post route fails if likePostId is not a number", async () => {
+  const token = "notAToken";
+  const likePostId = "xyz";
+  const profileId = -1;
 
-test("Create Like On Post route fails if authHeader is corrupted", async () => {});
+  await request(app)
+    .post(`/like/post/${likePostId}/from/${profileId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param likePostId must be a number." }] })
+    .expect(400);
+});
 
-test("Create Like On Post route fails if authHeader isn't for owner of profileId", async () => {});
+test("Create Like On Post route fails if profileId is not a number", async () => {
+  const token = "notAToken";
+  const likePostId = -1;
+  const profileId = "xyz";
 
-test("Create Like On Post route fails if likePostId is for a nonexistent post", async () => {});
+  await request(app)
+    .post(`/like/post/${likePostId}/from/${profileId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param profileId must be a number." }] })
+    .expect(400);
+});
 
-test("Create Like On Post route succeeds if all provided info is correct", async () => {});
+test("Create Like On Post route fails if authHeader is missing", async () => {
+  const likePostId = -1;
+  const profileId = -1;
 
+  await request(app)
+    .post(`/like/post/${likePostId}/from/${profileId}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Create Like On Post route fails if authHeader is corrupted", async () => {
+  const token = "notAToken";
+  const likePostId = -1;
+  const profileId = -1;
+
+  await request(app)
+    .post(`/like/post/${likePostId}/from/${profileId}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Create Like On Post route fails if authHeader isn't for owner of profileId", async () => {
+  const { user: lillyAccount, post: lillyPost } =
+    await generateUserProfilePost("Lilly Evans");
+  const { user: severusAccount, profile: severusSnape } =
+    await generateUserAndProfile("Severus Snape");
+
+  await request(app)
+    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
+    .set("Authorization", `Bearer ${lillyAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Access to that is not allowed from this account." }],
+    })
+    .expect(403);
+
+  await deleteUser(severusAccount);
+  await deleteUser(lillyAccount);
+});
+
+test("Create Like On Post route fails if likePostId is for a nonexistent post", async () => {
+  const { user: lillyAccount, post: lillyPost } =
+    await generateUserProfilePost("Lilly Evans");
+  const { user: severusAccount, profile: severusSnape } =
+    await generateUserAndProfile("Severus Snape");
+
+  await request(app)
+    .post(`/like/post/${lillyPost.id - 1000}/from/${severusSnape.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "That post was not found." }],
+    })
+    .expect(404);
+
+  await deleteUser(severusAccount);
+  await deleteUser(lillyAccount);
+});
+
+test("Create Like On Post route succeeds if all provided info is correct", async () => {
+  const { user: lillyAccount, post: lillyPost } =
+    await generateUserProfilePost("Lilly Evans");
+  const { user: severusAccount, profile: severusSnape } =
+    await generateUserAndProfile("Severus Snape");
+
+  await request(app)
+    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body.id).toBeGreaterThan(0);
+      expect(res.body.profileId).toBe(severusSnape.id);
+      expect(res.body.postId).toBe(lillyPost.id);
+      expect(res.body.commentId).toBe(null);
+    });
+
+  await deleteUser(severusAccount);
+  await deleteUser(lillyAccount);
+});
+
+/*
 // like deletion tests
 test("Delete Like route fails if likeId is missing", async () => {});
 
