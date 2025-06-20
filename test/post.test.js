@@ -1,6 +1,4 @@
-/* to run only this test:
-  clear & npx tsc & npx jest test/post.test.js
-*/
+// to run only this test:    clear & npx jest test/post.test.js
 
 const router = require("../routes/router");
 
@@ -190,14 +188,12 @@ test("Create Post route succeeds if all required info is correct", async () => {
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .type("form")
-    .send({
-      profileId: profile.id,
-      text,
-    })
+    .send({ text })
     .then((res) => {
       expect(res.body.id).toBeDefined;
       expect(res.body.text).toBe(text);
       expect(res.body.profileId).toBe(profile.id);
+      expect(res.body.Profile.name).toBe(profile.name);
       expect(200);
     });
 
@@ -262,6 +258,7 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
       expect(res.body.id).toBe(post.id);
       expect(res.body.createdAt).toBe(post.createdAt);
       expect(res.body.profileId).toBe(profile.id);
+      expect(res.body.Profile.name).toBe(profile.name);
       expect(res.body.text).toBe(post.text);
       expect(res.body._count.comments).toBeDefined();
       expect(res.body._count.likes).toBeDefined();
@@ -478,7 +475,7 @@ test("Delete Post route fails if authHeader doesn't match post owner", async () 
 test("Delete Post route succeeds if authHeader matches :postId owner", async () => {
   const { user, profile, post } = await generateUserProfilePost();
 
-  await request(app)
+  const res = await request(app)
     .delete(`/post/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)

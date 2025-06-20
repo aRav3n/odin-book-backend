@@ -1,6 +1,4 @@
-/* to run only this test:
-  clear & npx tsc & npx jest test/profile.test.js
-*/
+// to run only this test:    clear & npx jest test/profile.test.js
 
 const router = require("../routes/router");
 
@@ -206,6 +204,7 @@ test("Read Profile succeeds when using a good authHeader and valid id", async ()
       expect(body.name).toBe(profile.name);
       expect(body.website).toBe(profile.website);
       expect(body.about).toBe(profile.about);
+      expect(body.posts).toEqual([]);
     });
 
   await deleteUser(user);
@@ -356,6 +355,7 @@ test("Update Profile succeeds when using a good authHeader and valid id", async 
       expect(body.website).toBe(profileUpdate.website);
       expect(body.website).not.toBe(profile.website);
       expect(body.about).toBe(profileUpdate.about);
+      expect(body.posts).toEqual([]);
       expect(200);
     });
 

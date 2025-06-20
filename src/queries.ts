@@ -137,6 +137,25 @@ async function createCommentReply(
       text,
       profileId,
     },
+    select: {
+      id: true,
+      text: true,
+      profileId: true,
+      postId: true,
+      commentId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          replies: true,
+        },
+      },
+    },
   });
 
   return comment || null;
@@ -149,6 +168,25 @@ async function createCommentOnPost(
 ) {
   const comment = await prisma.comment.create({
     data: { postId, profileId, text },
+    select: {
+      id: true,
+      text: true,
+      profileId: true,
+      postId: true,
+      commentId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          replies: true,
+        },
+      },
+    },
   });
 
   return comment || null;
@@ -161,9 +199,12 @@ async function readCommentReplies(commentId: number) {
       id: true,
       text: true,
       profileId: true,
+      postId: true,
+      commentId: true,
       Profile: {
         select: {
           name: true,
+          id: true,
         },
       },
       _count: {
@@ -185,9 +226,12 @@ async function readCommentsOnPost(postId: number) {
       id: true,
       text: true,
       profileId: true,
+      postId: true,
+      commentId: true,
       Profile: {
         select: {
           name: true,
+          id: true,
         },
       },
       _count: {
@@ -203,7 +247,28 @@ async function readCommentsOnPost(postId: number) {
 }
 
 async function readSingleComment(id: number) {
-  const comment = await prisma.comment.findFirst({ where: { id } });
+  const comment = await prisma.comment.findFirst({
+    where: { id },
+    select: {
+      id: true,
+      text: true,
+      profileId: true,
+      postId: true,
+      commentId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          replies: true,
+        },
+      },
+    },
+  });
   return comment || null;
 }
 
@@ -211,6 +276,25 @@ async function updateCommentInDatabase(id: number, text: string) {
   const commentWithUpdates = await prisma.comment.update({
     where: { id },
     data: { text },
+    select: {
+      id: true,
+      text: true,
+      profileId: true,
+      postId: true,
+      commentId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      _count: {
+        select: {
+          likes: true,
+          replies: true,
+        },
+      },
+    },
   });
   return commentWithUpdates || null;
 }
@@ -324,6 +408,18 @@ async function deleteLikeFromDatabase(likeId: number) {
 async function createPostForProfile(profileId: number, text: string) {
   const post = await prisma.post.create({
     data: { profileId, text },
+    select: {
+      id: true,
+      createdAt: true,
+      text: true,
+      profileId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
   });
   return post || null;
 }
@@ -332,21 +428,57 @@ async function readPostFromDatabase(id: number) {
   const post = await prisma.post.findFirst({
     where: { id },
     include: {
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
       _count: {
         select: { comments: true, likes: true },
+      },
+    },
+  });
+
+  return post;
+}
+
+async function updatePostText(id: number, text: string) {
+  const post = await prisma.post.update({
+    where: { id },
+    data: { text },
+    select: {
+      id: true,
+      createdAt: true,
+      text: true,
+      profileId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
       },
     },
   });
   return post;
 }
 
-async function updatePostText(id: number, text: string) {
-  const post = await prisma.post.update({ where: { id }, data: { text } });
-  return post;
-}
-
 async function deletePostFromDatabase(id: number) {
-  const post = await prisma.post.delete({ where: { id } });
+  const post = await prisma.post.delete({
+    where: { id },
+    select: {
+      id: true,
+      createdAt: true,
+      text: true,
+      profileId: true,
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+    },
+  });
   if (!post) {
     return false;
   }
@@ -375,6 +507,14 @@ async function deleteUserProfile(id: number) {
 async function getProfile(id: number) {
   const profile = await prisma.profile.findFirst({
     where: { id },
+    select: {
+      posts: true,
+      id: true,
+      userId: true,
+      name: true,
+      website: true,
+      about: true,
+    },
   });
 
   return profile || false;
@@ -390,6 +530,14 @@ async function updateExistingProfile(
   const updatedProfile = await prisma.profile.update({
     where: { id, userId },
     data: { name, website: website, about: about },
+    select: {
+      id: true,
+      posts: true,
+      userId: true,
+      name: true,
+      website: true,
+      about: true,
+    },
   });
   return updatedProfile || null;
 }

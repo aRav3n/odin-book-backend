@@ -1,6 +1,4 @@
-/* to run only this test:
-  clear & npx jest test/comment.test.js
-*/
+// to run only this test:     clear & npx jest test/comment.test.js
 
 const router = require("../routes/router");
 
@@ -945,8 +943,14 @@ test("Delete Comment route succeeds with correct requirements", async () => {
   await request(app)
     .delete(`/comment/${comment.id}`)
     .set("Authorization", `Bearer ${user.token}`)
-    .expect(comment)
-    .expect(200);
+    .expect(200)
+    .then((res) => {
+      expect(res.body.id).toBe(comment.id);
+      expect(res.body.text).toBe(comment.text);
+      expect(res.body.profileId).toBe(comment.profileId);
+      expect(res.body.postId).toBe(comment.postId);
+      expect(res.body.commentId).toBe(comment.commentId);
+    });
 
   await request(app)
     .get(`/comment/post/${post.id}`)

@@ -268,7 +268,7 @@ test("Login User route fails if wrong password", async () => {
 
 test("Login User route succeeds with correct email and correct password", async () => {
   const user = generateUserObject();
-  user.id = await signUserUp(user);
+  await signUserUp(user);
 
   await request(app)
     .post("/user/login")
@@ -541,12 +541,13 @@ test("Update Account route succeeds with correct info and token", async () => {
       currentPassword: loggedInUser.password,
     })
     .then((res) => {
-      loggedInUser.token = res.body.token;
       expect(res.body.id).toBe(loggedInUser.id);
       expect(res.body.email).toBe(userUpdate.newEmail);
-      loggedInUser.email = userUpdate.newEmail;
+      expect(res.body.token).toBeDefined();
       expect(res.body.hash).not.toBeDefined();
+      loggedInUser.token = res.body.token;
       loggedInUser.password = userUpdate.newPassword;
+      loggedInUser.email = userUpdate.newEmail;
       expect(200);
     });
 

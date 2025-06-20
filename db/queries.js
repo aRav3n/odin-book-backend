@@ -157,6 +157,25 @@ function createCommentReply(commentId, text, profileId) {
                 text,
                 profileId,
             },
+            select: {
+                id: true,
+                text: true,
+                profileId: true,
+                postId: true,
+                commentId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    },
+                },
+            },
         });
         return comment || null;
     });
@@ -165,6 +184,25 @@ function createCommentOnPost(postId, profileId, text) {
     return __awaiter(this, void 0, void 0, function* () {
         const comment = yield prisma.comment.create({
             data: { postId, profileId, text },
+            select: {
+                id: true,
+                text: true,
+                profileId: true,
+                postId: true,
+                commentId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    },
+                },
+            },
         });
         return comment || null;
     });
@@ -177,9 +215,12 @@ function readCommentReplies(commentId) {
                 id: true,
                 text: true,
                 profileId: true,
+                postId: true,
+                commentId: true,
                 Profile: {
                     select: {
                         name: true,
+                        id: true,
                     },
                 },
                 _count: {
@@ -201,9 +242,12 @@ function readCommentsOnPost(postId) {
                 id: true,
                 text: true,
                 profileId: true,
+                postId: true,
+                commentId: true,
                 Profile: {
                     select: {
                         name: true,
+                        id: true,
                     },
                 },
                 _count: {
@@ -219,7 +263,28 @@ function readCommentsOnPost(postId) {
 }
 function readSingleComment(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const comment = yield prisma.comment.findFirst({ where: { id } });
+        const comment = yield prisma.comment.findFirst({
+            where: { id },
+            select: {
+                id: true,
+                text: true,
+                profileId: true,
+                postId: true,
+                commentId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    },
+                },
+            },
+        });
         return comment || null;
     });
 }
@@ -228,6 +293,25 @@ function updateCommentInDatabase(id, text) {
         const commentWithUpdates = yield prisma.comment.update({
             where: { id },
             data: { text },
+            select: {
+                id: true,
+                text: true,
+                profileId: true,
+                postId: true,
+                commentId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    },
+                },
+            },
         });
         return commentWithUpdates || null;
     });
@@ -342,6 +426,18 @@ function createPostForProfile(profileId, text) {
     return __awaiter(this, void 0, void 0, function* () {
         const post = yield prisma.post.create({
             data: { profileId, text },
+            select: {
+                id: true,
+                createdAt: true,
+                text: true,
+                profileId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+            },
         });
         return post || null;
     });
@@ -351,6 +447,12 @@ function readPostFromDatabase(id) {
         const post = yield prisma.post.findFirst({
             where: { id },
             include: {
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
                 _count: {
                     select: { comments: true, likes: true },
                 },
@@ -361,13 +463,42 @@ function readPostFromDatabase(id) {
 }
 function updatePostText(id, text) {
     return __awaiter(this, void 0, void 0, function* () {
-        const post = yield prisma.post.update({ where: { id }, data: { text } });
+        const post = yield prisma.post.update({
+            where: { id },
+            data: { text },
+            select: {
+                id: true,
+                createdAt: true,
+                text: true,
+                profileId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+            },
+        });
         return post;
     });
 }
 function deletePostFromDatabase(id) {
     return __awaiter(this, void 0, void 0, function* () {
-        const post = yield prisma.post.delete({ where: { id } });
+        const post = yield prisma.post.delete({
+            where: { id },
+            select: {
+                id: true,
+                createdAt: true,
+                text: true,
+                profileId: true,
+                Profile: {
+                    select: {
+                        name: true,
+                        id: true,
+                    },
+                },
+            },
+        });
         if (!post) {
             return false;
         }
@@ -393,6 +524,14 @@ function getProfile(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const profile = yield prisma.profile.findFirst({
             where: { id },
+            select: {
+                posts: true,
+                id: true,
+                userId: true,
+                name: true,
+                website: true,
+                about: true,
+            },
         });
         return profile || false;
     });
@@ -402,6 +541,14 @@ function updateExistingProfile(id, userId, name, website, about) {
         const updatedProfile = yield prisma.profile.update({
             where: { id, userId },
             data: { name, website: website, about: about },
+            select: {
+                id: true,
+                posts: true,
+                userId: true,
+                name: true,
+                website: true,
+                about: true,
+            },
         });
         return updatedProfile || null;
     });

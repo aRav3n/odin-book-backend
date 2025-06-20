@@ -1,6 +1,4 @@
-/* to run only this test:
-  clear & npx tsc & npx jest test/follow.test.js
-*/
+// to run only this test:    clear & npx jest test/follow.test.js
 
 const router = require("../routes/router");
 
@@ -271,7 +269,7 @@ test("Read Followers route succeeds if all provided information is correct", asy
           expect(res.body.followingId).toBe(aProfile.id);
 
           // check that aProfile now has a follower and that it's bProfile
-          await request(app)
+          const logRes = await request(app)
             .get(`/follow/profile/followers/${aProfile.id}`)
             .set("Authorization", `Bearer ${aUser.token}`)
             .expect("Content-Type", /json/)
@@ -374,7 +372,7 @@ test("Read Following route succeeds if all provided information is correct", asy
           expect(res.body.followerId).toBe(severusProfile.id);
           expect(res.body.followingId).toBe(lillyProfile.id);
 
-          await request(app)
+          const logRes = await request(app)
             .get(`/follow/profile/following/${severusProfile.id}`)
             .set("Authorization", `Bearer ${severusAccount.token}`)
             .expect("Content-Type", /json/)
