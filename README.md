@@ -1,1 +1,180 @@
-# odin_book_backend
+# Odin Book Backend
+
+## API Usage
+- **Auth Header Note**
+    - Most routes require a JSON Web Token
+        - Correct format:
+            - Authorization: Bearer token &lt;token&gt;
+        - In this documentation, "authHeader" refers to this header
+- **Routes & Successful Responses**
+    - **User Routes**
+        - /user
+            - POST
+                - Description: Create user account, this is the signup route
+                - Requires: { email, password, confirmPassword }
+                - Success: 200 OK
+                    - Response: { id, email }
+        - /user/login
+            - POST
+                - Description: Create user login info, this is the login route
+                - Requires: { email, password }
+                - Success: 200 OK
+                    - Response: { id, email, token }
+        - /user/:userId
+            - GET
+                - Description: Read user's email address
+                - Requires: authHeader (must be userId owner)
+                - Success: 200 OK
+                    - Response: { email }
+            - PUT
+                - Description: Update user account
+                - Requires: authHeader (must be userId owner), { currentPassword, newEmail, newPassword, newPasswordConfirm }
+                - Success: 200 OK
+                    - Response: { id, email, token}
+            - DELETE
+                - Description: Delete user account
+                - Requires: authHeader (must be userId owner), { password }
+                - Success: 200 OK
+                    - Response: { message: "Account successfully deleted." }
+    - **Profile Routes**
+        - /profile
+            - POST
+                - Description: Create a profile for a user
+                - Requires: authHeader (just to verify logged in), { name, about (can be blank), website (can be blank) }
+                - Success: 200 OK
+                    - Response: { id, userId, name, website, about }
+        - /profile/:profileId
+            - GET
+                - Description: Read a profile, similar to visiting a profile page on Facebook
+                - Requires: authHeader (just to verify logged in)
+                - Success: 200 OK
+                    - Response: { id, userId, name, about, website, posts }
+            - PUT
+                - Description: Update a profile, can change name, about, and/or website
+                - Requires: authHeader (must be profileId owner), { name, about (can be blank), website (can be blank) }
+                - Success: 200 OK
+                    - Response: { id, userId, name, about, website, posts }
+            - DELETE
+                - Description: Delete a profile
+                - Requires: authHeader (must be profileId owner)
+                - Success: 200 OK
+                    - Response: { id, name, about, website, userId }
+    - **Post Routes**
+        - /post/:profileId
+            - POST
+                - Description: Create a post from a profile, must be the user's own profile
+                - Requires: authHeader (must be profileId owner), { text }
+                - Success: 200 OK
+                    - Response: { id, createdAt, text, profileId, Profile: { name, id } }
+        - /post/:postId
+            - GET
+                - Description: Read a specific post to see more detailed information
+                - Requires: authHeader (just to verify logged in)
+                - Success: 200 OK
+                    - Response: { id, createdAt, text, profileId, Profile: { name, id }, \_count: { comments, likes } }
+            - PUT
+                - Description: Update a post
+                - Requires: authHeader (must be postId owner), { text }
+                - Success: 200 OK
+                    - Response: { id, createdAt, text, profileId, Profile: { name, id } }
+            - DELETE
+                - Description: Delete a post
+                - Requires: authHeader (must be postId owner)
+                - Success: 200 OK
+                    - Response: { id, createdAt, text, profileId, Profile: { name, id } }
+    - **Comment Routes**
+        - /comment/post/:postId/from/:profileId
+            - POST
+                - Description: Create a comment on a post
+                - Requires: authHeader (just to verify logged in), { text }
+                - Success: 200 OK
+                    - Response: { id, text, profileId, postId, commentId: null, Profile: { name, id }, \_count: { likes, replies } }
+        - /comment/post/:postId
+            - GET
+                - Description: Read comments on a post
+                - Requires: authHeader (just to verify logged in)
+                - Success: 200 OK
+                    - Response: \[ { id, text, profileId, postId, commentId: null, Profile: { name, id }, \_count: { likes, replies } } \]
+        - /comment/reply/:commentId/from/:profileId
+            - POST
+                - Description: Create a reply to another comment
+                - Requires: authHeader (just to verify logged in), { profileId, text }
+                - Success: 200 OK
+                    - Response: { id, text, profileId, postId: null, commentId, Profile: { name, id }, \_count: { likes, replies } }
+        - /comment/reply/:commentId
+            - GET
+                - Description: Read comment replies
+                - Requires: authHeader (just to verify logged in)
+                - Success: 200 OK
+                    - Response: \[ { id, text, profileId, postId: null, commentId, Profile: { name, id }, \_count: { likes, replies } } \]
+        - /comment/:commentId
+            - PUT
+                - Description: Update a comment
+                - Requires: authHeader (must be commentId owner), { text }
+                - Success: 200 OK
+                    - Response: { id, text, profileId, postId, commentId, Profile: { name, id }, \_count: { likes, replies } }
+            - DELETE
+                - Description: Delete a comment, currently can only be done by the comment owner
+                - Requires: authHeader (must be commentId owner)
+                - Success: 200 OK
+                    - Response: { id, text, profileId, postId, commentId }
+    - **Follow Routes**
+        - /follow/:followingId/from/:followerId
+            - POST
+                - Description: Create a new follow, followerId user is following followingId user
+                - Requires: authHeader (must be followerId owner)
+                - Success: 200 OK
+                    - Response: { id, updatedAt, accepted, followerId, followingId }
+        - /follow/profile/followers/:profileId
+            - GET
+                - Description: Read list of profiles that are following profileId
+                - Requires: authHeader (just to verify logged in)
+                - Success: 200 OK
+                    - Response: \[ { follower: { id, name } } \]
+        - /follow/profile/following/:profileId
+            - GET
+                - Description: Read list of profiles that profileId is following
+                - Requires: authHeader (just to verify logged in)
+                - Success: 200 OK
+                    - Response: \[ { following: { id, name } } \]
+        - /follow/:followId
+            - PUT
+                - Description: Update a follow
+                    - Note: This is currently not in use but here in case we want to allow privacy settings of accepting followers before allowing a follow.
+                - Requires: authHeader (must be follow's followingId owner), { accepted: true }
+                - Success: 200 OK
+                    - Response: { success: true }
+        - /follow/:deleteFollowId
+            - DELETE
+                - Description: Delete a follow
+                - Requires: authHeader (must be owner of either followingId or followerId)
+                - Success: 200 OK
+                    - Response: { success: true }
+    - **Like Routes**
+        - /like/comment/:likeCommentId/from/:profileId
+            - POST
+                - Description: Create a like on a comment
+                - Requires: authHeader (must be profileId owner)
+                - Success: 200 OK
+                    - Response: { id, profileId, commentId, postId: null }
+        - /like/post/:likePostId/from/:profileId
+            - POST
+                - Description: Create a like on a post
+                - Requires: authHeader (must be profileId owner)
+                - Success: 200 OK
+                    - Response: { id, profileId, postId, commentId: null }
+        - /like/:likeId
+            - DELETE
+                - Description: Delete a like
+                - Requires: authHeader (must be likeId owner)
+                - Success: 200 OK
+                    - Response: { id, profileId, postId, commentId }
+- **Errors**
+    - Response: { errors: \[ { message }, \] }
+        - Example: { message: "The param likeCommentId must be a number." }
+    - HTTP Codes
+        - 400: Bad Request, a provided piece of information was incorrect
+        - 401: Unauthorized, the auth header is missing or corrupted
+        - 403: Forbidden, not able to perform the selected action from this account
+        - 404: Not Found, route or database resource not found
+        - 500: Internal Server Error, there was an error with the server, try again
