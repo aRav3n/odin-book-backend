@@ -215,7 +215,7 @@ test("Create Comment On Post route succeeds with correct requirements", async ()
     });
 
   await request(app)
-    .get(`/post/${post.id}`)
+    .get(`/post/single/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect(200)

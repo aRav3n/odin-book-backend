@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const {
   createPostForProfile,
   readPostFromDatabase,
+  readRecentPostsFromDatabase,
   updatePostText,
   deletePostFromDatabase,
 } = require("../db/queries");
@@ -40,7 +41,7 @@ const createPost = [
 
 async function deletePost(req, res) {
   const post = await deletePostFromDatabase(req.postId);
-  
+
   return res.status(200).json(post);
 }
 
@@ -59,6 +60,14 @@ async function readPost(req, res) {
   return res.status(200).json(post);
 }
 
+async function readRecentPosts(req, res) {
+  const startNumber = req.start >= 1 ? req.start : 1;
+
+  const posts = await readRecentPostsFromDatabase(startNumber);
+
+  return res.status(200).json(posts);
+}
+
 async function updatePost(req, res) {
   const text = req.body.text || null;
   if (!text || text.length === 0) {
@@ -71,4 +80,10 @@ async function updatePost(req, res) {
   return res.status(200).json(updatedPost);
 }
 
-module.exports = { createPost, readPost, updatePost, deletePost };
+module.exports = {
+  createPost,
+  readPost,
+  readRecentPosts,
+  updatePost,
+  deletePost,
+};

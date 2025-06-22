@@ -13,6 +13,7 @@ app.use("/", router);
 const {
   generateUserAndProfile,
   generateUserProfilePost,
+  deleteEveryone,
   deleteUser,
 } = require("./internalTestFunctions");
 
@@ -30,6 +31,14 @@ afterEach(() => {
   }
 });
 
+/*
+afterAll(async () => {
+  const deleted = await deleteEveryone();
+  console.log(deleted);
+});
+*/
+
+// create post route
 test("Create Post route fails if :profileId is not present", async () => {
   await request(app)
     .post("/post")
@@ -97,7 +106,7 @@ test("Create Post route fails if authHeader is corrupted or modified", async () 
 });
 
 test("Create Post route fails if :profileId is not a number", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const { user } = await generateUserAndProfile();
   await request(app)
     .post("/post/xyz")
     .set("Authorization", `Bearer ${user.token}`)
@@ -200,9 +209,10 @@ test("Create Post route succeeds if all required info is correct", async () => {
   await deleteUser(user);
 });
 
+// read single post route
 test("Read Post route fails if postId is missing", async () => {
   await request(app)
-    .get("/post/")
+    .get("/post/single/")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Route not found" }] })
     .expect(404);
@@ -210,7 +220,7 @@ test("Read Post route fails if postId is missing", async () => {
 
 test("Read Post route fails if postId is not a number", async () => {
   await request(app)
-    .get("/post/xyz")
+    .get("/post/single/xyz")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "The param postId must be a number." }] })
     .expect(400);
@@ -218,7 +228,7 @@ test("Read Post route fails if postId is not a number", async () => {
 
 test("Read Post route fails with missing authHeader", async () => {
   await request(app)
-    .get("/post/1")
+    .get("/post/single/1")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "You must be logged in to do that." }] })
     .expect(401);
@@ -226,7 +236,7 @@ test("Read Post route fails with missing authHeader", async () => {
 
 test("Read Post route fails with corrupted authHeader", async () => {
   await request(app)
-    .get("/post/1")
+    .get("/post/single/1")
     .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
@@ -234,10 +244,10 @@ test("Read Post route fails with corrupted authHeader", async () => {
 });
 
 test("Read Post route fails if a post with the id of postId doesn't exist", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const { user } = await generateUserAndProfile();
 
   await request(app)
-    .get("/post/-1")
+    .get("/post/single/-1")
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "No post with an id of -1 found." }] })
@@ -250,7 +260,7 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
   const { user, profile, post } = await generateUserProfilePost();
 
   await request(app)
-    .get(`/post/${post.id}`)
+    .get(`/post/single/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect(200)
@@ -267,6 +277,116 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
   await deleteUser(user);
 });
 
+// read recent posts route
+test("Read Recent Posts route fails if :start is missing", async () => {
+  await request(app)
+    .get("/post/recent/")
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Route not found" }] })
+    .expect(404);
+});
+
+test("Read Recent Posts route fails if :start is not a number", async () => {
+  const start = "xyz";
+  await request(app)
+    .get(`/post/recent/${start}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "The param start must be a number." }] })
+    .expect(400);
+});
+
+test("Read Recent Posts route fails with missing authHeader", async () => {
+  const start = -1;
+  await request(app)
+    .get(`/post/recent/${start}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
+});
+
+test("Read Recent Posts route fails with corrupted authHeader", async () => {
+  const start = -1;
+  const token = "notAToken";
+
+  await request(app)
+    .get(`/post/recent/${start}`)
+    .set("Authorization", `Bearer ${token}`)
+    .expect("Content-Type", /json/)
+    .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
+    .expect(401);
+});
+
+test("Read Recent Posts route returns empty array if there no posts in that range", async () => {
+  const { user } = await generateUserAndProfile();
+  const start = 1000;
+
+  await request(app)
+    .get(`/post/recent/${start}`)
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect([])
+    .expect(200);
+
+  await deleteUser(user);
+});
+
+test("Read Recent Posts route succeeds with correct info, safely handling :start numbers less than 1", async () => {
+  const { user: userOne, post: postOne } = await generateUserProfilePost();
+  const { user: userTwo, post: postTwo } = await generateUserProfilePost();
+  const { user: userThree, post: postThree } = await generateUserProfilePost();
+  const { user: userFour, post: postFour } = await generateUserProfilePost();
+  const { user: userFive, post: postFive } = await generateUserProfilePost();
+  const { user: userSix, post: postSix } = await generateUserProfilePost();
+  const { user: userSeven, post: postSeven } = await generateUserProfilePost();
+  const { user: userEight, post: postEight } = await generateUserProfilePost();
+  const { user: userNine, post: postNine } = await generateUserProfilePost();
+
+  const firstStart = -100;
+  await request(app)
+    .get(`/post/recent/${firstStart}`)
+    .set("Authorization", `Bearer ${userOne.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body[0].id).toBe(postNine.id);
+      expect(res.body[1].id).toBe(postEight.id);
+      expect(res.body[2].id).toBe(postSeven.id);
+      expect(res.body[3].id).toBe(postSix.id);
+      expect(res.body[4].id).toBe(postFive.id);
+      expect(res.body[5].id).toBe(postFour.id);
+      expect(res.body[6].id).toBe(postThree.id);
+      expect(res.body[7].id).toBe(postTwo.id);
+      expect(res.body[8].id).toBe(postOne.id);
+    });
+
+  const secondStart = 3;
+  await request(app)
+    .get(`/post/recent/${secondStart}`)
+    .set("Authorization", `Bearer ${userOne.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body[0].id).toBe(postSeven.id);
+      expect(res.body[1].id).toBe(postSix.id);
+      expect(res.body[2].id).toBe(postFive.id);
+      expect(res.body[3].id).toBe(postFour.id);
+      expect(res.body[4].id).toBe(postThree.id);
+      expect(res.body[5].id).toBe(postTwo.id);
+      expect(res.body[6].id).toBe(postOne.id);
+    });
+
+  await deleteUser(userOne);
+  await deleteUser(userTwo);
+  await deleteUser(userThree);
+  await deleteUser(userFour);
+  await deleteUser(userFive);
+  await deleteUser(userSix);
+  await deleteUser(userSeven);
+  await deleteUser(userEight);
+  await deleteUser(userNine);
+});
+
+// update post route
 test("Update Post route fails if req.body is blank", async () => {
   await request(app)
     .put("/post/1")
@@ -327,10 +447,10 @@ test("Update Post route fails with corrupted authHeader", async () => {
 });
 
 test("Update Post route fails if a post with the id of postId doesn't exist", async () => {
-  const { user, profile } = await generateUserAndProfile();
-  const postId = 1;
+  const { user } = await generateUserAndProfile();
+  const postId = -1;
 
-  const res = await request(app)
+  await request(app)
     .put(`/post/${postId}`)
     .set("Authorization", `Bearer ${user.token}`)
     .type("form")
@@ -347,7 +467,7 @@ test("Update Post route fails if a post with the id of postId doesn't exist", as
 });
 
 test("Update Post route fails if text nonexistent", async () => {
-  const { user, profile, post } = await generateUserProfilePost();
+  const { user, post } = await generateUserProfilePost();
 
   await request(app)
     .put(`/post/${post.id}`)
@@ -394,7 +514,7 @@ test("Update Post route succeeds with good authHeader and correct postId", async
   const updatedPost = res.body;
 
   await request(app)
-    .get(`/post/${post.id}`)
+    .get(`/post/single/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect(200)
@@ -408,6 +528,7 @@ test("Update Post route succeeds with good authHeader and correct postId", async
   await deleteUser(user);
 });
 
+// delete post route
 test("Delete Post route fails if :postId is not present", async () => {
   await request(app)
     .delete("/post/")
@@ -444,16 +565,8 @@ test("Delete Post route fails with corrupted authHeader", async () => {
 });
 
 test("Delete Post route fails if authHeader doesn't match post owner", async () => {
-  const {
-    user: userOne,
-    profile: profileOne,
-    post: postOne,
-  } = await generateUserProfilePost();
-  const {
-    user: userTwo,
-    profile: profileTwo,
-    post: postTwo,
-  } = await generateUserAndProfile();
+  const { user: userOne, post: postOne } = await generateUserProfilePost();
+  const { user: userTwo } = await generateUserAndProfile();
 
   await request(app)
     .delete(`/post/${postOne.id}`)
@@ -473,9 +586,9 @@ test("Delete Post route fails if authHeader doesn't match post owner", async () 
 });
 
 test("Delete Post route succeeds if authHeader matches :postId owner", async () => {
-  const { user, profile, post } = await generateUserProfilePost();
+  const { user, post } = await generateUserProfilePost();
 
-  const res = await request(app)
+  await request(app)
     .delete(`/post/${post.id}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)

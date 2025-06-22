@@ -443,6 +443,18 @@ async function readPostFromDatabase(id: number) {
   return post;
 }
 
+async function readRecentPostsFromDatabase(start: number) {
+  const take = 10;
+  const skip = start - 1;
+  const posts = await prisma.post.findMany({
+    orderBy: { createdAt: "desc" },
+    skip,
+    take,
+  });
+
+  return posts;
+}
+
 async function updatePostText(id: number, text: string) {
   const post = await prisma.post.update({
     where: { id },
@@ -625,6 +637,7 @@ export {
   // post queries
   createPostForProfile,
   readPostFromDatabase,
+  readRecentPostsFromDatabase,
   updatePostText,
   deletePostFromDatabase,
 

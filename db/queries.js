@@ -26,6 +26,7 @@ exports.createLikePost = createLikePost;
 exports.deleteLikeFromDatabase = deleteLikeFromDatabase;
 exports.createPostForProfile = createPostForProfile;
 exports.readPostFromDatabase = readPostFromDatabase;
+exports.readRecentPostsFromDatabase = readRecentPostsFromDatabase;
 exports.updatePostText = updatePostText;
 exports.deletePostFromDatabase = deletePostFromDatabase;
 exports.addProfile = addProfile;
@@ -459,6 +460,18 @@ function readPostFromDatabase(id) {
             },
         });
         return post;
+    });
+}
+function readRecentPostsFromDatabase(start) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const take = 10;
+        const skip = start - 1;
+        const posts = yield prisma.post.findMany({
+            orderBy: { createdAt: "desc" },
+            skip,
+            take,
+        });
+        return posts;
     });
 }
 function updatePostText(id, text) {

@@ -76,10 +76,16 @@ router.post(
   postController.createPost
 );
 router.get(
-  "/post/:postId",
+  "/post/single/:postId",
   checkThatParamsAreValid,
   verifyTokenValid,
   postController.readPost
+);
+router.get(
+  "/post/recent/:start",
+  checkThatParamsAreValid,
+  verifyTokenValid,
+  postController.readRecentPosts
 );
 router.put(
   "/post/:postId",
