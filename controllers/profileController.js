@@ -25,6 +25,15 @@ const createProfile = [
     }
 
     const userId = req.user.user.id;
+    const existingProfile = await getUserProfile(userId);
+    if (existingProfile) {
+      return generateErrorRes(
+        res,
+        409,
+        "A profile for this account already exists"
+      );
+    }
+
     const about = req.body.about || "";
     const website = req.body.website || "";
 

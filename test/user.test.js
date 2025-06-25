@@ -154,7 +154,7 @@ test("Signup User route fails if user already exists", async () => {
     .expect({
       errors: [{ message: "User with this email already exists." }],
     })
-    .expect(400);
+    .expect(409);
 
   await logInAndDelete(user);
 });

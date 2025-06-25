@@ -11,6 +11,7 @@ const {
   updateUserInfo,
 } = require("../db/queries");
 const {
+  generateErrorRes,
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
   trimFields,
@@ -31,10 +32,7 @@ const createUser = [
     const email = req.body.email;
     const existingUser = await getUser(email);
     if (existingUser) {
-      const errorMessage = generateIndividualErrorMessage(
-        "User with this email already exists."
-      );
-      return res.status(400).json(errorMessage);
+      return generateErrorRes(res, 409, "User with this email already exists.")
     }
 
     const salt = bcrypt.genSaltSync(10);

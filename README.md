@@ -195,4 +195,5 @@
     - 401: Unauthorized, the auth header is missing or corrupted
     - 403: Forbidden, not able to perform the selected action from this account
     - 404: Not Found, route or database resource not found
+    - 409: Conflict, cannot create a duplicate item in the database
     - 500: Internal Server Error, there was an error with the server, try again

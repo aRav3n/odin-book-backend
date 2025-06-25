@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
 const {
+  deleteEveryone,
   deleteUser,
   generateSignedInUser,
   generateUserAndProfile,
@@ -30,6 +31,13 @@ afterEach(() => {
     console.log(`${testName} - ${duration} ms`);
   }
 });
+
+/*
+afterAll(async () => {
+  const deleted = await deleteEveryone();
+  console.log(deleted);
+});
+*/
 
 // create profile tests
 test("Create Profile route fails if req.body is blank", async () => {
@@ -102,6 +110,23 @@ test("Create Profile route fails when website exists but is not a valid URL", as
       errors: [{ message: "Website must be a valid URL." }],
     })
     .expect(400);
+
+  await deleteUser(user);
+});
+
+test("Create Profile route fails if a profile already exists for the user", async () => {
+  const { user } = await generateUserAndProfile();
+
+  await request(app)
+    .post("/profile")
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ name: "Corran Horn" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "A profile for this account already exists" }],
+    })
+    .expect(409);
 
   await deleteUser(user);
 });
