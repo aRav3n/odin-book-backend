@@ -42,7 +42,8 @@
       - POST
         - Description: Create a profile for a user
         - Requires: authHeader (just to verify logged in), { name, about (can be blank), website (can be blank) }
-        - Success: 200 OK - Response: { id, userId, name, website, about }
+        - Success: 200 OK 
+          - Response: { id, userId, name, website, about }
       - GET
         - Description: Read user's profile using the provided authHeader
         - Requires: authHeader (used for authentication and to identify the user)
