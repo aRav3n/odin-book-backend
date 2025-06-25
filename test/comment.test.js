@@ -11,7 +11,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
 const {
+  deleteEveryone,
   generateCommentAndParents,
+  generateSignedInUser,
   generateUserAndProfile,
   generateUserProfilePost,
   deleteUser,
@@ -30,6 +32,13 @@ afterEach(() => {
     console.log(`${testName} - ${duration} ms`);
   }
 });
+
+/*
+afterAll(async () => {
+  const deleted = await deleteEveryone();
+  console.log(deleted);
+});
+*/
 
 test("Create Comment On Post route fails if :postId is missing", async () => {
   await request(app)
@@ -106,7 +115,7 @@ test("Create Comment On Post route fails if token is corrupted", async () => {
 });
 
 test("Create Comment On Post route fails if :postId is for a nonexistent post", async () => {
-  const { user, profile, post } = await generateUserProfilePost();
+  const { user, profile } = await generateUserAndProfile();
   const nonexistentId = -1;
 
   await request(app)
@@ -265,7 +274,7 @@ test("Get Comments On Post route fails if authHeader is corrupted", async () => 
 });
 
 test("Get Comments On Post route fails if :postId is for a nonexistent post", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const postId = -1;
 
   await request(app)
@@ -394,7 +403,7 @@ test("Create Comment Reply route fails if authHeader is corrupted", async () => 
 });
 
 test("Create Comment Reply route fails if :profileId is for a nonexistent profile", async () => {
-  const { user, profile, post } = await generateUserProfilePost();
+  const user = await generateSignedInUser();
   const nonexistentId = -1;
   const text = "Never tell me the odds!";
 
@@ -415,7 +424,7 @@ test("Create Comment Reply route fails if :profileId is for a nonexistent profil
 });
 
 test("Create Comment Reply route fails if :commentId is for a nonexistent comment", async () => {
-  const { user, profile, post } = await generateUserProfilePost();
+  const { user, profile } = await generateUserAndProfile();
   const nonexistentId = -1;
   const text = "Never tell me the odds!";
 
@@ -436,7 +445,7 @@ test("Create Comment Reply route fails if :commentId is for a nonexistent commen
 });
 
 test("Create Comment Reply route fails if req.body.text doesn't exist", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, profile, comment } = await generateCommentAndParents();
   const text = "Never tell me the odds!";
 
   await request(app)
@@ -454,7 +463,7 @@ test("Create Comment Reply route fails if req.body.text doesn't exist", async ()
 });
 
 test("Create Comment Reply route fails if req.body.text is empty", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, profile, comment } = await generateCommentAndParents();
   const text = " ";
 
   await request(app)
@@ -472,7 +481,7 @@ test("Create Comment Reply route fails if req.body.text is empty", async () => {
 });
 
 test("Create Comment Reply route fails if req.body.text is not a string", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, profile, comment } = await generateCommentAndParents();
 
   await request(app)
     .post(`/comment/reply/${comment.id}/from/${profile.id}`)
@@ -489,7 +498,7 @@ test("Create Comment Reply route fails if req.body.text is not a string", async 
 });
 
 test("Create Comment Reply route succeeds with correct requirements", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, profile, comment } = await generateCommentAndParents();
   const text = "This route should pass.";
 
   await request(app)
@@ -510,7 +519,7 @@ test("Create Comment Reply route succeeds with correct requirements", async () =
 });
 
 test("Create Comment Reply route succeeds for a comment on a comment on a comment", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, profile, comment } = await generateCommentAndParents();
   const text = "This route should pass.";
 
   await request(app)
@@ -599,7 +608,7 @@ test("Get Comment Replies route fails if authHeader is corrupted", async () => {
 });
 
 test("Get Comment Replies route fails if parent comment doesn't exist", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const commentId = -1;
 
   await request(app)
@@ -613,10 +622,12 @@ test("Get Comment Replies route fails if parent comment doesn't exist", async ()
         },
       ],
     });
+
+  await deleteUser(user);
 });
 
 test("Get Comment Replies route succeeds with correct requirements", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, comment } = await generateCommentAndParents();
 
   await request(app)
     .get(`/comment/reply/${comment.id}`)
@@ -628,7 +639,7 @@ test("Get Comment Replies route succeeds with correct requirements", async () =>
 });
 
 test("Get Comment Replies route succeeds for a comment that has replies", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, profile, comment } = await generateCommentAndParents();
 
   const text = "This is a comment reply.";
   const textAlso = "This is the reply you are looking for.";
@@ -755,7 +766,7 @@ test("Update Comment route fails if authHeader is corrupted", async () => {
 test("Update Comment route fails if :commentId is not a number", async () => {
   const commentId = "xyz";
 
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const user = await generateSignedInUser();
   await request(app)
     .put(`/comment/${commentId}`)
     .set("Authorization", `Bearer ${user.token}`)
@@ -776,7 +787,7 @@ test("Update Comment route fails if :commentId is not a number", async () => {
 test("Update Comment route fails if user in authHeader isn't :commentId owner", async () => {
   const commentId = -1;
 
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const user = await generateSignedInUser();
   await request(app)
     .put(`/comment/${commentId}`)
     .set("Authorization", `Bearer ${user.token}`)
@@ -798,7 +809,7 @@ test("Update Comment route fails if :commentId is for a nonexistent comment", as
   const commentId = -1;
   const text = "Sample text.";
 
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const user = await generateSignedInUser();
   await request(app)
     .put(`/comment/${commentId}`)
     .set("Authorization", `Bearer ${user.token}`)
@@ -817,7 +828,7 @@ test("Update Comment route fails if :commentId is for a nonexistent comment", as
 });
 
 test("Update Comment route fails if req.body.text doesn't exist", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, comment } = await generateCommentAndParents();
 
   await request(app)
     .put(`/comment/${comment.id}`)
@@ -831,7 +842,7 @@ test("Update Comment route fails if req.body.text doesn't exist", async () => {
 });
 
 test("Update Comment route fails if req.body.text is empty", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, comment } = await generateCommentAndParents();
 
   await request(app)
     .put(`/comment/${comment.id}`)
@@ -845,7 +856,7 @@ test("Update Comment route fails if req.body.text is empty", async () => {
 });
 
 test("Update Comment route fails if req.body.text is not a string", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, comment } = await generateCommentAndParents();
 
   await request(app)
     .put(`/comment/${comment.id}`)
@@ -859,7 +870,7 @@ test("Update Comment route fails if req.body.text is not a string", async () => 
 });
 
 test("Update Comment route succeeds with correct requirements", async () => {
-  const { user, profile, post, comment } = await generateCommentAndParents();
+  const { user, comment } = await generateCommentAndParents();
   const text = "Comment update.";
 
   await request(app)
@@ -910,7 +921,7 @@ test("Delete Comment route fails if authHeader is corrupted", async () => {
 });
 
 test("Delete Comment route fails if user in authHeader isn't :commentId owner or comment doesn't exist", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const commentId = -1;
 
   await request(app)

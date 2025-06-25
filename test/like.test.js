@@ -12,6 +12,7 @@ app.use("/", router);
 
 const {
   deleteEveryone,
+  generateSignedInUser,
   generateUserAndProfile,
   deleteUser,
   generateCommentAndParents,
@@ -138,13 +139,14 @@ test("Create Like On Comment route fails if authHeader isn't for owner of profil
 });
 
 test("Create Like On Comment route fails if likeCommentId is for a nonexistent comment", async () => {
-  const { user: siriusAccount, comment } =
-    await generateCommentAndParents("Sirius Black");
+  const siriusAccount = await generateSignedInUser();
   const { user: lupinAccount, profile: lupinProfile } =
     await generateUserAndProfile("Remus Lupin");
 
+  const commentId = -1;
+
   await request(app)
-    .post(`/like/comment/${comment.id - 1000}/from/${lupinProfile.id}`)
+    .post(`/like/comment/${commentId}/from/${lupinProfile.id}`)
     .set("Authorization", `Bearer ${lupinAccount.token}`)
     .expect("Content-Type", /json/)
     .expect({
@@ -256,13 +258,14 @@ test("Create Like On Post route fails if authHeader is corrupted", async () => {
 });
 
 test("Create Like On Post route fails if authHeader isn't for owner of profileId", async () => {
-  const { user: lillyAccount, post: lillyPost } =
-    await generateUserProfilePost("Lilly Evans");
+  const lillyAccount = await generateSignedInUser();
   const { user: severusAccount, profile: severusSnape } =
     await generateUserAndProfile("Severus Snape");
 
+  const postId = -1;
+
   await request(app)
-    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
+    .post(`/like/post/${postId}/from/${severusSnape.id}`)
     .set("Authorization", `Bearer ${lillyAccount.token}`)
     .expect("Content-Type", /json/)
     .expect({
@@ -275,13 +278,14 @@ test("Create Like On Post route fails if authHeader isn't for owner of profileId
 });
 
 test("Create Like On Post route fails if likePostId is for a nonexistent post", async () => {
-  const { user: lillyAccount, post: lillyPost } =
-    await generateUserProfilePost("Lilly Evans");
+  const lillyAccount = await generateSignedInUser();
   const { user: severusAccount, profile: severusSnape } =
     await generateUserAndProfile("Severus Snape");
 
+  const postId = -1;
+
   await request(app)
-    .post(`/like/post/${lillyPost.id - 1000}/from/${severusSnape.id}`)
+    .post(`/like/post/${postId}/from/${severusSnape.id}`)
     .set("Authorization", `Bearer ${severusAccount.token}`)
     .expect("Content-Type", /json/)
     .expect({
@@ -397,24 +401,13 @@ test("Delete Like route fails if trying to delete another user's like", async ()
 });
 
 test("Delete Like route fails if trying to delete a like that doesn't exist", async () => {
-  const {
-    user: lillyAccount,
-    profile: lillyProfile,
-    post: lillyPost,
-  } = await generateUserProfilePost("Lilly Potter (Evans)");
-  const { user: severusAccount, profile: severusSnape } =
-    await generateUserAndProfile("Severus Snape");
+  const lillyAccount = await generateSignedInUser();
+  const severusAccount = await generateSignedInUser();
 
-  const likeRes = await request(app)
-    .post(`/like/post/${lillyPost.id}/from/${severusSnape.id}`)
-    .set("Authorization", `Bearer ${severusAccount.token}`)
-    .expect("Content-Type", /json/)
-    .expect(200);
-
-  const like = likeRes.body;
+  const likeId = -1;
 
   await request(app)
-    .delete(`/like/${like.id - 1000}`)
+    .delete(`/like/${likeId}`)
     .set("Authorization", `Bearer ${severusAccount.token}`)
     .expect("Content-Type", /json/)
     .expect({
@@ -431,11 +424,9 @@ test("Delete Like route fails if trying to delete a like that doesn't exist", as
 });
 
 test("Delete Like route succeeds if all provided info is correct", async () => {
-  const {
-    user: lillyAccount,
-    profile: lillyProfile,
-    post: lillyPost,
-  } = await generateUserProfilePost("Lilly Potter (Evans)");
+  const { user: lillyAccount, post: lillyPost } = await generateUserProfilePost(
+    "Lilly Potter (Evans)"
+  );
   const { user: severusAccount, profile: severusSnape } =
     await generateUserAndProfile("Severus Snape");
 

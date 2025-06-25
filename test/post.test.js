@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
 const {
+  generateSignedInUser,
   generateUserAndProfile,
   generateUserProfilePost,
   deleteEveryone,
@@ -106,7 +107,7 @@ test("Create Post route fails if authHeader is corrupted or modified", async () 
 });
 
 test("Create Post route fails if :profileId is not a number", async () => {
-  const { user } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   await request(app)
     .post("/post/xyz")
     .set("Authorization", `Bearer ${user.token}`)
@@ -120,10 +121,11 @@ test("Create Post route fails if :profileId is not a number", async () => {
 });
 
 test("Create Post route fails if the profile with profileId doesn't belong to the user with the authHeader", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
+  const profileId = -1;
 
   await request(app)
-    .post(`/post/${profile.id - 1000}`)
+    .post(`/post/${profileId}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .type("form")
@@ -237,14 +239,14 @@ test("Read Post route fails with missing authHeader", async () => {
 test("Read Post route fails with corrupted authHeader", async () => {
   await request(app)
     .get("/post/single/1")
-    .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
+    .set("Authorization", "Bearer notAToken")
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "Please sign in again and re-try that." }] })
     .expect(401);
 });
 
 test("Read Post route fails if a post with the id of postId doesn't exist", async () => {
-  const { user } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
 
   await request(app)
     .get("/post/single/-1")
@@ -317,7 +319,7 @@ test("Read Recent Posts route fails with corrupted authHeader", async () => {
 });
 
 test("Read Recent Posts route returns empty array if there no posts in that range", async () => {
-  const { user } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const start = 1000;
 
   await request(app)
@@ -348,15 +350,25 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
     .expect("Content-Type", /json/)
     .expect(200)
     .then((res) => {
-      expect(res.body[0].id).toBe(postNine.id);
-      expect(res.body[1].id).toBe(postEight.id);
-      expect(res.body[2].id).toBe(postSeven.id);
-      expect(res.body[3].id).toBe(postSix.id);
-      expect(res.body[4].id).toBe(postFive.id);
-      expect(res.body[5].id).toBe(postFour.id);
-      expect(res.body[6].id).toBe(postThree.id);
-      expect(res.body[7].id).toBe(postTwo.id);
-      expect(res.body[8].id).toBe(postOne.id);
+      const array = res.body;
+      const indexOne = array.findIndex(item => item.id === postOne.id);
+      const indexTwo = array.findIndex(item => item.id === postTwo.id);
+      const indexThree = array.findIndex(item => item.id === postThree.id);
+      const indexFour = array.findIndex(item => item.id === postFour.id);
+      const indexFive = array.findIndex(item => item.id === postFive.id);
+      const indexSix = array.findIndex(item => item.id === postSix.id);
+      const indexSeven = array.findIndex(item => item.id === postSeven.id);
+      const indexEight = array.findIndex(item => item.id === postEight.id);
+      const indexNine = array.findIndex(item => item.id === postNine.id);
+
+      expect(indexOne).toBeGreaterThan(indexTwo);
+      expect(indexTwo).toBeGreaterThan(indexThree);
+      expect(indexThree).toBeGreaterThan(indexFour);
+      expect(indexFour).toBeGreaterThan(indexFive);
+      expect(indexFive).toBeGreaterThan(indexSix);
+      expect(indexSix).toBeGreaterThan(indexSeven);
+      expect(indexSeven).toBeGreaterThan(indexEight);
+      expect(indexEight).toBeGreaterThan(indexNine);
     });
 
   const secondStart = 3;
@@ -366,13 +378,21 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
     .expect("Content-Type", /json/)
     .expect(200)
     .then((res) => {
-      expect(res.body[0].id).toBe(postSeven.id);
-      expect(res.body[1].id).toBe(postSix.id);
-      expect(res.body[2].id).toBe(postFive.id);
-      expect(res.body[3].id).toBe(postFour.id);
-      expect(res.body[4].id).toBe(postThree.id);
-      expect(res.body[5].id).toBe(postTwo.id);
-      expect(res.body[6].id).toBe(postOne.id);
+      const array = res.body;
+      const indexOne = array.findIndex(item => item.id === postOne.id);
+      const indexTwo = array.findIndex(item => item.id === postTwo.id);
+      const indexThree = array.findIndex(item => item.id === postThree.id);
+      const indexFour = array.findIndex(item => item.id === postFour.id);
+      const indexFive = array.findIndex(item => item.id === postFive.id);
+      const indexSix = array.findIndex(item => item.id === postSix.id);
+      const indexSeven = array.findIndex(item => item.id === postSeven.id);
+
+      expect(indexOne).toBeGreaterThan(indexTwo);
+      expect(indexTwo).toBeGreaterThan(indexThree);
+      expect(indexThree).toBeGreaterThan(indexFour);
+      expect(indexFour).toBeGreaterThan(indexFive);
+      expect(indexFive).toBeGreaterThan(indexSix);
+      expect(indexSix).toBeGreaterThan(indexSeven);
     });
 
   await deleteUser(userOne);
@@ -438,7 +458,7 @@ test("Update Post route fails with missing authHeader", async () => {
 test("Update Post route fails with corrupted authHeader", async () => {
   await request(app)
     .put("/post/1")
-    .set("Authorization", "Bearer c0rrupt3d_4uth_h3ad3r")
+    .set("Authorization", "Bearer notAToken33")
     .type("form")
     .send({ soCute: "Bye bye" })
     .expect("Content-Type", /json/)
@@ -447,7 +467,7 @@ test("Update Post route fails with corrupted authHeader", async () => {
 });
 
 test("Update Post route fails if a post with the id of postId doesn't exist", async () => {
-  const { user } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const postId = -1;
 
   await request(app)
@@ -566,7 +586,7 @@ test("Delete Post route fails with corrupted authHeader", async () => {
 
 test("Delete Post route fails if authHeader doesn't match post owner", async () => {
   const { user: userOne, post: postOne } = await generateUserProfilePost();
-  const { user: userTwo } = await generateUserAndProfile();
+  const userTwo = await generateSignedInUser();
 
   await request(app)
     .delete(`/post/${postOne.id}`)

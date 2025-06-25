@@ -13,6 +13,7 @@ app.use("/", router);
 const {
   deleteEveryone,
   generateJamesFollowingLilly,
+  generateSignedInUser,
   generateUserAndProfile,
   deleteUser,
 } = require("./internalTestFunctions");
@@ -31,10 +32,12 @@ afterEach(() => {
   }
 });
 
+/*
 afterAll(async () => {
-  // const deleted = await deleteEveryone();
-  // console.log(deleted);
+  const deleted = await deleteEveryone();
+  console.log(deleted);
 });
+*/
 
 test("Create Follow route fails if profileId is missing", async () => {
   const token = "notAToken";
@@ -91,13 +94,11 @@ test("Create Follow route fails if followerId isn't a number", async () => {
 });
 
 test("Create Follow route fails if authHeader is missing", async () => {
-  const token = "notAToken";
   const profileId = -1;
   const followerId = -1;
 
   await request(app)
     .post(`/follow/${profileId}/from/${followerId}`)
-    // .set("Authorization", `Bearer ${token}`)
     .expect("Content-Type", /json/)
     .expect({ errors: [{ message: "You must be logged in to do that." }] })
     .expect(401);
@@ -117,7 +118,7 @@ test("Create Follow route fails if authHeader is corrupted", async () => {
 });
 
 test("Create Follow route fails if authHeader user's profile.id !== followerId", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const profileId = -1;
   const followerId = -1;
 
@@ -232,7 +233,7 @@ test("Read Followers route fails if authHeader is corrupted", async () => {
 });
 
 test("Read Followers route fails if profileId is for a nonexistent profile", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const profileId = -1;
 
   await request(app)
@@ -336,7 +337,7 @@ test("Read Following route fails if authHeader is corrupted", async () => {
 });
 
 test("Read Following route fails if profileId is for a nonexistent profile", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const profileId = -1;
 
   await request(app)
@@ -439,7 +440,7 @@ test("Update Follow route fails if authHeader is corrupted", async () => {
 });
 
 test("Update Follow route fails if followId is for a nonexistent follow", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const followId = -1;
 
   await request(app)
@@ -461,7 +462,7 @@ test("Update Follow route fails if followId is for a nonexistent follow", async 
 });
 
 test("Update Follow route fails if authHeader user.id isn't followingId", async () => {
-  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+  const { lillyAccount, jamesAccount, follow } =
     await generateJamesFollowingLilly();
 
   await request(app)
@@ -484,7 +485,7 @@ test("Update Follow route fails if authHeader user.id isn't followingId", async 
 });
 
 test("Update Follow route fails if accepted is included but not a boolean", async () => {
-  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+  const { lillyAccount, jamesAccount, follow } =
     await generateJamesFollowingLilly();
 
   await request(app)
@@ -501,7 +502,7 @@ test("Update Follow route fails if accepted is included but not a boolean", asyn
 });
 
 test("Update Follow route fails if accepted is missing", async () => {
-  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+  const { lillyAccount, jamesAccount, follow } =
     await generateJamesFollowingLilly();
 
   await request(app)
@@ -516,7 +517,7 @@ test("Update Follow route fails if accepted is missing", async () => {
 });
 
 test("Update Follow route succeeds if all information provided is correct", async () => {
-  const { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow } =
+  const { lillyAccount, jamesAccount, follow } =
     await generateJamesFollowingLilly();
 
   await request(app)
@@ -580,7 +581,7 @@ test("Delete Follow route fails if authHeader is corrupted", async () => {
 });
 
 test("Delete Follow route fails if followId is for a nonexistent follow", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
   const followId = -1;
 
   await request(app)
@@ -602,7 +603,7 @@ test("Delete Follow route fails if followId is for a nonexistent follow", async 
 test("Delete Follow route fails if authHeader user.id isn't owner of follow.followingId or follow.followerId", async () => {
   const { lillyAccount, jamesAccount, follow } =
     await generateJamesFollowingLilly();
-  const { user: snapeAccount } = await generateUserAndProfile("Severus Snape");
+  const snapeAccount = await generateSignedInUser();
 
   await request(app)
     .delete(`/follow/${follow.id}`)

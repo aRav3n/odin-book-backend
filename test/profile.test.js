@@ -15,9 +15,6 @@ const {
   generateSignedInUser,
   generateUserAndProfile,
   generateUserProfileObject,
-  logInAndDelete,
-  logUserIn,
-  signUserUp,
 } = require("./internalTestFunctions");
 
 let profileStart;
