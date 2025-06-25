@@ -42,14 +42,18 @@
       - POST
         - Description: Create a profile for a user
         - Requires: authHeader (just to verify logged in), { name, about (can be blank), website (can be blank) }
+        - Success: 200 OK - Response: { id, userId, name, website, about }
+      - GET
+        - Description: Read user's profile using the provided authHeader
+        - Requires: authHeader (used for authentication and to identify the user)
         - Success: 200 OK
-          - Response: { id, userId, name, website, about }
+          - Response: { id, userId, name, about, website, posts: [ ... ] }
     - /profile/:profileId
       - GET
         - Description: Read a profile, similar to visiting a profile page on Facebook
         - Requires: authHeader (just to verify logged in)
         - Success: 200 OK
-          - Response: { id, userId, name, about, website, posts }
+          - Response: { id, userId, name, about, website, posts: [ ... ] }
       - PUT
         - Description: Update a profile, can change name, about, and/or website
         - Requires: authHeader (must be profileId owner), { name, about (can be blank), website (can be blank) }
@@ -67,7 +71,7 @@
         - Requires: authHeader (must be profileId owner), { text }
         - Success: 200 OK
           - Response: { id, createdAt, text, profileId, Profile: { name, id } }
-    - /post/:postId
+    - /post/single/:postId
       - GET
         - Description: Read a specific post to see more detailed information
         - Requires: authHeader (just to verify logged in)

@@ -34,6 +34,7 @@ afterEach(() => {
   }
 });
 
+// create profile tests
 test("Create Profile route fails if req.body is blank", async () => {
   await request(app)
     .post("/profile")
@@ -131,12 +132,13 @@ test("Create Profile route succeeds when using a good authHeader and name, websi
   await deleteUser(user);
 });
 
+// read profile based on profileId
 test("Read Profile route fails if :profileId is not present", async () => {
   await request(app)
     .get("/profile/")
     .expect("Content-Type", /json/)
-    .expect({ errors: [{ message: "Route not found" }] })
-    .expect(404);
+    .expect({ errors: [{ message: "You must be logged in to do that." }] })
+    .expect(401);
 });
 
 test("Read Profile route fails if :profileId is not a number", async () => {
@@ -173,7 +175,7 @@ test("Read Profile route fails with corrupted authHeader", async () => {
 });
 
 test("Read Profile fails with id for nonexistent profile", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
 
   const profileId = -1;
   await request(app)
@@ -210,6 +212,67 @@ test("Read Profile succeeds when using a good authHeader and valid id", async ()
   await deleteUser(user);
 });
 
+// read profile based on user token
+test("Read User Profile route fails without authHeader", async () => {
+  await request(app)
+    .get("/profile")
+    .type("form")
+    .send({ ourOnlyHope: "Obi-Wan Kenobi" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You must be logged in to do that." }],
+    })
+    .expect(401);
+});
+
+test("Read User Profile route fails with corrupted authHeader", async () => {
+  await request(app)
+    .get("/profile")
+    .set("Authorization", "Bearer broken_t0k3n")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Please sign in again and re-try that." }],
+    })
+    .expect(401);
+});
+
+test("Read User Profile fails if no profile for this user", async () => {
+  const user = await generateSignedInUser();
+
+  await request(app)
+    .get("/profile")
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "No profile found for your account." }],
+    })
+    .expect(404);
+
+  await deleteUser(user);
+});
+
+test("Read User Profile succeeds when using a good authHeader and valid id", async () => {
+  const { user, profile } = await generateUserAndProfile();
+
+  await request(app)
+    .get("/profile")
+    .set("Authorization", `Bearer ${user.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      const body = res.body;
+      expect(body.id).toBe(profile.id);
+      expect(body.userId).toBe(user.id);
+      expect(body.name).toBe(profile.name);
+      expect(body.website).toBe(profile.website);
+      expect(body.about).toBe(profile.about);
+      expect(body.posts).toEqual([]);
+    });
+
+  await deleteUser(user);
+});
+
+// update profile
 test("Update Profile route fails if req.body is blank", async () => {
   const profileId = 1;
   await request(app)
@@ -274,7 +337,7 @@ test("Update Profile route fails with corrupted authHeader", async () => {
 });
 
 test("Update Profile route fails when trying to update another user's profile", async () => {
-  const { user: userOne, profile: profileOne } = await generateUserAndProfile();
+  const userOne = await generateSignedInUser();
   const { user: userTwo, profile: profileTwo } = await generateUserAndProfile();
 
   await request(app)
@@ -297,10 +360,11 @@ test("Update Profile route fails when trying to update another user's profile", 
 });
 
 test("Update Profile fails with id for nonexistent profile", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
+  const profileId = -1;
 
   await request(app)
-    .put(`/profile/${profile.id - 1}`)
+    .put(`/profile/${profileId}`)
     .type("form")
     .send({ niceShot: "Don't get cocky" })
     .set("Authorization", `Bearer ${user.token}`)
@@ -362,6 +426,7 @@ test("Update Profile succeeds when using a good authHeader and valid id", async 
   await deleteUser(user);
 });
 
+// delete profile
 test("Delete Profile route fails if :profileId is not present", async () => {
   await request(app)
     .delete("/profile/")
@@ -409,7 +474,7 @@ test("Delete Profile route fails with corrupted authHeader", async () => {
 });
 
 test("Delete Profile route fails when trying to delete another user's profile", async () => {
-  const { user: userOne, profile: profileOne } = await generateUserAndProfile();
+  const userOne = await generateSignedInUser();
   const { user: userTwo, profile: profileTwo } = await generateUserAndProfile();
 
   await request(app)
@@ -430,10 +495,11 @@ test("Delete Profile route fails when trying to delete another user's profile", 
 });
 
 test("Delete Profile fails with id for nonexistent profile", async () => {
-  const { user, profile } = await generateUserAndProfile();
+  const user = await generateSignedInUser();
+  const profileId = -1;
 
   await request(app)
-    .delete(`/profile/${profile.id - 1}`)
+    .delete(`/profile/${profileId}`)
     .set("Authorization", `Bearer ${user.token}`)
     .expect("Content-Type", /json/)
     .expect({
@@ -448,7 +514,7 @@ test("Delete Profile fails with id for nonexistent profile", async () => {
   await deleteUser(user);
 });
 
-test("Delete Profile fails if profile has already been delete", async () => {
+test("Delete Profile fails if profile has already been deleted", async () => {
   const { user, profile } = await generateUserAndProfile();
 
   await request(app)

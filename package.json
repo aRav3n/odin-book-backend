@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/aRav3n/odin_book_backend#readme",
   "dependencies": {
-    "@prisma/client": "^6.8.2",
+    "@prisma/client": "^6.10.1",
     "@prisma/extension-accelerate": "^2.0.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",

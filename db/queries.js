@@ -32,6 +32,7 @@ exports.deletePostFromDatabase = deletePostFromDatabase;
 exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
+exports.getUserProfile = getUserProfile;
 exports.updateExistingProfile = updateExistingProfile;
 exports.checkOwnerFromDatabase = checkOwnerFromDatabase;
 exports.addUser = addUser;
@@ -537,6 +538,22 @@ function getProfile(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const profile = yield prisma.profile.findFirst({
             where: { id },
+            select: {
+                posts: true,
+                id: true,
+                userId: true,
+                name: true,
+                website: true,
+                about: true,
+            },
+        });
+        return profile || false;
+    });
+}
+function getUserProfile(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const profile = yield prisma.profile.findFirst({
+            where: { userId },
             select: {
                 posts: true,
                 id: true,

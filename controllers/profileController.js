@@ -4,12 +4,14 @@ const {
   addProfile,
   deleteUserProfile,
   getProfile,
+  getUserProfile,
   updateExistingProfile,
 } = require("../db/queries");
 
 const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
+  generateErrorRes,
   validateProfile,
 } = require("./internalFunctions");
 
@@ -46,13 +48,22 @@ async function readProfile(req, res) {
   const profile = await getProfile(req.profileId);
 
   if (!profile) {
-    return res
-      .status(404)
-      .json(
-        generateIndividualErrorMessage(
-          "Could not find that profile, please try again."
-        )
-      );
+    return generateErrorRes(
+      res,
+      404,
+      "Could not find that profile, please try again."
+    );
+  }
+
+  return res.status(200).json(profile);
+}
+
+async function readUserProfile(req, res) {
+  const userId = req.user.user.id;
+  const profile = await getUserProfile(userId);
+
+  if (!profile) {
+    return generateErrorRes(res, 404, "No profile found for your account.");
   }
 
   return res.status(200).json(profile);
@@ -111,4 +122,10 @@ async function deleteProfile(req, res) {
   return res.status(200).json(deletedProfile);
 }
 
-module.exports = { createProfile, readProfile, updateProfile, deleteProfile };
+module.exports = {
+  createProfile,
+  readProfile,
+  readUserProfile,
+  updateProfile,
+  deleteProfile,
+};

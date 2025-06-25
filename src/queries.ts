@@ -532,6 +532,22 @@ async function getProfile(id: number) {
   return profile || false;
 }
 
+async function getUserProfile(userId: number) {
+  const profile = await prisma.profile.findFirst({
+    where: { userId },
+    select: {
+      posts: true,
+      id: true,
+      userId: true,
+      name: true,
+      website: true,
+      about: true,
+    },
+  });
+
+  return profile || false;
+}
+
 async function updateExistingProfile(
   id: number,
   userId: number,
@@ -645,6 +661,7 @@ export {
   addProfile,
   deleteUserProfile,
   getProfile,
+  getUserProfile,
   updateExistingProfile,
 
   // security queries

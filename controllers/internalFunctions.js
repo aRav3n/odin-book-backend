@@ -58,6 +58,17 @@ function generateIndividualErrorMessage(message) {
   };
 }
 
+function generateErrorRes(res, httpCode, errorMessageOrArray) {
+  if (Array.isArray(errorMessageOrArray)) {
+    return res
+      .status(httpCode)
+      .json(generateErrorMessageFromArray(errorMessageOrArray));
+  }
+  return res
+    .status(httpCode)
+    .json(generateIndividualErrorMessage(errorMessageOrArray));
+}
+
 function getTokenFromReq(req) {
   const bearerHeader = req.headers["authorization"];
   if (bearerHeader !== undefined) {
@@ -175,6 +186,7 @@ module.exports = {
   checkTokenForIssues,
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
+  generateErrorRes,
   getTokenFromReq,
   getUserInfoFromToken,
   trimFields,
