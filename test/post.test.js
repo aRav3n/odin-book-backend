@@ -333,7 +333,11 @@ test("Read Recent Posts route returns empty array if there no posts in that rang
 });
 
 test("Read Recent Posts route succeeds with correct info, safely handling :start numbers less than 1", async () => {
-  const { user: userOne, post: postOne } = await generateUserProfilePost();
+  const {
+    user: userOne,
+    profile: profileOne,
+    post: postOne,
+  } = await generateUserProfilePost();
   const { user: userTwo, post: postTwo } = await generateUserProfilePost();
   const { user: userThree, post: postThree } = await generateUserProfilePost();
   const { user: userFour, post: postFour } = await generateUserProfilePost();
@@ -351,15 +355,15 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
     .expect(200)
     .then((res) => {
       const array = res.body;
-      const indexOne = array.findIndex(item => item.id === postOne.id);
-      const indexTwo = array.findIndex(item => item.id === postTwo.id);
-      const indexThree = array.findIndex(item => item.id === postThree.id);
-      const indexFour = array.findIndex(item => item.id === postFour.id);
-      const indexFive = array.findIndex(item => item.id === postFive.id);
-      const indexSix = array.findIndex(item => item.id === postSix.id);
-      const indexSeven = array.findIndex(item => item.id === postSeven.id);
-      const indexEight = array.findIndex(item => item.id === postEight.id);
-      const indexNine = array.findIndex(item => item.id === postNine.id);
+      const indexOne = array.findIndex((item) => item.id === postOne.id);
+      const indexTwo = array.findIndex((item) => item.id === postTwo.id);
+      const indexThree = array.findIndex((item) => item.id === postThree.id);
+      const indexFour = array.findIndex((item) => item.id === postFour.id);
+      const indexFive = array.findIndex((item) => item.id === postFive.id);
+      const indexSix = array.findIndex((item) => item.id === postSix.id);
+      const indexSeven = array.findIndex((item) => item.id === postSeven.id);
+      const indexEight = array.findIndex((item) => item.id === postEight.id);
+      const indexNine = array.findIndex((item) => item.id === postNine.id);
 
       expect(indexOne).toBeGreaterThan(indexTwo);
       expect(indexTwo).toBeGreaterThan(indexThree);
@@ -369,6 +373,11 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
       expect(indexSix).toBeGreaterThan(indexSeven);
       expect(indexSeven).toBeGreaterThan(indexEight);
       expect(indexEight).toBeGreaterThan(indexNine);
+
+      expect(array[indexOne].Profile.name).toBe(profileOne.name);
+      expect(array[indexOne].Profile.id).toBe(profileOne.id);
+      expect(array[indexOne]._count.comments).toBe(0);
+      expect(array[indexOne]._count.likes).toBe(0);
     });
 
   const secondStart = 3;
@@ -379,13 +388,13 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
     .expect(200)
     .then((res) => {
       const array = res.body;
-      const indexOne = array.findIndex(item => item.id === postOne.id);
-      const indexTwo = array.findIndex(item => item.id === postTwo.id);
-      const indexThree = array.findIndex(item => item.id === postThree.id);
-      const indexFour = array.findIndex(item => item.id === postFour.id);
-      const indexFive = array.findIndex(item => item.id === postFive.id);
-      const indexSix = array.findIndex(item => item.id === postSix.id);
-      const indexSeven = array.findIndex(item => item.id === postSeven.id);
+      const indexOne = array.findIndex((item) => item.id === postOne.id);
+      const indexTwo = array.findIndex((item) => item.id === postTwo.id);
+      const indexThree = array.findIndex((item) => item.id === postThree.id);
+      const indexFour = array.findIndex((item) => item.id === postFour.id);
+      const indexFive = array.findIndex((item) => item.id === postFive.id);
+      const indexSix = array.findIndex((item) => item.id === postSix.id);
+      const indexSeven = array.findIndex((item) => item.id === postSeven.id);
 
       expect(indexOne).toBeGreaterThan(indexTwo);
       expect(indexTwo).toBeGreaterThan(indexThree);

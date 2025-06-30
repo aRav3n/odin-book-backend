@@ -450,6 +450,17 @@ async function readRecentPostsFromDatabase(start: number) {
     orderBy: { createdAt: "desc" },
     skip,
     take,
+    include: {
+      Profile: {
+        select: {
+          name: true,
+          id: true,
+        },
+      },
+      _count: {
+        select: { comments: true, likes: true },
+      },
+    },
   });
 
   return posts;
