@@ -77,13 +77,13 @@
         - Description: Read a specific post to see more detailed information
         - Requires: authHeader (just to verify logged in)
         - Success: 200 OK
-          - Response: { id, createdAt, text, profileId, Profile: { name, id }, \_count: { comments, likes } }
+          - Response: { id, createdAt, text, profileId, Profile: { name, id }, \_count: { comments, likes }, likes: [ { id } ] }
     - /post/recent/:start
       - GET
         - Description: Read the 10 most recent posts from all profiles, starting at the specified number
         - Requires: authHeader (just to verify logged in)
         - Success: 200 OK
-          - Response: [ { id, createdAt, text, profileId, Profile: { name, id }, \_count: { comments, likes } } ]
+          - Response: [ { id, createdAt, text, profileId, Profile: { name, id }, \_count: { comments, likes }, likes: [ { id } ] } ]
         - Sample
           - Send a GET request to /post/recent/11 with a valid authHeader
           - Response: [ { 11th most recent post }, ..., { 20th most recent post } ]
@@ -112,7 +112,7 @@
         - Description: Read comments on a post
         - Requires: authHeader (just to verify logged in)
         - Success: 200 OK
-          - Response: \[ { id, text, profileId, postId, commentId: null, Profile: { name, id }, \_count: { likes, replies } } \]
+          - Response: \[ { id, text, profileId, postId, commentId: null, Profile: { name, id }, \_count: { likes, replies }, likes: [ { id } ] } \]
     - /comment/reply/:commentId/from/:profileId
       - POST
         - Description: Create a reply to another comment
@@ -124,7 +124,7 @@
         - Description: Read comment replies
         - Requires: authHeader (just to verify logged in)
         - Success: 200 OK
-          - Response: \[ { id, text, profileId, postId: null, commentId, Profile: { name, id }, \_count: { likes, replies } } \]
+          - Response: \[ { id, text, profileId, postId: null, commentId, Profile: { name, id }, \_count: { likes, replies }, likes: [ { id } ] } \]
     - /comment/:commentId
       - PUT
         - Description: Update a comment

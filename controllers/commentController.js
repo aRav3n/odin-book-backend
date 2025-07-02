@@ -132,9 +132,10 @@ async function deleteComment(req, res) {
 async function readComments(req, res) {
   const postId = req.postId || null;
   const commentId = req.commentId || null;
+  const userId = req.user.user.id;
 
   if (postId) {
-    const post = await readPostFromDatabase(postId);
+    const post = await readPostFromDatabase(postId, userId);
     if (!post) {
       return res
         .status(404)
@@ -145,11 +146,11 @@ async function readComments(req, res) {
         );
     }
 
-    const comments = await readCommentsOnPost(postId);
+    const comments = await readCommentsOnPost(postId, userId);
     return res.status(200).json(comments);
   }
 
-  const comment = await readSingleComment(commentId);
+  const comment = await readSingleComment(commentId, userId);
   if (!comment) {
     return res
       .status(404)
@@ -160,7 +161,7 @@ async function readComments(req, res) {
       );
   }
 
-  const replies = await readCommentReplies(commentId);
+  const replies = await readCommentReplies(commentId, userId);
 
   return res.status(200).json(replies);
 }

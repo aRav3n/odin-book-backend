@@ -39,14 +39,10 @@ const createPost = [
   },
 ];
 
-async function deletePost(req, res) {
-  const post = await deletePostFromDatabase(req.postId);
-
-  return res.status(200).json(post);
-}
-
 async function readPost(req, res) {
-  const post = await readPostFromDatabase(req.postId);
+  const userId = req.user.user.id;
+
+  const post = await readPostFromDatabase(req.postId, userId);
   if (!post) {
     return res
       .status(404)
@@ -61,9 +57,11 @@ async function readPost(req, res) {
 }
 
 async function readRecentPosts(req, res) {
+  const userId = req.user.user.id;
+
   const startNumber = req.start >= 1 ? req.start : 1;
 
-  const posts = await readRecentPostsFromDatabase(startNumber);
+  const posts = await readRecentPostsFromDatabase(startNumber, userId);
 
   return res.status(200).json(posts);
 }
@@ -78,6 +76,12 @@ async function updatePost(req, res) {
 
   const updatedPost = await updatePostText(req.postId, text);
   return res.status(200).json(updatedPost);
+}
+
+async function deletePost(req, res) {
+  const post = await deletePostFromDatabase(req.postId);
+
+  return res.status(200).json(post);
 }
 
 module.exports = {

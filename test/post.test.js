@@ -274,6 +274,7 @@ test("Read Post route succeeds with good authHeader and correct postId", async (
       expect(res.body.text).toBe(post.text);
       expect(res.body._count.comments).toBeDefined();
       expect(res.body._count.likes).toBeDefined();
+      expect(res.body.likes.length).toBe(0);
     });
 
   await deleteUser(user);
@@ -378,6 +379,8 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
       expect(array[indexOne].Profile.id).toBe(profileOne.id);
       expect(array[indexOne]._count.comments).toBe(0);
       expect(array[indexOne]._count.likes).toBe(0);
+      expect(array[indexOne].likes.length).toBe(0);
+
     });
 
   const secondStart = 3;

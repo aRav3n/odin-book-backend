@@ -150,6 +150,19 @@ function checkOwnerFromDatabase(userId, profileId, postId, commentId, followerId
         return false;
     });
 }
+// other internal queries
+function readProfileIdFromUserId(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!userId) {
+            return 0;
+        }
+        const profile = yield prisma.profile.findFirst({
+            where: { userId },
+        });
+        const profileId = (profile === null || profile === void 0 ? void 0 : profile.id) || 0;
+        return profileId;
+    });
+}
 // comment queries
 function createCommentReply(commentId, text, profileId) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -209,8 +222,9 @@ function createCommentOnPost(postId, profileId, text) {
         return comment || null;
     });
 }
-function readCommentReplies(commentId) {
+function readCommentReplies(commentId, userId) {
     return __awaiter(this, void 0, void 0, function* () {
+        const profileId = yield readProfileIdFromUserId(userId);
         const comments = yield prisma.comment.findMany({
             where: { commentId },
             select: {
@@ -231,13 +245,18 @@ function readCommentReplies(commentId) {
                         replies: true,
                     },
                 },
+                likes: {
+                    where: { profileId },
+                    select: { id: true },
+                },
             },
         });
         return comments;
     });
 }
-function readCommentsOnPost(postId) {
+function readCommentsOnPost(postId, userId) {
     return __awaiter(this, void 0, void 0, function* () {
+        const profileId = yield readProfileIdFromUserId(userId);
         const comments = yield prisma.comment.findMany({
             where: { postId },
             select: {
@@ -258,13 +277,18 @@ function readCommentsOnPost(postId) {
                         replies: true,
                     },
                 },
+                likes: {
+                    where: { profileId },
+                    select: { id: true },
+                },
             },
         });
         return comments;
     });
 }
-function readSingleComment(id) {
+function readSingleComment(id, userId) {
     return __awaiter(this, void 0, void 0, function* () {
+        const profileId = yield readProfileIdFromUserId(userId);
         const comment = yield prisma.comment.findFirst({
             where: { id },
             select: {
@@ -284,6 +308,10 @@ function readSingleComment(id) {
                         likes: true,
                         replies: true,
                     },
+                },
+                likes: {
+                    where: { profileId },
+                    select: { id: true },
                 },
             },
         });
@@ -444,8 +472,9 @@ function createPostForProfile(profileId, text) {
         return post || null;
     });
 }
-function readPostFromDatabase(id) {
+function readPostFromDatabase(id, userId) {
     return __awaiter(this, void 0, void 0, function* () {
+        const profileId = yield readProfileIdFromUserId(userId);
         const post = yield prisma.post.findFirst({
             where: { id },
             include: {
@@ -458,13 +487,18 @@ function readPostFromDatabase(id) {
                 _count: {
                     select: { comments: true, likes: true },
                 },
+                likes: {
+                    where: { profileId },
+                    select: { id: true },
+                },
             },
         });
         return post;
     });
 }
-function readRecentPostsFromDatabase(start) {
+function readRecentPostsFromDatabase(start, userId) {
     return __awaiter(this, void 0, void 0, function* () {
+        const profileId = yield readProfileIdFromUserId(userId);
         const take = 10;
         const skip = start - 1;
         const posts = yield prisma.post.findMany({
@@ -480,6 +514,10 @@ function readRecentPostsFromDatabase(start) {
                 },
                 _count: {
                     select: { comments: true, likes: true },
+                },
+                likes: {
+                    where: { profileId },
+                    select: { id: true },
                 },
             },
         });

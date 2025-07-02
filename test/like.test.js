@@ -159,8 +159,11 @@ test("Create Like On Comment route fails if likeCommentId is for a nonexistent c
 });
 
 test("Create Like On Comment route succeeds if all provided info is correct", async () => {
-  const { user: siriusAccount, comment } =
-    await generateCommentAndParents("Sirius Black");
+  const {
+    user: siriusAccount,
+    post,
+    comment,
+  } = await generateCommentAndParents("Sirius Black");
   const { user: lupinAccount, profile: lupinProfile } =
     await generateUserAndProfile("Remus Lupin");
 
@@ -174,6 +177,24 @@ test("Create Like On Comment route succeeds if all provided info is correct", as
       expect(res.body.profileId).toBe(lupinProfile.id);
       expect(res.body.postId).toBe(null);
       expect(res.body.commentId).toBe(comment.id);
+    });
+
+  await request(app)
+    .get(`/comment/post/${post.id}`)
+    .set("Authorization", `Bearer ${siriusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body[0].likes.length).toBe(0);
+    });
+
+  await request(app)
+    .get(`/comment/post/${post.id}`)
+    .set("Authorization", `Bearer ${lupinAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body[0].likes.length).toBe(1);
     });
 
   await deleteUser(siriusAccount);
@@ -313,6 +334,15 @@ test("Create Like On Post route succeeds if all provided info is correct", async
       expect(res.body.profileId).toBe(severusSnape.id);
       expect(res.body.postId).toBe(lillyPost.id);
       expect(res.body.commentId).toBe(null);
+    });
+
+  await request(app)
+    .get(`/post/single/${lillyPost.id}`)
+    .set("Authorization", `Bearer ${severusAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body.likes.length).toBe(1);
     });
 
   await deleteUser(severusAccount);

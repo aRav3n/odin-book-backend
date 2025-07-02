@@ -125,6 +125,20 @@ async function checkOwnerFromDatabase(
   return false;
 }
 
+// other internal queries
+async function readProfileIdFromUserId(userId?: number) {
+  if (!userId) {
+    return 0;
+  }
+  const profile = await prisma.profile.findFirst({
+    where: { userId },
+  });
+
+  const profileId = profile?.id || 0;
+
+  return profileId;
+}
+
 // comment queries
 async function createCommentReply(
   commentId: number,
@@ -192,7 +206,8 @@ async function createCommentOnPost(
   return comment || null;
 }
 
-async function readCommentReplies(commentId: number) {
+async function readCommentReplies(commentId: number, userId?: number) {
+  const profileId = await readProfileIdFromUserId(userId);
   const comments = await prisma.comment.findMany({
     where: { commentId },
     select: {
@@ -213,13 +228,19 @@ async function readCommentReplies(commentId: number) {
           replies: true,
         },
       },
+      likes: {
+        where: { profileId },
+        select: { id: true },
+      },
     },
   });
 
   return comments;
 }
 
-async function readCommentsOnPost(postId: number) {
+async function readCommentsOnPost(postId: number, userId?: number) {
+  const profileId = await readProfileIdFromUserId(userId);
+
   const comments = await prisma.comment.findMany({
     where: { postId },
     select: {
@@ -240,13 +261,19 @@ async function readCommentsOnPost(postId: number) {
           replies: true,
         },
       },
+      likes: {
+        where: { profileId },
+        select: { id: true },
+      },
     },
   });
 
   return comments;
 }
 
-async function readSingleComment(id: number) {
+async function readSingleComment(id: number, userId?: number) {
+  const profileId = await readProfileIdFromUserId(userId);
+
   const comment = await prisma.comment.findFirst({
     where: { id },
     select: {
@@ -266,6 +293,10 @@ async function readSingleComment(id: number) {
           likes: true,
           replies: true,
         },
+      },
+      likes: {
+        where: { profileId },
+        select: { id: true },
       },
     },
   });
@@ -424,7 +455,9 @@ async function createPostForProfile(profileId: number, text: string) {
   return post || null;
 }
 
-async function readPostFromDatabase(id: number) {
+async function readPostFromDatabase(id: number, userId?: number) {
+  const profileId = await readProfileIdFromUserId(userId);
+
   const post = await prisma.post.findFirst({
     where: { id },
     include: {
@@ -437,13 +470,19 @@ async function readPostFromDatabase(id: number) {
       _count: {
         select: { comments: true, likes: true },
       },
+      likes: {
+        where: { profileId },
+        select: { id: true },
+      },
     },
   });
 
   return post;
 }
 
-async function readRecentPostsFromDatabase(start: number) {
+async function readRecentPostsFromDatabase(start: number, userId?: number) {
+  const profileId = await readProfileIdFromUserId(userId);
+
   const take = 10;
   const skip = start - 1;
   const posts = await prisma.post.findMany({
@@ -459,6 +498,10 @@ async function readRecentPostsFromDatabase(start: number) {
       },
       _count: {
         select: { comments: true, likes: true },
+      },
+      likes: {
+        where: { profileId },
+        select: { id: true },
       },
     },
   });

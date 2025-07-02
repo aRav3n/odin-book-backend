@@ -40,6 +40,7 @@ afterAll(async () => {
 });
 */
 
+// create comment on post tests
 test("Create Comment On Post route fails if :postId is missing", async () => {
   await request(app)
     .post("/comment/post/")
@@ -229,12 +230,14 @@ test("Create Comment On Post route succeeds with correct requirements", async ()
     .expect("Content-Type", /json/)
     .expect(200)
     .then((res) => {
+      expect(res.body.likes.length).toBe(0);
       expect(res.body._count.comments).toBe(1);
     });
 
   await deleteUser(user);
 });
 
+// get comments on post tests
 test("Get Comments On Post route fails if :postId is missing", async () => {
   const postId = "";
   await request(app)
@@ -304,11 +307,13 @@ test("Get Comments On Post route succeeds with correct requirements", async () =
       expect(res.body[0].Profile.name).toBe(profile.name);
       expect(res.body[0]._count.likes).toBeDefined();
       expect(res.body[0]._count.replies).toBeDefined();
+      expect(res.body[0].likes.length).toBe(0);
     });
 
   await deleteUser(user);
 });
 
+// create comment reply tests
 test("Create Comment Reply route fails if :commentId is missing", async () => {
   await request(app)
     .post("/comment/reply/")
@@ -541,14 +546,23 @@ test("Create Comment Reply route succeeds for a comment on a comment on a commen
         .send({ text: "Replying" })
         .expect("Content-Type", /json/)
         .expect(200)
-        .then((resTwo) => {
+        .then(async (resTwo) => {
           expect(resTwo.body.commentId).toBe(res.body.id);
+
+          await request(app)
+            .get(`/comment/reply/${res.body.id}`)
+            .set("Authorization", `Bearer ${user.token}`)
+            .expect(200)
+            .then((resThree) => {
+              expect(resThree.body[0].likes.length).toBe(0);
+            });
         });
     });
 
   await deleteUser(user);
 });
 
+// read comment replies tests
 test("Get Comment Replies route fails if :commentId is missing", async () => {
   await request(app)
     .get("/comment/reply/")
@@ -663,6 +677,7 @@ test("Get Comment Replies route succeeds for a comment that has replies", async 
     .set("Authorization", `Bearer ${user.token}`)
     .expect(200)
     .then((res) => {
+      expect(res.body[0].likes.length).toBe(0);
       if (res.body[0].id === resOne.body.id) {
         expect(res.body[0].id).toBeGreaterThan(0);
         expect(res.body[0].text).toBe(text);
@@ -699,6 +714,7 @@ test("Get Comment Replies route succeeds for a comment that has replies", async 
   await deleteUser(user);
 });
 
+// update comment route
 test("Update Comment route fails if :commentId is missing", async () => {
   await request(app)
     .put("/comment/")
@@ -884,6 +900,7 @@ test("Update Comment route succeeds with correct requirements", async () => {
   await deleteUser(user);
 });
 
+// delete comment route
 test("Delete Comment route fails if :commentId is missing", async () => {
   await request(app)
     .delete("/comment/")
