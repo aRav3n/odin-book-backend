@@ -583,17 +583,34 @@ function deleteUserProfile(id) {
         return deletedProfile || false;
     });
 }
-function getProfile(id) {
+function getProfile(id, requestingProfileId) {
     return __awaiter(this, void 0, void 0, function* () {
         const profile = yield prisma.profile.findFirst({
             where: { id },
             select: {
-                posts: true,
                 id: true,
                 userId: true,
                 name: true,
                 website: true,
                 about: true,
+                posts: {
+                    orderBy: { createdAt: "desc" },
+                    include: {
+                        _count: {
+                            select: { comments: true, likes: true },
+                        },
+                        likes: {
+                            where: { profileId: requestingProfileId },
+                            select: { id: true },
+                        },
+                        Profile: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
             },
         });
         return profile || false;
@@ -604,7 +621,6 @@ function getUserProfile(userId) {
         const profile = yield prisma.profile.findFirst({
             where: { userId },
             select: {
-                posts: true,
                 id: true,
                 userId: true,
                 name: true,

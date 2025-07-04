@@ -54,7 +54,11 @@ const createProfile = [
 ];
 
 async function readProfile(req, res) {
-  const profile = await getProfile(req.profileId);
+  const requestingUserId = req.user.user.id;
+  const requestingProfile = await getUserProfile(requestingUserId);
+  const requestingProfileId = requestingProfile.id;
+
+  const profile = await getProfile(req.profileId, requestingProfileId);
 
   if (!profile) {
     return generateErrorRes(

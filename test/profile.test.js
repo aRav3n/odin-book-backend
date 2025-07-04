@@ -228,7 +228,7 @@ test("Read Profile succeeds when using a good authHeader and valid id", async ()
       expect(body.name).toBe(profile.name);
       expect(body.website).toBe(profile.website);
       expect(body.about).toBe(profile.about);
-      expect(body.posts).toEqual([]);
+      expect(body.posts.length).toBe(0);
     });
 
   await deleteUser(user);
@@ -288,7 +288,6 @@ test("Read User Profile succeeds when using a good authHeader and valid id", asy
       expect(body.name).toBe(profile.name);
       expect(body.website).toBe(profile.website);
       expect(body.about).toBe(profile.about);
-      expect(body.posts).toEqual([]);
     });
 
   await deleteUser(user);

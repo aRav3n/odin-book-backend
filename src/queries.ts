@@ -1,3 +1,4 @@
+import { profile } from "console";
 import { PrismaClient } from "../generated/prisma";
 import { withAccelerate } from "@prisma/extension-accelerate";
 require("dotenv");
@@ -570,16 +571,33 @@ async function deleteUserProfile(id: number) {
   return deletedProfile || false;
 }
 
-async function getProfile(id: number) {
+async function getProfile(id: number, requestingProfileId: number) {
   const profile = await prisma.profile.findFirst({
     where: { id },
     select: {
-      posts: true,
       id: true,
       userId: true,
       name: true,
       website: true,
       about: true,
+      posts: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: {
+            select: { comments: true, likes: true },
+          },
+          likes: {
+            where: { profileId: requestingProfileId },
+            select: { id: true },
+          },
+          Profile: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 
@@ -590,7 +608,6 @@ async function getUserProfile(userId: number) {
   const profile = await prisma.profile.findFirst({
     where: { userId },
     select: {
-      posts: true,
       id: true,
       userId: true,
       name: true,

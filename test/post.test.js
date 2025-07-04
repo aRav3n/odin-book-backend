@@ -28,7 +28,12 @@ afterEach(() => {
   const duration = Date.now() - postStart;
   const testName = expect.getState().currentTestName;
   if (duration >= 500) {
-    console.log(`${testName} - ${duration} ms`);
+    // don't log for a known long test
+    if (
+      testName !==
+      "Read Recent Posts route succeeds with correct info, safely handling :start numbers less than 1"
+    )
+      console.log(`${testName} - ${duration} ms`);
   }
 });
 
@@ -200,12 +205,28 @@ test("Create Post route succeeds if all required info is correct", async () => {
     .expect("Content-Type", /json/)
     .type("form")
     .send({ text })
-    .then((res) => {
+    .then(async (res) => {
       expect(res.body.id).toBeDefined;
       expect(res.body.text).toBe(text);
       expect(res.body.profileId).toBe(profile.id);
       expect(res.body.Profile.name).toBe(profile.name);
       expect(200);
+
+      const post = res.body;
+      const profileRes = await request(app)
+        .get(`/profile/${profile.id}`)
+        .set("Authorization", `Bearer ${user.token}`)
+        .expect("Content-Type", /json/)
+        .expect(200);
+
+      const postArray = profileRes.body.posts;
+      expect(postArray[0]).toBeDefined();
+      expect(postArray[0]._count.comments).toBe(0);
+      expect(postArray[0]._count.likes).toBe(0);
+      expect(postArray[0].Profile.id).toBe(profile.id);
+      expect(postArray[0].Profile.name).toBe(profile.name);
+      expect(postArray[0].likes.length).toBe(0);
+      expect(postArray[0].text).toBe(post.text);
     });
 
   await deleteUser(user);
@@ -380,7 +401,6 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
       expect(array[indexOne]._count.comments).toBe(0);
       expect(array[indexOne]._count.likes).toBe(0);
       expect(array[indexOne].likes.length).toBe(0);
-
     });
 
   const secondStart = 3;
