@@ -47,11 +47,7 @@ router.post(
   verifyTokenValid,
   profileController.createProfile
 );
-router.get(
-  "/profile",
-  verifyTokenValid,
-  profileController.readUserProfile
-);
+router.get("/profile", verifyTokenValid, profileController.readUserProfile);
 router.get(
   "/profile/:profileId",
   checkThatParamsAreValid,
@@ -70,6 +66,11 @@ router.delete(
   checkThatParamsAreValid,
   verifyTokenMatch,
   profileController.deleteProfile
+);
+router.post(
+  "/profile/list",
+  verifyTokenValid,
+  profileController.readProfileList
 );
 
 // post routes

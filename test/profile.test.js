@@ -27,7 +27,7 @@ beforeEach(() => {
 afterEach(() => {
   const duration = Date.now() - profileStart;
   const testName = expect.getState().currentTestName;
-  if (duration >= 500) {
+  if (duration >= 600) {
     console.log(`${testName} - ${duration} ms`);
   }
 });
@@ -212,7 +212,7 @@ test("Read Profile fails with id for nonexistent profile", async () => {
   await deleteUser(user);
 });
 
-test("Read Profile succeeds when using a good authHeader and valid id", async () => {
+test("Read Profile route succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
 
   const profileId = profile.id;
@@ -234,7 +234,144 @@ test("Read Profile succeeds when using a good authHeader and valid id", async ()
   await deleteUser(user);
 });
 
-// read profile based on user token
+// read profile list route tests
+test("Read Profile List route fails without authHeader", async () => {
+  await request(app)
+    .post("/profile/list")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "You must be logged in to do that." }],
+    })
+    .expect(401);
+});
+
+test("Read Profile List route fails with corrupted authHeader", async () => {
+  await request(app)
+    .post("/profile/list")
+    .set("Authorization", "Bearer broken_t0k3n")
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Please sign in again and re-try that." }],
+    })
+    .expect(401);
+});
+
+test("Read Profile List route fails if no profiles match stringToMatch", async () => {
+  const user = await generateSignedInUser();
+
+  await request(app)
+    .post("/profile/list")
+    .set("Authorization", `Bearer ${user.token}`)
+    .type("form")
+    .send({ stringToMatch: "meLlamoAndres" })
+    .expect("Content-Type", /json/)
+    .expect({
+      errors: [{ message: "Sorry, no matching profiles found!" }],
+    })
+    .expect(404);
+
+  await deleteUser(user);
+});
+
+test("Read Profile List route returns alphabetized list of profile names with ids if stringToMatch is blank", async () => {
+  const { user: anakinAccount, profile: anakinProfile } =
+    await generateUserAndProfile("Anakin Chosen Juan Skywalker");
+  const { user: lukeAccount, profile: lukeProfile } =
+    await generateUserAndProfile("Lucas Amadeus Vasquez Skywalker");
+  const { user: thrawnAccount, profile: thrawnProfile } =
+    await generateUserAndProfile("Grand Admiral Thrawn");
+
+  await request(app)
+    .post("/profile/list")
+    .set("Authorization", `Bearer ${lukeAccount.token}`)
+    .type("form")
+    .send({ stringToMatch: "" })
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      const array = res.body;
+      const indexAnakin = array.findIndex(
+        (item) => item.id === anakinProfile.id
+      );
+      const indexLuke = array.findIndex((item) => item.id === lukeProfile.id);
+      const indexThrawn = array.findIndex(
+        (item) => item.id === thrawnProfile.id
+      );
+
+      expect(indexAnakin).toBeLessThan(indexThrawn);
+      expect(indexThrawn).toBeLessThan(indexLuke);
+    });
+
+  await deleteUser(anakinAccount);
+  await deleteUser(lukeAccount);
+  await deleteUser(thrawnAccount);
+});
+
+test("Read Profile List route returns alphabetized list of profile names with ids if stringToMatch is nonexistent", async () => {
+  const { user: anakinAccount, profile: anakinProfile } =
+    await generateUserAndProfile("Anakin Chosen Juan Skywalker");
+  const { user: lukeAccount, profile: lukeProfile } =
+    await generateUserAndProfile("Lucas Amadeus Vasquez Skywalker");
+  const { user: thrawnAccount, profile: thrawnProfile } =
+    await generateUserAndProfile("Grand Admiral Thrawn");
+
+  await request(app)
+    .post("/profile/list")
+    .set("Authorization", `Bearer ${lukeAccount.token}`)
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      const array = res.body;
+      const indexAnakin = array.findIndex(
+        (item) => item.id === anakinProfile.id
+      );
+      const indexLuke = array.findIndex((item) => item.id === lukeProfile.id);
+      const indexThrawn = array.findIndex(
+        (item) => item.id === thrawnProfile.id
+      );
+
+      expect(indexAnakin).toBeLessThan(indexThrawn);
+      expect(indexThrawn).toBeLessThan(indexLuke);
+    });
+
+  await deleteUser(anakinAccount);
+  await deleteUser(lukeAccount);
+  await deleteUser(thrawnAccount);
+});
+
+test("Read Profile List route returns alphabetized list of profile names with ids matching stringToMatch", async () => {
+  const { user: anakinAccount, profile: anakinProfile } =
+    await generateUserAndProfile("Anakin Chosen Juan Skywalker");
+  const { user: lukeAccount, profile: lukeProfile } =
+    await generateUserAndProfile("Lucas Amadeus Vasquez Skywalker");
+  const { user: thrawnAccount, profile: thrawnProfile } =
+    await generateUserAndProfile("Grand Admiral Thrawn");
+
+  await request(app)
+    .post("/profile/list")
+    .set("Authorization", `Bearer ${lukeAccount.token}`)
+    .type("form")
+    .send({ stringToMatch: "an" })
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      const array = res.body;
+      let containsLuke = false;
+      for (let i = 0; i < array.length; i++) {
+        if (array[i].name === lukeProfile.name) {
+          containsLuke = true;
+        }
+      }
+
+      expect(containsLuke).toBeFalsy();
+    });
+
+  await deleteUser(anakinAccount);
+  await deleteUser(lukeAccount);
+  await deleteUser(thrawnAccount);
+});
+
+// read profile (based on user token) route tests
 test("Read User Profile route fails without authHeader", async () => {
   await request(app)
     .get("/profile")
@@ -273,7 +410,7 @@ test("Read User Profile fails if no profile for this user", async () => {
   await deleteUser(user);
 });
 
-test("Read User Profile succeeds when using a good authHeader and valid id", async () => {
+test("Read User Profile route succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
 
   await request(app)
@@ -417,7 +554,7 @@ test("Update Profile route fails if req.body.name is blank", async () => {
   await deleteUser(user);
 });
 
-test("Update Profile succeeds when using a good authHeader and valid id", async () => {
+test("Update Profile route succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
   const profileUpdate = {
     ...profile,
@@ -560,7 +697,7 @@ test("Delete Profile fails if profile has already been deleted", async () => {
   await deleteUser(user);
 });
 
-test("Delete Profile succeeds when using a good authHeader and valid id", async () => {
+test("Delete Profile route succeeds when using a good authHeader and valid id", async () => {
   const { user, profile } = await generateUserAndProfile();
 
   await request(app)

@@ -32,6 +32,7 @@ exports.deletePostFromDatabase = deletePostFromDatabase;
 exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
+exports.getProfileList = getProfileList;
 exports.getUserProfile = getUserProfile;
 exports.updateExistingProfile = updateExistingProfile;
 exports.checkOwnerFromDatabase = checkOwnerFromDatabase;
@@ -614,6 +615,25 @@ function getProfile(id, requestingProfileId) {
             },
         });
         return profile || false;
+    });
+}
+function getProfileList(string) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const hasString = string && string.length > 0 ? true : false;
+        const profileList = hasString
+            ? yield prisma.profile.findMany({
+                orderBy: { name: "asc" },
+                where: {
+                    name: {
+                        contains: string,
+                        mode: "insensitive",
+                    },
+                },
+            })
+            : yield prisma.profile.findMany({
+                orderBy: { name: "asc" },
+            });
+        return profileList || null;
     });
 }
 function getUserProfile(userId) {

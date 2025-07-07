@@ -4,6 +4,7 @@ const {
   addProfile,
   deleteUserProfile,
   getProfile,
+  getProfileList,
   getUserProfile,
   updateExistingProfile,
 } = require("../db/queries");
@@ -69,6 +70,23 @@ async function readProfile(req, res) {
   }
 
   return res.status(200).json(profile);
+}
+
+async function readProfileList(req, res) {
+  let partialStringToMatch;
+  if (!req.body || !req.body.stringToMatch) {
+    partialStringToMatch = "";
+  } else {
+    partialStringToMatch = req.body.stringToMatch;
+  }
+
+  const profileList = await getProfileList(partialStringToMatch);
+
+  if (!profileList || profileList.length === 0) {
+    return generateErrorRes(res, 404, "Sorry, no matching profiles found!");
+  }
+
+  return res.status(200).json(profileList);
 }
 
 async function readUserProfile(req, res) {
@@ -138,6 +156,7 @@ async function deleteProfile(req, res) {
 module.exports = {
   createProfile,
   readProfile,
+  readProfileList,
   readUserProfile,
   updateProfile,
   deleteProfile,

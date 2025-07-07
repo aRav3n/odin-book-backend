@@ -604,6 +604,26 @@ async function getProfile(id: number, requestingProfileId: number) {
   return profile || false;
 }
 
+async function getProfileList(string?: string) {
+  const hasString = string && string.length > 0 ? true : false;
+
+  const profileList = hasString
+    ? await prisma.profile.findMany({
+        orderBy: { name: "asc" },
+        where: {
+          name: {
+            contains: string,
+            mode: "insensitive",
+          },
+        },
+      })
+    : await prisma.profile.findMany({
+        orderBy: { name: "asc" },
+      });
+
+  return profileList || null;
+}
+
 async function getUserProfile(userId: number) {
   const profile = await prisma.profile.findFirst({
     where: { userId },
@@ -732,6 +752,7 @@ export {
   addProfile,
   deleteUserProfile,
   getProfile,
+  getProfileList,
   getUserProfile,
   updateExistingProfile,
 
