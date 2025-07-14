@@ -570,10 +570,10 @@ function deletePostFromDatabase(id) {
     });
 }
 // profile queries
-function addProfile(userId, name, about, website) {
+function addProfile(userId, name, about, website, avatarUrl) {
     return __awaiter(this, void 0, void 0, function* () {
         const newProfile = yield prisma.profile.create({
-            data: { userId, name, about, website },
+            data: { userId, name, about, website, avatarUrl },
         });
         return newProfile;
     });
@@ -594,6 +594,7 @@ function getProfile(id, requestingProfileId) {
                 name: true,
                 website: true,
                 about: true,
+                avatarUrl: true,
                 posts: {
                     orderBy: { createdAt: "desc" },
                     include: {
@@ -646,6 +647,7 @@ function getUserProfile(userId) {
                 name: true,
                 website: true,
                 about: true,
+                avatarUrl: true,
             },
         });
         return profile || false;
@@ -663,6 +665,7 @@ function updateExistingProfile(id, userId, name, website, about) {
                 name: true,
                 website: true,
                 about: true,
+                avatarUrl: true,
             },
         });
         return updatedProfile || null;

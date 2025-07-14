@@ -131,6 +131,7 @@ exports.Prisma.ProfileScalarFieldEnum = {
   name: 'name',
   about: 'about',
   website: 'website',
+  avatarUrl: 'avatarUrl',
   userId: 'userId'
 };
 

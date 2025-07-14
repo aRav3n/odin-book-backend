@@ -71,8 +71,8 @@ function generateUserProfileObject(customName) {
   return { userId, name, website, about };
 }
 
-async function generateSignedInUser() {
-  const user = generateUserObject();
+async function generateSignedInUser(useTestEmail) {
+  const user = generateUserObject(useTestEmail);
   user.id = await signUserUp(user);
   const loggedInUser = logUserIn(user);
   return loggedInUser;
@@ -147,6 +147,8 @@ async function generateJamesFollowingLilly() {
   return { lillyAccount, lillyProfile, jamesAccount, jamesProfile, follow };
 }
 
+const testTimeToLogIfOver = 800;
+
 module.exports = {
   deleteEveryone,
   deleteUser,
@@ -160,4 +162,5 @@ module.exports = {
   logInAndDelete,
   logUserIn,
   signUserUp,
+  testTimeToLogIfOver,
 };

@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 
 const {
+  getUserEmail,
   addProfile,
   deleteUserProfile,
   getProfile,
@@ -13,6 +14,7 @@ const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
   generateErrorRes,
+  getGravatarUrl,
   validateProfile,
 } = require("./internalFunctions");
 
@@ -38,7 +40,16 @@ const createProfile = [
     const about = req.body.about || "";
     const website = req.body.website || "";
 
-    const profile = await addProfile(userId, req.body.name, about, website);
+    const userEmail = await getUserEmail(userId);
+    const avatarUrl = getGravatarUrl(userEmail);
+
+    const profile = await addProfile(
+      userId,
+      req.body.name,
+      about,
+      website,
+      avatarUrl
+    );
 
     if (!profile) {
       return res

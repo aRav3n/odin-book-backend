@@ -2568,6 +2568,7 @@ export namespace Prisma {
     name: string | null
     about: string | null
     website: string | null
+    avatarUrl: string | null
     userId: number | null
   }
 
@@ -2576,6 +2577,7 @@ export namespace Prisma {
     name: string | null
     about: string | null
     website: string | null
+    avatarUrl: string | null
     userId: number | null
   }
 
@@ -2584,6 +2586,7 @@ export namespace Prisma {
     name: number
     about: number
     website: number
+    avatarUrl: number
     userId: number
     _all: number
   }
@@ -2604,6 +2607,7 @@ export namespace Prisma {
     name?: true
     about?: true
     website?: true
+    avatarUrl?: true
     userId?: true
   }
 
@@ -2612,6 +2616,7 @@ export namespace Prisma {
     name?: true
     about?: true
     website?: true
+    avatarUrl?: true
     userId?: true
   }
 
@@ -2620,6 +2625,7 @@ export namespace Prisma {
     name?: true
     about?: true
     website?: true
+    avatarUrl?: true
     userId?: true
     _all?: true
   }
@@ -2715,6 +2721,7 @@ export namespace Prisma {
     name: string
     about: string | null
     website: string | null
+    avatarUrl: string
     userId: number
     _count: ProfileCountAggregateOutputType | null
     _avg: ProfileAvgAggregateOutputType | null
@@ -2742,6 +2749,7 @@ export namespace Prisma {
     name?: boolean
     about?: boolean
     website?: boolean
+    avatarUrl?: boolean
     userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     posts?: boolean | Profile$postsArgs<ExtArgs>
@@ -2757,6 +2765,7 @@ export namespace Prisma {
     name?: boolean
     about?: boolean
     website?: boolean
+    avatarUrl?: boolean
     userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["profile"]>
@@ -2766,6 +2775,7 @@ export namespace Prisma {
     name?: boolean
     about?: boolean
     website?: boolean
+    avatarUrl?: boolean
     userId?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["profile"]>
@@ -2775,10 +2785,11 @@ export namespace Prisma {
     name?: boolean
     about?: boolean
     website?: boolean
+    avatarUrl?: boolean
     userId?: boolean
   }
 
-  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "about" | "website" | "userId", ExtArgs["result"]["profile"]>
+  export type ProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "about" | "website" | "avatarUrl" | "userId", ExtArgs["result"]["profile"]>
   export type ProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     posts?: boolean | Profile$postsArgs<ExtArgs>
@@ -2810,6 +2821,7 @@ export namespace Prisma {
       name: string
       about: string | null
       website: string | null
+      avatarUrl: string
       userId: number
     }, ExtArgs["result"]["profile"]>
     composites: {}
@@ -3244,6 +3256,7 @@ export namespace Prisma {
     readonly name: FieldRef<"Profile", 'String'>
     readonly about: FieldRef<"Profile", 'String'>
     readonly website: FieldRef<"Profile", 'String'>
+    readonly avatarUrl: FieldRef<"Profile", 'String'>
     readonly userId: FieldRef<"Profile", 'Int'>
   }
     
@@ -8417,6 +8430,7 @@ export namespace Prisma {
     name: 'name',
     about: 'about',
     website: 'website',
+    avatarUrl: 'avatarUrl',
     userId: 'userId'
   };
 
@@ -8615,6 +8629,7 @@ export namespace Prisma {
     name?: StringFilter<"Profile"> | string
     about?: StringNullableFilter<"Profile"> | string | null
     website?: StringNullableFilter<"Profile"> | string | null
+    avatarUrl?: StringFilter<"Profile"> | string
     userId?: IntFilter<"Profile"> | number
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     posts?: PostListRelationFilter
@@ -8629,6 +8644,7 @@ export namespace Prisma {
     name?: SortOrder
     about?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
+    avatarUrl?: SortOrder
     userId?: SortOrder
     user?: UserOrderByWithRelationInput
     posts?: PostOrderByRelationAggregateInput
@@ -8647,6 +8663,7 @@ export namespace Prisma {
     name?: StringFilter<"Profile"> | string
     about?: StringNullableFilter<"Profile"> | string | null
     website?: StringNullableFilter<"Profile"> | string | null
+    avatarUrl?: StringFilter<"Profile"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     posts?: PostListRelationFilter
     followers?: FollowListRelationFilter
@@ -8660,6 +8677,7 @@ export namespace Prisma {
     name?: SortOrder
     about?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
+    avatarUrl?: SortOrder
     userId?: SortOrder
     _count?: ProfileCountOrderByAggregateInput
     _avg?: ProfileAvgOrderByAggregateInput
@@ -8676,6 +8694,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Profile"> | string
     about?: StringNullableWithAggregatesFilter<"Profile"> | string | null
     website?: StringNullableWithAggregatesFilter<"Profile"> | string | null
+    avatarUrl?: StringWithAggregatesFilter<"Profile"> | string
     userId?: IntWithAggregatesFilter<"Profile"> | number
   }
 
@@ -8974,6 +8993,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     user: UserCreateNestedOneWithoutProfileInput
     posts?: PostCreateNestedManyWithoutProfileInput
     followers?: FollowCreateNestedManyWithoutFollowerInput
@@ -8987,6 +9007,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
     posts?: PostUncheckedCreateNestedManyWithoutProfileInput
     followers?: FollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -8999,6 +9020,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
     posts?: PostUpdateManyWithoutProfileNestedInput
     followers?: FollowUpdateManyWithoutFollowerNestedInput
@@ -9012,6 +9034,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
     posts?: PostUncheckedUpdateManyWithoutProfileNestedInput
     followers?: FollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -9025,6 +9048,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
   }
 
@@ -9032,6 +9056,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProfileUncheckedUpdateManyInput = {
@@ -9039,6 +9064,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
   }
 
@@ -9409,6 +9435,7 @@ export namespace Prisma {
     name?: SortOrder
     about?: SortOrder
     website?: SortOrder
+    avatarUrl?: SortOrder
     userId?: SortOrder
   }
 
@@ -9422,6 +9449,7 @@ export namespace Prisma {
     name?: SortOrder
     about?: SortOrder
     website?: SortOrder
+    avatarUrl?: SortOrder
     userId?: SortOrder
   }
 
@@ -9430,6 +9458,7 @@ export namespace Prisma {
     name?: SortOrder
     about?: SortOrder
     website?: SortOrder
+    avatarUrl?: SortOrder
     userId?: SortOrder
   }
 
@@ -10461,6 +10490,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     posts?: PostCreateNestedManyWithoutProfileInput
     followers?: FollowCreateNestedManyWithoutFollowerInput
     following?: FollowCreateNestedManyWithoutFollowingInput
@@ -10473,6 +10503,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     posts?: PostUncheckedCreateNestedManyWithoutProfileInput
     followers?: FollowUncheckedCreateNestedManyWithoutFollowerInput
     following?: FollowUncheckedCreateNestedManyWithoutFollowingInput
@@ -10500,6 +10531,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     posts?: PostUpdateManyWithoutProfileNestedInput
     followers?: FollowUpdateManyWithoutFollowerNestedInput
     following?: FollowUpdateManyWithoutFollowingNestedInput
@@ -10512,6 +10544,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     posts?: PostUncheckedUpdateManyWithoutProfileNestedInput
     followers?: FollowUncheckedUpdateManyWithoutFollowerNestedInput
     following?: FollowUncheckedUpdateManyWithoutFollowingNestedInput
@@ -10802,6 +10835,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     user: UserCreateNestedOneWithoutProfileInput
     followers?: FollowCreateNestedManyWithoutFollowerInput
     following?: FollowCreateNestedManyWithoutFollowingInput
@@ -10814,6 +10848,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
     followers?: FollowUncheckedCreateNestedManyWithoutFollowerInput
     following?: FollowUncheckedCreateNestedManyWithoutFollowingInput
@@ -10889,6 +10924,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
     followers?: FollowUpdateManyWithoutFollowerNestedInput
     following?: FollowUpdateManyWithoutFollowingNestedInput
@@ -10901,6 +10937,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
     followers?: FollowUncheckedUpdateManyWithoutFollowerNestedInput
     following?: FollowUncheckedUpdateManyWithoutFollowingNestedInput
@@ -10944,6 +10981,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     user: UserCreateNestedOneWithoutProfileInput
     posts?: PostCreateNestedManyWithoutProfileInput
     followers?: FollowCreateNestedManyWithoutFollowerInput
@@ -10956,6 +10994,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
     posts?: PostUncheckedCreateNestedManyWithoutProfileInput
     followers?: FollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -11073,6 +11112,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
     posts?: PostUpdateManyWithoutProfileNestedInput
     followers?: FollowUpdateManyWithoutFollowerNestedInput
@@ -11085,6 +11125,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
     posts?: PostUncheckedUpdateManyWithoutProfileNestedInput
     followers?: FollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -11182,6 +11223,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     user: UserCreateNestedOneWithoutProfileInput
     posts?: PostCreateNestedManyWithoutProfileInput
     following?: FollowCreateNestedManyWithoutFollowingInput
@@ -11194,6 +11236,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
     posts?: PostUncheckedCreateNestedManyWithoutProfileInput
     following?: FollowUncheckedCreateNestedManyWithoutFollowingInput
@@ -11210,6 +11253,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     user: UserCreateNestedOneWithoutProfileInput
     posts?: PostCreateNestedManyWithoutProfileInput
     followers?: FollowCreateNestedManyWithoutFollowerInput
@@ -11222,6 +11266,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
     posts?: PostUncheckedCreateNestedManyWithoutProfileInput
     followers?: FollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -11249,6 +11294,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
     posts?: PostUpdateManyWithoutProfileNestedInput
     following?: FollowUpdateManyWithoutFollowingNestedInput
@@ -11261,6 +11307,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
     posts?: PostUncheckedUpdateManyWithoutProfileNestedInput
     following?: FollowUncheckedUpdateManyWithoutFollowingNestedInput
@@ -11283,6 +11330,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
     posts?: PostUpdateManyWithoutProfileNestedInput
     followers?: FollowUpdateManyWithoutFollowerNestedInput
@@ -11295,6 +11343,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
     posts?: PostUncheckedUpdateManyWithoutProfileNestedInput
     followers?: FollowUncheckedUpdateManyWithoutFollowerNestedInput
@@ -11306,6 +11355,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     user: UserCreateNestedOneWithoutProfileInput
     posts?: PostCreateNestedManyWithoutProfileInput
     followers?: FollowCreateNestedManyWithoutFollowerInput
@@ -11318,6 +11368,7 @@ export namespace Prisma {
     name: string
     about?: string | null
     website?: string | null
+    avatarUrl?: string
     userId: number
     posts?: PostUncheckedCreateNestedManyWithoutProfileInput
     followers?: FollowUncheckedCreateNestedManyWithoutFollowerInput
@@ -11387,6 +11438,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     user?: UserUpdateOneRequiredWithoutProfileNestedInput
     posts?: PostUpdateManyWithoutProfileNestedInput
     followers?: FollowUpdateManyWithoutFollowerNestedInput
@@ -11399,6 +11451,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     about?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: StringFieldUpdateOperationsInput | string
     userId?: IntFieldUpdateOperationsInput | number
     posts?: PostUncheckedUpdateManyWithoutProfileNestedInput
     followers?: FollowUncheckedUpdateManyWithoutFollowerNestedInput

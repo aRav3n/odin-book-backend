@@ -16,6 +16,7 @@ const {
   generateSignedInUser,
   generateUserAndProfile,
   generateUserProfileObject,
+  testTimeToLogIfOver,
 } = require("./internalTestFunctions");
 
 let profileStart;
@@ -27,7 +28,7 @@ beforeEach(() => {
 afterEach(() => {
   const duration = Date.now() - profileStart;
   const testName = expect.getState().currentTestName;
-  if (duration >= 600) {
+  if (duration >= testTimeToLogIfOver) {
     console.log(`${testName} - ${duration} ms`);
   }
 });
@@ -150,6 +151,7 @@ test("Create Profile route succeeds when using a good authHeader and name, websi
   expect(newProfile.name).toBe(profile.name);
   expect(newProfile.website).toBe(profile.website);
   expect(newProfile.about).toBe("");
+  expect(newProfile.avatarUrl).toBeDefined();
 
   await deleteUser(user);
 });
@@ -229,6 +231,7 @@ test("Read Profile route succeeds when using a good authHeader and valid id", as
       expect(body.website).toBe(profile.website);
       expect(body.about).toBe(profile.about);
       expect(body.posts.length).toBe(0);
+      expect(body.avatarUrl).toBeDefined();
     });
 
   await deleteUser(user);
@@ -364,6 +367,13 @@ test("Read Profile List route returns alphabetized list of profile names with id
       }
 
       expect(containsLuke).toBeFalsy();
+
+      expect(array[0].id).toBeDefined();
+      expect(array[0].userId).toBeDefined();
+      expect(array[0].name).toBeDefined();
+      expect(array[0].about).toBeDefined();
+      expect(array[0].website).toBeDefined();
+      expect(array[0].avatarUrl).toBeDefined();
     });
 
   await deleteUser(anakinAccount);
@@ -425,6 +435,7 @@ test("Read User Profile route succeeds when using a good authHeader and valid id
       expect(body.name).toBe(profile.name);
       expect(body.website).toBe(profile.website);
       expect(body.about).toBe(profile.about);
+      expect(body.avatarUrl).toBeDefined();
     });
 
   await deleteUser(user);
@@ -577,6 +588,7 @@ test("Update Profile route succeeds when using a good authHeader and valid id", 
       expect(body.website).toBe(profileUpdate.website);
       expect(body.website).not.toBe(profile.website);
       expect(body.about).toBe(profileUpdate.about);
+      expect(body.avatarUrl).toBeDefined();
       expect(body.posts).toEqual([]);
       expect(200);
     });

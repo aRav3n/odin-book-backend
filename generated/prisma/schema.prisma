@@ -27,6 +27,7 @@ model Profile {
   name      String
   about     String?
   website   String?
+  avatarUrl String    @default("https://static.wikia.nocookie.net/starwars/images/8/83/Rebel_Alliance_starbird-sw_battlefront.svg/revision/latest?cb=20160627204206")
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int       @unique
   posts     Post[]

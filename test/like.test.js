@@ -17,6 +17,7 @@ const {
   deleteUser,
   generateCommentAndParents,
   generateUserProfilePost,
+  testTimeToLogIfOver,
 } = require("./internalTestFunctions");
 
 let likeStart;
@@ -28,7 +29,7 @@ beforeEach(() => {
 afterEach(() => {
   const duration = Date.now() - likeStart;
   const testName = expect.getState().currentTestName;
-  if (duration >= 500) {
+  if (duration >= testTimeToLogIfOver) {
     console.log(`${testName} - ${duration} ms`);
   }
 });

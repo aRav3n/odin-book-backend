@@ -16,6 +16,7 @@ const {
   generateUserProfilePost,
   deleteEveryone,
   deleteUser,
+  testTimeToLogIfOver,
 } = require("./internalTestFunctions");
 
 let postStart;
@@ -27,7 +28,7 @@ beforeEach(() => {
 afterEach(() => {
   const duration = Date.now() - postStart;
   const testName = expect.getState().currentTestName;
-  if (duration >= 500) {
+  if (duration >= testTimeToLogIfOver) {
     // don't log for a known long test
     if (
       testName !==

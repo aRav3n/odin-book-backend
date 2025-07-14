@@ -557,10 +557,11 @@ async function addProfile(
   userId: number,
   name: string,
   about?: string,
-  website?: string
+  website?: string,
+  avatarUrl?: string
 ) {
   const newProfile = await prisma.profile.create({
-    data: { userId, name, about, website },
+    data: { userId, name, about, website, avatarUrl },
   });
 
   return newProfile;
@@ -580,6 +581,7 @@ async function getProfile(id: number, requestingProfileId: number) {
       name: true,
       website: true,
       about: true,
+      avatarUrl: true,
       posts: {
         orderBy: { createdAt: "desc" },
         include: {
@@ -633,6 +635,7 @@ async function getUserProfile(userId: number) {
       name: true,
       website: true,
       about: true,
+      avatarUrl: true,
     },
   });
 
@@ -656,6 +659,7 @@ async function updateExistingProfile(
       name: true,
       website: true,
       about: true,
+      avatarUrl: true,
     },
   });
   return updatedProfile || null;

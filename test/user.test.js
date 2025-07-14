@@ -23,6 +23,7 @@ const {
   logInAndDelete,
   logUserIn,
   signUserUp,
+  testTimeToLogIfOver,
 } = require("./internalTestFunctions");
 
 const testUserBadEmail = {
@@ -72,7 +73,7 @@ beforeEach(() => {
 afterEach(() => {
   const duration = Date.now() - userStart;
   const testName = expect.getState().currentTestName;
-  if (duration >= 500) {
+  if (duration >= testTimeToLogIfOver) {
     console.log(`${testName} - ${duration} ms`);
   }
 });

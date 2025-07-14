@@ -17,6 +17,7 @@ const {
   generateUserAndProfile,
   generateUserProfilePost,
   deleteUser,
+  testTimeToLogIfOver,
 } = require("./internalTestFunctions");
 
 let commentStart;
@@ -28,7 +29,7 @@ beforeEach(() => {
 afterEach(() => {
   const duration = Date.now() - commentStart;
   const testName = expect.getState().currentTestName;
-  if (duration >= 500) {
+  if (duration >= testTimeToLogIfOver) {
     console.log(`${testName} - ${duration} ms`);
   }
 });
@@ -39,7 +40,6 @@ afterAll(async () => {
   console.log(deleted);
 });
 */
-
 
 // create comment on post tests
 test("Create Comment On Post route fails if :postId is missing", async () => {

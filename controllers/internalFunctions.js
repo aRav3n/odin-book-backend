@@ -1,5 +1,6 @@
 const { body } = require("express-validator");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 function checkTokenForIssues(req, secretKey) {
   const infoObject = {
@@ -67,6 +68,12 @@ function generateErrorRes(res, httpCode, errorMessageOrArray) {
   return res
     .status(httpCode)
     .json(generateIndividualErrorMessage(errorMessageOrArray));
+}
+
+function getGravatarUrl(email) {
+  const trimmedEmail = email.trim().toLowerCase();
+  const hash = crypto.createHash("sha256").update(trimmedEmail).digest("hex");
+  return `https://www.gravatar.com/avatar/${hash}?s=${80}&d=identicon`;
 }
 
 function getTokenFromReq(req) {
@@ -187,6 +194,7 @@ module.exports = {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
   generateErrorRes,
+  getGravatarUrl,
   getTokenFromReq,
   getUserInfoFromToken,
   trimFields,
