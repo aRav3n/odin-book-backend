@@ -306,6 +306,7 @@ test("Get Comments On Post route succeeds with correct requirements", async () =
       expect(res.body[0].text).toBe(comment.text);
       expect(res.body[0].profileId).toBe(profile.id);
       expect(res.body[0].Profile.name).toBe(profile.name);
+      expect(res.body[0].Profile.avatarUrl).toBeDefined();
       expect(res.body[0]._count.likes).toBeDefined();
       expect(res.body[0]._count.replies).toBeDefined();
       expect(res.body[0].likes.length).toBe(0);
@@ -679,6 +680,7 @@ test("Get Comment Replies route succeeds for a comment that has replies", async 
     .expect(200)
     .then((res) => {
       expect(res.body[0].likes.length).toBe(0);
+      expect(res.body[0].Profile.avatarUrl).toBeDefined();
       if (res.body[0].id === resOne.body.id) {
         expect(res.body[0].id).toBeGreaterThan(0);
         expect(res.body[0].text).toBe(text);

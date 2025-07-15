@@ -238,6 +238,7 @@ function readCommentReplies(commentId, userId) {
                     select: {
                         name: true,
                         id: true,
+                        avatarUrl: true,
                     },
                 },
                 _count: {
@@ -270,6 +271,7 @@ function readCommentsOnPost(postId, userId) {
                     select: {
                         name: true,
                         id: true,
+                        avatarUrl: true,
                     },
                 },
                 _count: {

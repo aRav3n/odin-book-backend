@@ -221,6 +221,7 @@ async function readCommentReplies(commentId: number, userId?: number) {
         select: {
           name: true,
           id: true,
+          avatarUrl: true,
         },
       },
       _count: {
@@ -254,6 +255,7 @@ async function readCommentsOnPost(postId: number, userId?: number) {
         select: {
           name: true,
           id: true,
+          avatarUrl: true,
         },
       },
       _count: {
