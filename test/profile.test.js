@@ -574,6 +574,8 @@ test("Update Profile route succeeds when using a good authHeader and valid id", 
     ...profile,
     name: "Parvati Patil",
     website: "https://harrypotter.fandom.com/wiki/Gryffindor",
+    avatarUrl:
+      "https://static.wikia.nocookie.net/harrypotter/images/b/b1/Gryffindor_ClearBG.png",
   };
 
   await request(app)
@@ -591,7 +593,7 @@ test("Update Profile route succeeds when using a good authHeader and valid id", 
       expect(body.website).toBe(profileUpdate.website);
       expect(body.website).not.toBe(profile.website);
       expect(body.about).toBe(profileUpdate.about);
-      expect(body.avatarUrl).toBeDefined();
+      expect(body.avatarUrl).toBe(profileUpdate.avatarUrl);
       expect(body.posts).toEqual([]);
       expect(200);
     });

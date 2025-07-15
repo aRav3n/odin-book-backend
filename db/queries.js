@@ -659,11 +659,11 @@ function getUserProfile(userId) {
         return profile || false;
     });
 }
-function updateExistingProfile(id, userId, name, website, about) {
+function updateExistingProfile(id, userId, name, website, about, avatarUrl) {
     return __awaiter(this, void 0, void 0, function* () {
         const updatedProfile = yield prisma.profile.update({
             where: { id, userId },
-            data: { name, website: website, about: about },
+            data: { name, website, about, avatarUrl },
             select: {
                 id: true,
                 posts: true,

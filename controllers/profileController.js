@@ -128,13 +128,15 @@ const updateProfile = [
     const name = req.body.name;
     const website = req.body.website || "";
     const about = req.body.about || "";
+    const avatarUrl = req.body.avatarUrl || "";
 
     const updatedProfile = await updateExistingProfile(
       id,
       userId,
       name,
       website,
-      about
+      about,
+      avatarUrl
     );
 
     if (!updatedProfile) {

@@ -653,11 +653,12 @@ async function updateExistingProfile(
   userId: number,
   name: string,
   website?: string,
-  about?: string
+  about?: string,
+  avatarUrl?: string
 ) {
   const updatedProfile = await prisma.profile.update({
     where: { id, userId },
-    data: { name, website: website, about: about },
+    data: { name, website, about, avatarUrl },
     select: {
       id: true,
       posts: true,
