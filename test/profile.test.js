@@ -135,6 +135,9 @@ test("Create Profile route fails if a profile already exists for the user", asyn
 test("Create Profile route succeeds when using a good authHeader and name, website and about can be blank", async () => {
   const user = await generateSignedInUser();
   const profile = generateUserProfileObject();
+  const rebelAllianceLogoUrl =
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Rebel_Alliance_logo.svg/1280px-Rebel_Alliance_logo.svg.png";
+  profile.avatarUrl = rebelAllianceLogoUrl;
 
   const res = await request(app)
     .post("/profile")
@@ -151,7 +154,7 @@ test("Create Profile route succeeds when using a good authHeader and name, websi
   expect(newProfile.name).toBe(profile.name);
   expect(newProfile.website).toBe(profile.website);
   expect(newProfile.about).toBe("");
-  expect(newProfile.avatarUrl).toBeDefined();
+  expect(newProfile.avatarUrl).toBe(rebelAllianceLogoUrl);
 
   await deleteUser(user);
 });

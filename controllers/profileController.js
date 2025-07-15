@@ -41,7 +41,10 @@ const createProfile = [
     const website = req.body.website || "";
 
     const userEmail = await getUserEmail(userId);
-    const avatarUrl = getGravatarUrl(userEmail);
+    const avatarUrl =
+      req.body.avatarUrl && req.body.avatarUrl.length > 0
+        ? req.body.avatarUrl
+        : getGravatarUrl(userEmail);
 
     const profile = await addProfile(
       userId,

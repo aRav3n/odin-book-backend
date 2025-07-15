@@ -41,7 +41,7 @@
     - /profile
       - POST
         - Description: Create a profile for a user
-        - Requires: authHeader (just to verify logged in), { name, about (can be blank), website (can be blank) }
+        - Requires: authHeader (just to verify logged in), { name, about (can be blank), website (can be blank), avatarUrl (can be blank) }
         - Success: 200 OK
           - Response: { id, userId, name, website, about, avatarUrl }
       - GET
