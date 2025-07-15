@@ -495,6 +495,7 @@ async function readRecentPostsFromDatabase(start: number, userId?: number) {
         select: {
           name: true,
           id: true,
+          avatarUrl: true,
         },
       },
       _count: {

@@ -511,6 +511,7 @@ function readRecentPostsFromDatabase(start, userId) {
                     select: {
                         name: true,
                         id: true,
+                        avatarUrl: true,
                     },
                 },
                 _count: {

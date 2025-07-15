@@ -399,6 +399,7 @@ test("Read Recent Posts route succeeds with correct info, safely handling :start
 
       expect(array[indexOne].Profile.name).toBe(profileOne.name);
       expect(array[indexOne].Profile.id).toBe(profileOne.id);
+      expect(array[indexOne].Profile.avatarUrl).toBe(profileOne.avatarUrl);
       expect(array[indexOne]._count.comments).toBe(0);
       expect(array[indexOne]._count.likes).toBe(0);
       expect(array[indexOne].likes.length).toBe(0);
