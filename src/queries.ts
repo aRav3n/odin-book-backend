@@ -597,6 +597,7 @@ async function getProfile(id: number, requestingProfileId: number) {
             select: {
               id: true,
               name: true,
+              avatarUrl: true,
             },
           },
         },

@@ -610,6 +610,7 @@ function getProfile(id, requestingProfileId) {
                             select: {
                                 id: true,
                                 name: true,
+                                avatarUrl: true,
                             },
                         },
                     },
