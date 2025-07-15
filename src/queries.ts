@@ -365,6 +365,7 @@ async function readFollowers(profileId: number) {
         select: {
           id: true,
           name: true,
+          avatarUrl: true,
         },
       },
     },
@@ -384,6 +385,7 @@ async function readFollowing(profileId: number) {
         select: {
           id: true,
           name: true,
+          avatarUrl: true,
         },
       },
     },

@@ -40,6 +40,7 @@ afterAll(async () => {
 });
 */
 
+// create follow tests
 test("Create Follow route fails if profileId is missing", async () => {
   const token = "notAToken";
   const profileId = "";
@@ -140,7 +141,6 @@ test("Create Follow route fails if authHeader user's profile.id !== followerId",
   await deleteUser(user);
 });
 
-// nonexistent followerId profile is taken care of during "Create Follow route fails if authHeader user's profile.id !== followerId"
 test("Create Follow route fails if profileId is for a nonexistent profile", async () => {
   const { user, profile } = await generateUserAndProfile();
   const profileId = -1;
@@ -187,6 +187,7 @@ test("Create Follow route succeeds if all information provided is correct", asyn
   await deleteUser(followingUser);
 });
 
+// read followers tests
 test("Read Followers route fails if profileId is missing", async () => {
   const token = "notAToken";
   const profileId = "";
@@ -271,7 +272,7 @@ test("Read Followers route succeeds if all provided information is correct", asy
           expect(res.body.followingId).toBe(aProfile.id);
 
           // check that aProfile now has a follower and that it's bProfile
-          const logRes = await request(app)
+          await request(app)
             .get(`/follow/profile/followers/${aProfile.id}`)
             .set("Authorization", `Bearer ${aUser.token}`)
             .expect("Content-Type", /json/)
@@ -280,6 +281,7 @@ test("Read Followers route succeeds if all provided information is correct", asy
                 follower: {
                   id: bProfile.id,
                   name: bProfile.name,
+                  avatarUrl: bProfile.avatarUrl,
                 },
               },
             ])
@@ -291,6 +293,7 @@ test("Read Followers route succeeds if all provided information is correct", asy
   await deleteUser(bUser);
 });
 
+// read following tests
 test("Read Following route fails if profileId is missing", async () => {
   const token = "notAToken";
   const profileId = "";
@@ -374,7 +377,7 @@ test("Read Following route succeeds if all provided information is correct", asy
           expect(res.body.followerId).toBe(severusProfile.id);
           expect(res.body.followingId).toBe(lillyProfile.id);
 
-          const logRes = await request(app)
+          await request(app)
             .get(`/follow/profile/following/${severusProfile.id}`)
             .set("Authorization", `Bearer ${severusAccount.token}`)
             .expect("Content-Type", /json/)
@@ -383,6 +386,7 @@ test("Read Following route succeeds if all provided information is correct", asy
                 following: {
                   id: lillyProfile.id,
                   name: lillyProfile.name,
+                  avatarUrl: lillyProfile.avatarUrl,
                 },
               },
             ])
@@ -394,6 +398,7 @@ test("Read Following route succeeds if all provided information is correct", asy
   await deleteUser(lillyAccount);
 });
 
+// update follow tests
 test("Update Follow route fails if followId is missing", async () => {
   const token = "notAToken";
   const followId = "";
@@ -533,6 +538,7 @@ test("Update Follow route succeeds if all information provided is correct", asyn
   await deleteUser(lillyAccount);
 });
 
+// delete follow tests
 test("Delete Follow route fails if followId is missing", async () => {
   const token = "notAToken";
   const followId = "";

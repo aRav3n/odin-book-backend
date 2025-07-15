@@ -382,6 +382,7 @@ function readFollowers(profileId) {
                     select: {
                         id: true,
                         name: true,
+                        avatarUrl: true,
                     },
                 },
             },
@@ -401,6 +402,7 @@ function readFollowing(profileId) {
                     select: {
                         id: true,
                         name: true,
+                        avatarUrl: true,
                     },
                 },
             },
