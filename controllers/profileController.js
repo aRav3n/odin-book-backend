@@ -1,7 +1,9 @@
 const { validationResult } = require("express-validator");
+const bcrypt = require("bcryptjs");
 
 const {
   getUserEmail,
+  addAnonProfile,
   addProfile,
   deleteUserProfile,
   getProfile,
@@ -9,7 +11,6 @@ const {
   getUserProfile,
   updateExistingProfile,
 } = require("../db/queries");
-
 const {
   generateErrorMessageFromArray,
   generateIndividualErrorMessage,
@@ -17,6 +18,41 @@ const {
   getGravatarUrl,
   validateProfile,
 } = require("./internalFunctions");
+const security = require("./securityController");
+
+async function createAnonProfile(req, res) {
+  const name = "Anonymous User";
+  const website = "";
+  const about =
+    "This is an anonymous guest account that gets refreshed each time it's used.";
+  const avatarUrl = "/anon_avatar.png";
+  const email = "anon@user.co";
+
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync("password", salt);
+
+  const { user, profile } = await addAnonProfile(
+    name,
+    about,
+    website,
+    avatarUrl,
+    email,
+    hash
+  );
+
+  if (!user || !profile) {
+    return generateErrorRes(
+      res,
+      500,
+      "There was an issue generating the anon account."
+    );
+  }
+
+  const token = security.sign(user);
+  user.token = token;
+
+  return res.status(200).json({ user, profile });
+}
 
 const createProfile = [
   validateProfile,
@@ -170,6 +206,7 @@ async function deleteProfile(req, res) {
 }
 
 module.exports = {
+  createAnonProfile,
   createProfile,
   readProfile,
   readProfileList,

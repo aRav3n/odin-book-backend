@@ -49,6 +49,12 @@
         - Requires: authHeader (used for authentication and to identify the user)
         - Success: 200 OK
           - Response: { id, userId, name, about, website, avatarUrl, posts: [ ... ] }
+    - /profile/anon
+      - GET
+        - Description: Creates and returns an anonymous profile and user object so users can browse the site without signing in
+        - Requires: N/A
+        - Success: 200 OK
+          - Response: { user: { id, email, token }, profile: { id, name, about, website, avatarUrl, userId } }
     - /profile/list
       - POST
         - Description: Read list of profiles in alphabetical order by name, if the optional stringToMatch is included then only profiles whose names match this partial will be returned

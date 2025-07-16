@@ -1,4 +1,3 @@
-import { profile } from "console";
 import { PrismaClient } from "../generated/prisma";
 import { withAccelerate } from "@prisma/extension-accelerate";
 require("dotenv");
@@ -558,6 +557,39 @@ async function deletePostFromDatabase(id: number) {
 }
 
 // profile queries
+async function addAnonProfile(
+  name: string,
+  about: string,
+  website: string,
+  avatarUrl: string,
+  email: string,
+  hash: string
+) {
+  const userCount = await prisma.user.count({ where: { email } });
+  if (userCount > 0) {
+    await prisma.user.delete({ where: { email } });
+  }
+
+  const user = await prisma.user.create({
+    data: { email, hash },
+    select: { id: true, email: true },
+  });
+  if (!user) {
+    return null;
+  }
+  const profile = await prisma.profile.create({
+    data: {
+      userId: user.id,
+      name,
+      website,
+      about,
+      avatarUrl,
+    },
+  });
+
+  return { user, profile };
+}
+
 async function addProfile(
   userId: number,
   name: string,
@@ -760,6 +792,7 @@ export {
   deletePostFromDatabase,
 
   // profile queries
+  addAnonProfile,
   addProfile,
   deleteUserProfile,
   getProfile,

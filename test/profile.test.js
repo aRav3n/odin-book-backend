@@ -159,6 +159,29 @@ test("Create Profile route succeeds when using a good authHeader and name, websi
   await deleteUser(user);
 });
 
+// create anon profile route tests
+test("Create Anon Profile succeeds", async () => {
+  await request(app)
+    .get("/profile/anon")
+    .expect("Content-Type", /json/)
+    .expect(200)
+    .then((res) => {
+      expect(res.body.user.id).toBeDefined();
+      expect(res.body.user.email).toBeDefined();
+      expect(res.body.user.token).toBeDefined();
+      expect(res.body.user.hash).not.toBeDefined();
+
+      expect(res.body.profile.id).toBeDefined();
+      expect(res.body.profile.name).toBeDefined();
+      expect(res.body.profile.about).toBeDefined();
+      expect(res.body.profile.website).toBeDefined();
+      expect(res.body.profile.avatarUrl).toBeDefined();
+      expect(res.body.profile.userId).toBeDefined();
+
+      deleteUser(res.body.user);
+    });
+});
+
 // read profile based on profileId
 test("Read Profile route fails if :profileId is not present", async () => {
   await request(app)

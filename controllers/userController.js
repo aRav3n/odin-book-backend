@@ -32,7 +32,7 @@ const createUser = [
     const email = req.body.email;
     const existingUser = await getUser(email);
     if (existingUser) {
-      return generateErrorRes(res, 409, "User with this email already exists.")
+      return generateErrorRes(res, 409, "User with this email already exists.");
     }
 
     const salt = bcrypt.genSaltSync(10);

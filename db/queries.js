@@ -29,6 +29,7 @@ exports.readPostFromDatabase = readPostFromDatabase;
 exports.readRecentPostsFromDatabase = readRecentPostsFromDatabase;
 exports.updatePostText = updatePostText;
 exports.deletePostFromDatabase = deletePostFromDatabase;
+exports.addAnonProfile = addAnonProfile;
 exports.addProfile = addProfile;
 exports.deleteUserProfile = deleteUserProfile;
 exports.getProfile = getProfile;
@@ -575,6 +576,31 @@ function deletePostFromDatabase(id) {
     });
 }
 // profile queries
+function addAnonProfile(name, about, website, avatarUrl, email, hash) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const userCount = yield prisma.user.count({ where: { email } });
+        if (userCount > 0) {
+            yield prisma.user.delete({ where: { email } });
+        }
+        const user = yield prisma.user.create({
+            data: { email, hash },
+            select: { id: true, email: true },
+        });
+        if (!user) {
+            return null;
+        }
+        const profile = yield prisma.profile.create({
+            data: {
+                userId: user.id,
+                name,
+                website,
+                about,
+                avatarUrl,
+            },
+        });
+        return { user, profile };
+    });
+}
 function addProfile(userId, name, about, website, avatarUrl) {
     return __awaiter(this, void 0, void 0, function* () {
         const newProfile = yield prisma.profile.create({

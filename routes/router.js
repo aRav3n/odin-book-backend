@@ -47,6 +47,7 @@ router.post(
   verifyTokenValid,
   profileController.createProfile
 );
+router.get("/profile/anon", profileController.createAnonProfile);
 router.get("/profile", verifyTokenValid, profileController.readUserProfile);
 router.get(
   "/profile/:profileId",
