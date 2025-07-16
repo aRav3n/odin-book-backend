@@ -63,7 +63,7 @@
           - Response: { id, userId, name, about, website, avatarUrl, posts: [ ... ] }
       - PUT
         - Description: Update a profile, can change name, about, and/or website
-        - Requires: authHeader (must be profileId owner), { name, about (can be blank), website (can be blank), avatarUrl (can be blank) }
+        - Requires: authHeader (must be profileId owner), { id (profileId), name, website (can be blank), avatarUrl (can be blank), about (can be blank) }
         - Success: 200 OK
           - Response: { id, userId, name, about, website, posts, avatarUrl }
       - DELETE
