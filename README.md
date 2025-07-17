@@ -1,6 +1,8 @@
 # Odin Book Backend
 
 ## API Usage
+- Root address
+  - https://odin-book-backend.onrender.com
 
 - **Auth Header Note**
   - Most routes require a JSON Web Token
