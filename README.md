@@ -1,8 +1,12 @@
 # Odin Book Backend
 
+## Links
+
+- [Root address](https://odin-book-backend.onrender.com)
+- [Frontend repo](https://github.com/aRav3n/odin_book_frontend)
+- [Live Preview](https://odin-book-frontend-8xo.pages.dev)
+
 ## API Usage
-- Root address
-  - https://odin-book-backend.onrender.com
 
 - **Auth Header Note**
   - Most routes require a JSON Web Token
