@@ -3,7 +3,10 @@ const app = express();
 const router = require("./routes/router");
 const cors = require("cors");
 
-const allowList = ["http://localhost:5173"];
+const allowList = [
+  "http://localhost:5173",
+  "https://odin-book-frontend-8xo.pages.dev",
+];
 const corsOptions = {
   origin: allowList,
   methods: ["GET", "POST", "PUT", "DELETE"],
