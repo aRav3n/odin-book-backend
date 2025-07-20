@@ -6,6 +6,9 @@
 - [Frontend repo](https://github.com/aRav3n/odin_book_frontend)
 - [Live Preview](https://odin-book-frontend-8xo.pages.dev)
 
+## Screenshots
+![Screenshot of the app](./public/screenshot.png)
+
 ## API Usage
 
 - **Auth Header Note**
