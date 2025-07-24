@@ -1,15 +1,28 @@
-# Odin Book Backend
+# Odin Book API
 
-## Links
+## Table of Contents
 
-- [Root address](https://odin-book-backend.onrender.com)
+- [Description](#description)
+- [Usage and Screenshots](#usage-and-screenshots)
+- [Technologies Used](#technologies-used)
+- [Project Structure](#project-structure)
+- [Dependencies and Credits](#dependencies-and-credits)
+
+## Description
+
+This is the backend for my social media website project that I built for [The Odin Project](https://www.theodinproject.com). It is a RESTful API that can be used per the endpoint instructions below. Please note that to use it yourself you'll need to clone this repo and update the allowList in app.js.
+
+## Usage and Screenshots
+
+<img src="./public/screenshot.png" alt="screenshot" style="height: 50vh; width: auto;">
+
+This backend is a RESTful API that uses JSON web tokens for authentication and authorization.
+
+- API Base URL: https://odin-book-backend.onrender.com
 - [Frontend repo](https://github.com/aRav3n/odin_book_frontend)
 - [Live Preview](https://odin-book-frontend-8xo.pages.dev)
 
-## Screenshots
-![Screenshot of the app](./public/screenshot.png)
-
-## API Usage
+### API Usage
 
 - **Auth Header Note**
   - Most routes require a JSON Web Token
@@ -218,3 +231,70 @@
     - 404: Not Found, route or database resource not found
     - 409: Conflict, cannot create a duplicate item in the database
     - 500: Internal Server Error, there was an error with the server, try again
+
+### Features
+
+- Returns JSON objects and 200 for good requests and accurate status codes with messages for bad requests
+- Incorporates CORS
+- Is a RESTful API
+- Was built using test driven development (TDD) using Jest and supertest
+
+## Technologies Used
+
+### Backend          
+- <a href="https://nodejs.org"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" style="height: 2rem; width: auto;"> Node.js</a>
+- <a href="https://expressjs.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg" style="height: 2rem; width: auto;"> Express</a>
+- <a href="https://www.postgresql.org/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" style="height: 2rem; width: auto;"/> PostgreSQL</a>
+- <a href="https://www.prisma.io/"><img src="https://skillicons.dev/icons?i=prisma" style="height: 2rem; width: auto;"/> Prisma ORM</a>
+- <a href="https://www.typescriptlang.org/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" style="height: 2rem; width: auto;"/> TypeScript</a>
+- <a href="https://jestjs.io/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/jest/jest-plain.svg" style="height: 2rem; width: auto;"/> Jest</a>
+
+### Development Tools
+
+- <a href="https://code.visualstudio.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg" style="height: 24px; width: auto;"/> VS Code</a>
+- <a href="https://www.npmjs.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/npm/npm-original.svg" style="height: 24px; width: auto;"/> NPM</a>
+- <a href="https://git-scm.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg" style="height: 24px; width: auto;"/> Git</a>
+
+### Hosting
+
+- <a href="https://github.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg" style="height: 24px; width: auto;"/> Github</a>
+- <a href="https://neon.com/"><img src="https://neon.com/brand/neon-logomark-light-color.svg" style="height: 24px; width: auto;"/> Neon</a>
+- <a href="https://render.com/"><img src="https://render.com/icon.svg" style="height: 24px; width: auto;"/> Render</a>
+
+
+## Dependencies and Credits
+
+### Package Dependencies
+
+- [@prisma/extension-accelerate](https://www.npmjs.com/package/@prisma/extension-accelerate)
+- [@prisma/client](https://www.npmjs.com/package/@prisma/client)
+- [@types/node](https://www.npmjs.com/package/@types/node)
+- [bcryptjs](https://www.npmjs.com/package/bcryptjs)
+- [cors](https://www.npmjs.com/package/cors)
+- [dotenv](https://www.npmjs.com/package/dotenv)
+- [express-validator](https://www.npmjs.com/package/express-validator)
+- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
+- [pg](https://www.npmjs.com/package/pg)
+- [supertest](https://www.npmjs.com/package/supertest)
+- [tsx](https://www.npmjs.com/package/tsx)
+- [uuid](https://www.npmjs.com/package/uuid)
+
+### Other Credits
+
+- [Devicion](https://devicon.dev/)
+- [Skillicons](https://skillicons.dev/)
+
+
+## Project Structure
+
+```bash
+├──controllers/            # Controller and internal security functions
+├──db/                     # queries.js is automatically placed here after running npx tsc
+├──generated/              
+    ├── prisma/            # Prisma generated models
+├──prisma/                 # Prisma models and migrations
+├──public/                 # Public image(s)
+├──routes/                 # Router file(s)
+├──src/                    # queries.ts
+├──test/                   # Contains all test files and internal test function files
+```
