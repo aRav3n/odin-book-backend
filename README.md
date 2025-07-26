@@ -3,14 +3,47 @@
 ## Table of Contents
 
 - [Description](#description)
+- [Installation Instructions](#installation-instructions)
 - [Usage and Screenshots](#usage-and-screenshots)
 - [Technologies Used](#technologies-used)
-- [Project Structure](#project-structure)
 - [Dependencies and Credits](#dependencies-and-credits)
+- [Project Structure](#project-structure)
 
 ## Description
 
 This is the backend for my social media website project that I built for [The Odin Project](https://www.theodinproject.com). It is a RESTful API that can be used per the endpoint instructions below. Please note that to use it yourself you'll need to clone this repo and update the allowList in app.js.
+
+## Installation Instructions
+
+1. Clone or fork this repo
+2. cd into the project root directory (where the README.md file is located)
+3. Run the following in your terminal (I've found that separating them into smaller install blocks helps when your internet is slower)
+    - ``` bash
+      npm init -y
+ 
+      npm install @prisma/client @prisma/extension-accelerate
+      npm install bcryptjs cors dotenv
+      npm install express express-validator
+      npm install jsonwebtoken pg uuid
+ 
+      npm install @types/node jest --save-dev
+      npm install prisma supertest --save-dev
+      npm install tsx typescript --save-dev
+      ```
+4. Create a .env file
+   - ``` bash
+     NODE_ENV=development
+     TEST_DATABASE_URL="your_local_test_database_url"
+     DATABASE_URL="your_local_database_url"
+     SECRET_KEY="your_secret_key"
+     ```
+6. ``` bash
+   npm run dev
+   ```
+7. After making updates to ./src/queries.ts you'll want to run this to recompile queries.js
+   - ``` bash
+     npx tsc
+     ```
 
 ## Usage and Screenshots
 
