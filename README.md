@@ -18,30 +18,32 @@ This is the backend for my social media website project that I built for [The Od
 1. Clone or fork this repo
 2. cd into the project root directory (where the README.md file is located)
 3. Run the following in your terminal (I've found that separating them into smaller install blocks helps when your internet is slower)
-    - ``` bash
-      npm init -y
- 
-      npm install @prisma/client @prisma/extension-accelerate
-      npm install bcryptjs cors dotenv
-      npm install express express-validator
-      npm install jsonwebtoken pg uuid
- 
-      npm install @types/node jest --save-dev
-      npm install prisma supertest --save-dev
-      npm install tsx typescript --save-dev
-      ```
+
+   - ```bash
+     npm init -y
+
+     npm install @prisma/client @prisma/extension-accelerate
+     npm install bcryptjs cors dotenv
+     npm install express express-validator
+     npm install jsonwebtoken pg uuid
+
+     npm install @types/node jest --save-dev
+     npm install prisma supertest --save-dev
+     npm install tsx typescript --save-dev
+     ```
+
 4. Create a .env file
-   - ``` bash
+   - ```bash
      NODE_ENV=development
      TEST_DATABASE_URL="your_local_test_database_url"
      DATABASE_URL="your_local_database_url"
      SECRET_KEY="your_secret_key"
      ```
-6. ``` bash
+5. ```bash
    npm run dev
    ```
-7. After making updates to ./src/queries.ts you'll want to run this to recompile queries.js
-   - ``` bash
+6. After making updates to ./src/queries.ts you'll want to run this to recompile queries.js
+   - ```bash
      npx tsc
      ```
 
@@ -63,6 +65,13 @@ This backend is a RESTful API that uses JSON web tokens for authentication and a
       - Authorization: Bearer token &lt;token&gt;
     - In this documentation, "authHeader" refers to this header
 - **Routes & Successful Responses**
+  - **Database Wakeup Route**
+    - /
+      - GET
+        - Description: Wakes up the database by requesting a count of users
+        - Requires: nothing
+        - Success: 200 OK
+          - Response: { message: "Database is awake and ready for coffee!" }
   - **User Routes**
     - /user
       - POST
@@ -274,7 +283,8 @@ This backend is a RESTful API that uses JSON web tokens for authentication and a
 
 ## Technologies Used
 
-### Backend          
+### Backend
+
 - <a href="https://nodejs.org"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" style="height: 2rem; width: auto;"> Node.js</a>
 - <a href="https://expressjs.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg" style="height: 2rem; width: auto;"> Express</a>
 - <a href="https://www.postgresql.org/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" style="height: 2rem; width: auto;"/> PostgreSQL</a>
@@ -293,7 +303,6 @@ This backend is a RESTful API that uses JSON web tokens for authentication and a
 - <a href="https://github.com/"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg" style="height: 24px; width: auto;"/> Github</a>
 - <a href="https://neon.com/"><img src="https://neon.com/brand/neon-logomark-light-color.svg" style="height: 24px; width: auto;"/> Neon</a>
 - <a href="https://render.com/"><img src="https://render.com/icon.svg" style="height: 24px; width: auto;"/> Render</a>
-
 
 ## Dependencies and Credits
 
@@ -317,13 +326,12 @@ This backend is a RESTful API that uses JSON web tokens for authentication and a
 - [Devicion](https://devicon.dev/)
 - [Skillicons](https://skillicons.dev/)
 
-
 ## Project Structure
 
 ```bash
 ├──controllers/            # Controller and internal security functions
 ├──db/                     # queries.js is automatically placed here after running npx tsc
-├──generated/              
+├──generated/
     ├── prisma/            # Prisma generated models
 ├──prisma/                 # Prisma models and migrations
 ├──public/                 # Public image(s)

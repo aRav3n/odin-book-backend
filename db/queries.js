@@ -21,6 +21,7 @@ exports.readFollowers = readFollowers;
 exports.readFollowing = readFollowing;
 exports.updateFollowAccept = updateFollowAccept;
 exports.deleteFollowInDatabase = deleteFollowInDatabase;
+exports.wakeUpBackendDatabase = wakeUpBackendDatabase;
 exports.createLikeComment = createLikeComment;
 exports.createLikePost = createLikePost;
 exports.deleteLikeFromDatabase = deleteLikeFromDatabase;
@@ -424,6 +425,13 @@ function deleteFollowInDatabase(followId) {
     return __awaiter(this, void 0, void 0, function* () {
         const deletedFollow = yield prisma.follow.delete({ where: { id: followId } });
         return deletedFollow || null;
+    });
+}
+// general queries
+function wakeUpBackendDatabase() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const count = yield prisma.user.count();
+        return count;
     });
 }
 // like queries

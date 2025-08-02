@@ -407,6 +407,12 @@ async function deleteFollowInDatabase(followId: number) {
   return deletedFollow || null;
 }
 
+// general queries
+async function wakeUpBackendDatabase() {
+  const count = await prisma.user.count()
+  return count;
+}
+
 // like queries
 async function createLikeComment(commentId: number, profileId: number) {
   const commentCount = await prisma.comment.count({ where: { id: commentId } });
@@ -778,6 +784,9 @@ export {
   readFollowing,
   updateFollowAccept,
   deleteFollowInDatabase,
+
+  // general queries
+  wakeUpBackendDatabase,
 
   // like queries
   createLikeComment,

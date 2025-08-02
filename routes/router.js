@@ -15,6 +15,7 @@ const likeController = require("../controllers/likeController");
 const postController = require("../controllers/postController");
 const profileController = require("../controllers/profileController");
 const userController = require("../controllers/userController");
+const wakeupController = require("../controllers/wakeupController");
 
 // user routes
 router.post("/user", checkThatBodyExists, userController.createUser);
@@ -200,6 +201,9 @@ router.delete(
   verifyTokenMatch,
   likeController.deleteLike
 );
+
+// wakeup route
+router.get("/", wakeupController.wakeUpDatabase);
 
 router.use((req, res) => {
   const errorObject = {
