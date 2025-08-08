@@ -21,15 +21,7 @@ This is the backend for my social media website project that I built for [The Od
 
    - ```bash
      npm init -y
-
-     npm install @prisma/client @prisma/extension-accelerate
-     npm install bcryptjs cors dotenv
-     npm install express express-validator
-     npm install jsonwebtoken pg uuid
-
-     npm install @types/node jest --save-dev
-     npm install prisma supertest --save-dev
-     npm install tsx typescript --save-dev
+     npm install
      ```
 
 4. Create a .env file
